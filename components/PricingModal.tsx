@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CoinIcon } from './CoinIcon';
 import { Button } from './Button';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ type Currency = 'DZD' | 'USD';
 
 export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
   const [currency, setCurrency] = useState<Currency>('DZD');
+  const { t } = useLanguage();
 
   if (!isOpen) return null;
 
@@ -19,11 +21,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
       name: "BASIC",
       points: 300,
       price: { DZD: "1,500 DA", USD: "$7.99" },
-      description: "Perfect for testing the waters and small campaigns.",
+      description: t('plan_basic_desc'),
       features: [
-        { count: "10", label: "Social Media Posts" },
-        { count: "10", label: "Landing Page Designs" },
-        { count: "15", label: "Ad Creatives" },
+        { count: "10", label: t('feat_social') },
+        { count: "10", label: t('feat_landing') },
+        { count: "15", label: t('feat_ads') },
       ],
       isPopular: false,
       gradient: "from-slate-200 to-slate-300",
@@ -33,11 +35,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
       name: "PRO",
       points: 1290,
       price: { DZD: "5,990 DA", USD: "$30.99" },
-      description: "Best value for active marketers and dropshippers.",
+      description: t('plan_pro_desc'),
       features: [
-        { count: "43", label: "Social Media Posts" },
-        { count: "43", label: "Landing Page Designs" },
-        { count: "64", label: "Ad Creatives" },
+        { count: "43", label: t('feat_social') },
+        { count: "43", label: t('feat_landing') },
+        { count: "64", label: t('feat_ads') },
       ],
       isPopular: true,
       gradient: "from-indigo-500 to-purple-600",
@@ -46,12 +48,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
     {
       name: "ELITE",
       points: "Custom",
-      price: { DZD: "Contact Us", USD: "Contact Us" },
-      description: "For agencies requiring bulk generation and API access.",
+      price: { DZD: t('contact_sales'), USD: t('contact_sales') },
+      description: t('plan_elite_desc'),
       features: [
-        { count: "∞", label: "Custom Points" },
-        { count: "✓", label: "Dedicated Support" },
-        { count: "✓", label: "API Access" },
+        { count: "∞", label: t('feat_custom') },
+        { count: "✓", label: t('feat_support') },
+        { count: "✓", label: t('feat_api') },
       ],
       isPopular: false,
       gradient: "from-slate-800 to-black",
@@ -68,16 +70,16 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
         <div className="p-8 text-center bg-slate-50 border-b border-slate-100 relative">
           <button 
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-200 text-slate-500 transition-colors"
+            className="absolute top-6 right-6 rtl:right-auto rtl:left-6 p-2 rounded-full hover:bg-slate-200 text-slate-500 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
 
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Recharge Your Creativity</h2>
-          <p className="text-slate-500 mb-8">Choose a package to top up your credits and keep designing.</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">{t('pricing_title')}</h2>
+          <p className="text-slate-500 mb-8">{t('pricing_subtitle')}</p>
 
           {/* Currency Toggle */}
-          <div className="inline-flex items-center bg-white p-1 rounded-full border border-slate-200 shadow-sm relative">
+          <div className="inline-flex items-center bg-white p-1 rounded-full border border-slate-200 shadow-sm relative" dir="ltr">
              <div 
                 className={`absolute top-1 bottom-1 w-[50%] bg-indigo-600 rounded-full transition-all duration-300 ${currency === 'USD' ? 'left-[48%]' : 'left-1'}`}
              ></div>
@@ -109,7 +111,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
               >
                 {plan.isPopular && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
-                    Most Popular
+                    {t('most_popular')}
                   </div>
                 )}
 
@@ -127,7 +129,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
 
                 <div className={`p-4 rounded-2xl mb-6 ${plan.name === 'ELITE' ? 'bg-white/10' : 'bg-white border border-slate-100'}`}>
                    <div className="text-center mb-4">
-                     <span className="text-xs font-bold uppercase tracking-wider opacity-50">You Get Approx.</span>
+                     <span className="text-xs font-bold uppercase tracking-wider opacity-50">{t('you_get')}</span>
                    </div>
                    <div className="space-y-3">
                       {plan.features.map((feature, i) => (
@@ -157,7 +159,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                         }
                     }}
                    >
-                     {plan.name === 'ELITE' ? 'Contact Sales' : 'Buy Credits'}
+                     {plan.name === 'ELITE' ? t('contact_sales') : t('buy_credits')}
                    </Button>
                 </div>
               </div>
@@ -166,7 +168,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
         </div>
         
         <div className="p-4 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-400">
-           Secure payment via CIB, Eddahabia, or PayPal. Points are added instantly to your account.
+           {t('secure_payment')}
         </div>
       </div>
     </div>
