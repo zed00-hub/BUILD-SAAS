@@ -1,3 +1,4 @@
+
 export enum Language {
   Arabic = 'Arabic',
   French = 'French',
@@ -58,4 +59,17 @@ export interface SlidePlan {
   title: string;
   subtitle: string;
   designNotes: string;
+}
+
+// --- History Types ---
+
+export type HistoryToolType = 'social' | 'ad' | 'landing';
+
+export interface HistoryItem {
+  id: string;
+  timestamp: number;
+  tool: HistoryToolType;
+  inputs: any; // Flexible input data based on tool
+  results: string[] | string; // Array of images or single image
+  meta?: any; // Extra metadata (like SlidePlan)
 }
