@@ -12,11 +12,22 @@ interface LandingPageToolProps {
 export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deductPoints }) => {
   const [formData, setFormData] = useState({
     description: '',
+    
+    // Pricing & Offer
     price: '',
-    customization: '',
-    language: Language.English,
-    country: Country.USA,
-    socialProofType: 'none' as 'none' | 'customer' | 'expert'
+    currency: 'DZD',
+    discount: '',
+    showPrice: true,
+    
+    // Logistics
+    paymentMethod: 'cod' as 'cod' | 'online' | 'both',
+    
+    // Targeting
+    language: Language.Arabic, // Default to Arabic as per screenshot preference
+    country: Country.Algeria,
+    
+    // Customization
+    customization: '', // "Custom Features"
   });
   
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -29,6 +40,20 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
   const generationCost = 30;
   const editCost = 15;
+
+  const currencies = [
+    { code: 'DZD', label: 'Algerian Dinar (د.ج)' },
+    { code: 'USD', label: 'US Dollar ($)' },
+    { code: 'EUR', label: 'Euro (€)' },
+    { code: 'SAR', label: 'Saudi Riyal (ر.س)' },
+    { code: 'AED', label: 'UAE Dirham (د.إ)' },
+  ];
+
+  const paymentMethods = [
+    { value: 'cod', label: 'Cash on Delivery (الدفع عند الاستلام)' },
+    { value: 'online', label: 'Online Payment (بطاقة بنكية)' },
+    { value: 'both', label: 'Both / All Methods (كلاهما)' },
+  ];
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -44,7 +69,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+    setFormData(prev => ({ ...prev, [e.target.name]: value }));
+  };
+
+  const toggleShowPrice = () => {
+    setFormData(prev => ({ ...prev, showPrice: !prev.showPrice }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,24 +94,60 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     setResultImage(null);
 
     try {
-      const prompt = `Act as a Senior Designer. Design a LONG-FORM VERTICAL Mobile Sales Page. 
+      // Logic for Payment Icons based on selection
+      let paymentInstruction = "";
+      if (formData.paymentMethod === 'cod') {
+        paymentInstruction = "Include prominent icons/badges for 'Cash on Delivery' (الدفع عند الاستلام) and 'Fast Shipping'.";
+      } else if (formData.paymentMethod === 'online') {
+         paymentInstruction = "Include secure payment icons (Visa/Mastercard).";
+      } else {
+         paymentInstruction = "Include trust badges for both Secure Payment and Cash on Delivery.";
+      }
+
+      // Logic for Price Display
+      let priceInstruction = "";
+      if (formData.showPrice && formData.price) {
+        if (formData.discount && parseInt(formData.discount) > 0) {
+           priceInstruction = `DISPLAY PRICE: Show the main price "${formData.price} ${formData.currency}" clearly. Also show a "SALE" badge with "-${formData.discount}% OFF".`;
+        } else {
+           priceInstruction = `DISPLAY PRICE: Show the price "${formData.price} ${formData.currency}" prominently.`;
+        }
+      } else {
+        priceInstruction = "DO NOT display specific price numbers. Focus on the 'Order Now' Call to Action.";
+      }
+
+      // Enhanced Prompt
+      const prompt = `Design a HIGH-FIDELITY 4K VERTICAL Mobile Landing Page (E-commerce Style).
       
       CONTEXT:
-      - Market/Country: ${formData.country}
-      - Language: ${formData.language}
+      - Product: See attached image.
+      - Target Market: ${formData.country}
+      - Language: ${formData.language} (CRITICAL: Ensure all text is grammatically correct. If Arabic, use proper connecting letters).
+      - Payment Method: ${formData.paymentMethod}
+      
+      CONTENT & OFFERS:
       - Product Description: ${formData.description}
-      ${formData.price ? `- Price Point to Display: ${formData.price}` : ''}
-      ${formData.customization ? `- Design Customization/Notes: ${formData.customization}` : ''}
+      - ${priceInstruction}
+      - ${paymentInstruction}
+      ${formData.customization ? `- Special Features to Highlight: ${formData.customization}` : ''}
 
-      STRUCTURE:
-      Include sections for Hero, Value Proposition, Before/After visuals, and Features. 
-      Ensure the layout is clean, sequential, and not cluttered.`;
+      VISUAL STRUCTURE (Modern Sales Funnel Layout):
+      1. **Hero Section**: High-impact headline, large product visual, and immediate "Order Now" button.
+      2. **Offer/Price Box**: A distinct visual container showing the Price/Offer details (if enabled) with a shadow effect.
+      3. **Transformation**: A "Before vs After" comparison section to show value.
+      4. **Trust & Logistics**: A bar or grid showing the Payment Method icons and Shipping guarantees.
+      5. **Footer**: Floating action button style "Order Now".
+
+      DESIGN STYLE:
+      - Clean, trustworthy, high-conversion aesthetic.
+      - Use colors that match the product but keep the background clean (white/soft gray/pastel) to ensure readability.
+      - No gibberish text. Use icons where text is too complex.`;
 
       const result = await generateImage({
         prompt,
         referenceImage: productImage,
         aspectRatio: "9:16", 
-        imageSize: "2K" 
+        imageSize: "4K" // Upgraded to 4K
       });
       setResultImage(result);
     } catch (err: any) {
@@ -115,98 +181,224 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     <div className="max-w-7xl mx-auto p-4 lg:p-8 animate-fade-in">
        <div className="mb-8 border-b border-slate-200 pb-6">
         <h2 className="text-3xl font-bold text-slate-900 mb-2">Landing Page Designer</h2>
-        <p className="text-slate-600">Create high-conversion vertical sales pages.</p>
+        <p className="text-slate-600">Create high-conversion vertical sales pages (4K Resolution).</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4 bg-white p-6 rounded-2xl shadow-lg border border-slate-100 h-fit">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Configuration Panel */}
+        <div className="lg:col-span-5 bg-white rounded-2xl shadow-lg border border-slate-100 h-fit overflow-hidden">
+          <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+             <span className="font-bold text-slate-700">Configuration</span>
+             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Step 1</span>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="p-6 space-y-8">
             
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Product Image (Required)</label>
-              <label className={`cursor-pointer flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl transition-all ${productImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
-                <span className="text-3xl mb-2">{productImage ? '✅' : '📤'}</span>
-                <span className="text-sm font-medium text-slate-700">{productImage ? 'Image Loaded' : 'Click to Upload'}</span>
-                <input type="file" accept="image/png, image/webp, image/jpeg, image/jpg" onChange={handleImageUpload} className="hidden" />
-              </label>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Language</label>
-                <select name="language" value={formData.language} onChange={handleChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none">
-                  {Object.values(Language).map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Market</label>
-                <select name="country" value={formData.country} onChange={handleChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none">
-                  {Object.values(Country).map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+            {/* 1. Visual Asset */}
+            <div className="space-y-3">
+              <label className="block text-sm font-bold text-slate-800">Product Image <span className="text-red-500">*</span></label>
+              <div className="flex gap-4">
+                 <label className={`flex-1 cursor-pointer flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-xl transition-all relative overflow-hidden ${productImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                    {productImage ? (
+                      <>
+                        <img src={`data:image/png;base64,${productImage}`} className="absolute inset-0 w-full h-full object-cover opacity-50" />
+                        <div className="relative z-10 bg-white/90 px-3 py-1 rounded-full shadow-sm text-xs font-bold text-emerald-600">Image Loaded</div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-3xl mb-2">📤</span>
+                        <span className="text-xs font-medium text-slate-500">Upload Product</span>
+                      </>
+                    )}
+                    <input type="file" accept="image/png, image/webp, image/jpeg, image/jpg" onChange={handleImageUpload} className="hidden" />
+                 </label>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Product Description</label>
-              <textarea 
-                name="description"
-                value={formData.description} 
-                onChange={handleChange} 
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg h-24 outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-900 placeholder:text-slate-400" 
-                placeholder="Describe your product (e.g., Wireless Gaming Headset with 7.1 Surround Sound)..." 
-              />
+            {/* 2. Market Settings */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">Target Market</h3>
+              <div className="grid grid-cols-2 gap-4">
+                 <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Language</label>
+                    <select name="language" value={formData.language} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium">
+                      {Object.values(Language).map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                 </div>
+                 <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Region</label>
+                    <select name="country" value={formData.country} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium">
+                      {Object.values(Country).map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                 </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Price (Optional)</label>
-              <input 
-                name="price"
-                type="text" 
-                value={formData.price} 
-                onChange={handleChange} 
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-900 placeholder:text-slate-400" 
-                placeholder="e.g. $49.99 or 5000 DZD" 
-              />
+            {/* 3. Pricing Engine */}
+            <div className="space-y-4">
+               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">Pricing & Offer</h3>
+               
+               <div className="grid grid-cols-12 gap-3">
+                  <div className="col-span-4">
+                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">Currency</label>
+                     <select name="currency" value={formData.currency} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white outline-none text-sm">
+                        {currencies.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                     </select>
+                  </div>
+                  <div className="col-span-8">
+                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">Payment Method</label>
+                     <select name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white outline-none text-sm">
+                        {paymentMethods.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                     </select>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Price Amount</label>
+                    <input 
+                      type="number" 
+                      name="price" 
+                      value={formData.price} 
+                      onChange={handleChange} 
+                      placeholder="e.g. 3500"
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">Discount %</label>
+                    <input 
+                      type="number" 
+                      name="discount" 
+                      min="0" 
+                      max="100" 
+                      value={formData.discount} 
+                      onChange={handleChange} 
+                      placeholder="0-100"
+                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                    />
+                  </div>
+               </div>
+               
+               {/* Show Price Toggle */}
+               <div 
+                 onClick={toggleShowPrice}
+                 className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:border-indigo-200 bg-slate-50 cursor-pointer transition-colors"
+               >
+                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.showPrice ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
+                     {formData.showPrice && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">Show Price in Generated Page</span>
+               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Customization / Notes (Optional)</label>
-              <textarea 
-                name="customization"
-                value={formData.customization} 
-                onChange={handleChange} 
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg h-20 outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-900 placeholder:text-slate-400" 
-                placeholder="Specific colors, vibes, or things to avoid..." 
-              />
+            {/* 4. Content Details */}
+            <div className="space-y-4">
+               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">Content Details</h3>
+               
+               <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Product Description</label>
+                  <textarea 
+                    name="description"
+                    value={formData.description} 
+                    onChange={handleChange} 
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg h-20 outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 text-sm resize-none" 
+                    placeholder="Short summary of the product..." 
+                  />
+               </div>
+
+               <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Custom Features (Optional)</label>
+                  <textarea 
+                    name="customization"
+                    value={formData.customization} 
+                    onChange={handleChange} 
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg h-16 outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 text-sm resize-none" 
+                    placeholder="Add any specific details, features, or sections..." 
+                  />
+               </div>
             </div>
             
-            <Button type="submit" isLoading={isLoading} className="w-full py-4 text-lg">
+            <Button type="submit" isLoading={isLoading} className="w-full py-4 text-lg font-bold shadow-xl shadow-indigo-100 hover:shadow-indigo-200">
               <span className="flex items-center gap-1">
                 Generate Design ({generationCost} <CoinIcon className="w-5 h-5 inline-block" />)
               </span>
             </Button>
-            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg">{error}</p>}
           </form>
         </div>
 
-        <div className="lg:col-span-8">
+        {/* Results Panel */}
+        <div className="lg:col-span-7">
            {resultImage ? (
-             <div className="space-y-6">
-                <div className="rounded-2xl overflow-hidden shadow-2xl bg-slate-900 flex justify-center py-8">
-                  <img src={resultImage} alt="Mockup" className="max-w-[80%] h-auto rounded-lg" />
+             <div className="space-y-6 animate-fade-in">
+                <div className="rounded-2xl overflow-hidden shadow-2xl bg-slate-900 flex justify-center py-8 relative group">
+                  <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none"></div>
+                  <img src={resultImage} alt="Mockup" className="max-w-[85%] sm:max-w-[70%] h-auto rounded-lg shadow-black/50 shadow-2xl ring-1 ring-white/10" />
                 </div>
-                <div className="flex gap-3">
-                  <input type="text" value={editInstruction} onChange={(e) => setEditInstruction(e.target.value)} placeholder="Live edit (e.g., make background darker)..." className="flex-1 px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
-                  <Button onClick={handleEdit} isLoading={isEditing}>
-                    <span className="flex items-center gap-1">
-                      Update ({editCost} <CoinIcon className="w-4 h-4 inline-block" />)
-                    </span>
-                  </Button>
+                
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                   <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                     <span>✨ Refine Result</span>
+                     <span className="text-xs font-normal text-slate-400 px-2 py-0.5 bg-slate-100 rounded-full">AI Editor</span>
+                   </h3>
+                   
+                   <div className="flex flex-col sm:flex-row gap-3">
+                     <div className="flex flex-[2] gap-2">
+                       <input 
+                          type="text" 
+                          value={editInstruction} 
+                          onChange={(e) => setEditInstruction(e.target.value)} 
+                          placeholder="E.g. Make the price text larger, Change background to blue..." 
+                          className="flex-1 px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-all" 
+                       />
+                       <Button onClick={handleEdit} isLoading={isEditing} variant="secondary">
+                           Update
+                       </Button>
+                     </div>
+                     <a 
+                       href={resultImage} 
+                       download="creakits-landing-page-4k.png" 
+                       className="flex-1 text-center py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                     >
+                       <span>Download 4K</span>
+                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                     </a>
+                   </div>
                 </div>
             </div>
            ) : (
-            <div className="h-[500px] flex items-center justify-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-300 text-slate-400">
-               Design will appear here.
+            <div className="h-full min-h-[600px] flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+               {/* Placeholder Graphics */}
+               <div className="absolute inset-0 opacity-40 pointer-events-none">
+                  <div className="absolute top-10 right-10 w-32 h-32 bg-indigo-100 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-10 left-10 w-40 h-40 bg-pink-100 rounded-full blur-3xl"></div>
+               </div>
+
+               <div className="relative z-10 text-center p-8">
+                  <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                     <span className="text-5xl">📄</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Ready to Design</h3>
+                  <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
+                    Configure your landing page settings on the left and click Generate. We will create a high-fidelity 4K mobile layout.
+                  </p>
+                  
+                  <div className="mt-8 grid grid-cols-3 gap-4 text-xs text-slate-400">
+                     <div className="flex flex-col items-center gap-1">
+                        <span className="bg-slate-100 p-2 rounded-lg">4K</span>
+                        <span>Resolution</span>
+                     </div>
+                     <div className="flex flex-col items-center gap-1">
+                        <span className="bg-slate-100 p-2 rounded-lg">Aa</span>
+                        <span>Typography</span>
+                     </div>
+                     <div className="flex flex-col items-center gap-1">
+                        <span className="bg-slate-100 p-2 rounded-lg">🛒</span>
+                        <span>Conversion</span>
+                     </div>
+                  </div>
+               </div>
             </div>
            )}
         </div>
