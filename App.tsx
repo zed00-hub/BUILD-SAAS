@@ -373,31 +373,6 @@ const AppContent: React.FC = () => {
             </nav>
 
             <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-4">
-              {user && (
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-2">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg overflow-hidden shrink-0 border-2 border-white shadow-sm">
-                      {user.photoURL ? (
-                        <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
-                      ) : (
-                        user.email?.[0].toUpperCase() || "U"
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || t('welcome_back')}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => signOut(auth)}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 bg-white border border-red-100 hover:bg-red-50 hover:border-red-200 rounded-lg transition-all shadow-sm"
-                  >
-                    <span>🚪</span>
-                    <span>{t('sign_out')}</span>
-                  </button>
-                </div>
-              )}
-              <LanguageSwitcher className="justify-center" />
               <div className="text-xs text-slate-400 text-center">
                 {t('powered_by')}
               </div>
@@ -409,12 +384,44 @@ const AppContent: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 relative overflow-x-hidden">
 
-        {/* Points Display - Correctly Positioned for LTR and RTL */}
+        {/* Top Header Controls - Correctly Positioned for LTR and RTL */}
         {user && (
-          <div className="fixed top-4 right-4 rtl:right-auto rtl:left-4 sm:top-6 sm:right-8 rtl:sm:left-8 z-50 pointer-events-none">
+          <div className="fixed top-4 right-4 rtl:right-auto rtl:left-4 sm:top-6 sm:right-8 rtl:sm:left-8 z-50 flex items-center gap-3">
+
+            {/* Language Switcher */}
+            <div className="bg-white/90 backdrop-blur-md shadow-lg border border-slate-200 rounded-full px-1 py-1">
+              <LanguageSwitcher className="!mb-0" />
+            </div>
+
+            {/* Account Dropdown (Simplified as Icon for now, can be expanded) */}
+            <div className="relative group">
+              <div className="w-10 h-10 rounded-full bg-white shadow-lg border border-slate-200 cursor-pointer overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-indigo-100 transition-all">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-indigo-700 font-bold">{user.email?.[0].toUpperCase() || "U"}</span>
+                )}
+              </div>
+
+              {/* Dropdown Menu */}
+              <div className="absolute top-12 right-0 rtl:right-auto rtl:left-0 w-48 bg-white rounded-xl shadow-xl border border-slate-100 p-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all transform origin-top-right rtl:origin-top-left z-50">
+                <div className="px-3 py-2 border-b border-slate-50 mb-1">
+                  <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || t('welcome_back')}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
+                </div>
+                <button
+                  onClick={() => signOut(auth)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left rtl:text-right"
+                >
+                  <span>🚪</span> {t('sign_out')}
+                </button>
+              </div>
+            </div>
+
+            {/* Points Display */}
             <div
               onClick={() => setIsPricingOpen(true)}
-              className="pointer-events-auto cursor-pointer bg-white/90 backdrop-blur-md shadow-lg border border-slate-200 rounded-full pl-5 pr-2 rtl:pl-2 rtl:pr-5 py-2 flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 group"
+              className="cursor-pointer bg-white/90 backdrop-blur-md shadow-lg border border-slate-200 rounded-full pl-5 pr-2 rtl:pl-2 rtl:pr-5 py-2 flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 group"
             >
               <div className="flex flex-col items-end leading-none">
                 <span className="font-bold text-slate-900 text-lg tabular-nums group-hover:text-indigo-600 transition-colors">{points}</span>
