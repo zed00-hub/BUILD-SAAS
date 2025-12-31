@@ -6,6 +6,35 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { auth, googleProvider } from '../src/firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
+// Country codes with flags
+const COUNTRY_CODES = [
+  { code: '+213', country: 'Algeria', flag: '🇩🇿' },
+  { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦' },
+  { code: '+971', country: 'UAE', flag: '🇦🇪' },
+  { code: '+20', country: 'Egypt', flag: '🇪🇬' },
+  { code: '+212', country: 'Morocco', flag: '🇲🇦' },
+  { code: '+216', country: 'Tunisia', flag: '🇹🇳' },
+  { code: '+962', country: 'Jordan', flag: '🇯🇴' },
+  { code: '+961', country: 'Lebanon', flag: '🇱🇧' },
+  { code: '+964', country: 'Iraq', flag: '🇮🇶' },
+  { code: '+968', country: 'Oman', flag: '🇴🇲' },
+  { code: '+974', country: 'Qatar', flag: '🇶🇦' },
+  { code: '+973', country: 'Bahrain', flag: '🇧🇭' },
+  { code: '+965', country: 'Kuwait', flag: '🇰🇼' },
+  { code: '+218', country: 'Libya', flag: '🇱🇾' },
+  { code: '+249', country: 'Sudan', flag: '🇸🇩' },
+  { code: '+963', country: 'Syria', flag: '🇸🇾' },
+  { code: '+967', country: 'Yemen', flag: '🇾🇪' },
+  { code: '+970', country: 'Palestine', flag: '🇵🇸' },
+  { code: '+33', country: 'France', flag: '🇫🇷' },
+  { code: '+1', country: 'USA', flag: '🇺🇸' },
+  { code: '+44', country: 'UK', flag: '🇬🇧' },
+  { code: '+49', country: 'Germany', flag: '🇩🇪' },
+  { code: '+34', country: 'Spain', flag: '🇪🇸' },
+  { code: '+39', country: 'Italy', flag: '🇮🇹' },
+  { code: '+90', country: 'Turkey', flag: '🇹🇷' },
+];
+
 interface AuthScreenProps {
   onLogin: () => void;
 }
@@ -13,11 +42,14 @@ interface AuthScreenProps {
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]); // Algeria as default
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: ''
+    name: '',
+    phone: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -146,6 +178,53 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 placeholder="John Doe"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-slate-50 focus:bg-white"
               />
+            </div>
+          )}
+
+          {isSignUp && (
+            <div className="input-group">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">{t('phone_number')}</label>
+              <div className="flex gap-2">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                    className="h-full px-3 py-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white flex items-center gap-2 transition-all min-w-[100px]"
+                  >
+                    <span className="text-xl">{selectedCountry.flag}</span>
+                    <span className="text-sm font-medium text-slate-600">{selectedCountry.code}</span>
+                  </button>
+
+                  {showCountryDropdown && (
+                    <div className="absolute top-full left-0 mt-1 w-64 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-50">
+                      {COUNTRY_CODES.map((country) => (
+                        <button
+                          key={country.country}
+                          type="button"
+                          onClick={() => {
+                            setSelectedCountry(country);
+                            setShowCountryDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-3 transition-colors"
+                        >
+                          <span className="text-xl">{country.flag}</span>
+                          <span className="text-sm text-slate-600 font-medium w-12">{country.code}</span>
+                          <span className="text-sm text-slate-800 truncate">{country.country}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="tel"
+                  name="phone"
+                  required={isSignUp}
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="123 456 789"
+                  className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-slate-50 focus:bg-white"
+                />
+              </div>
             </div>
           )}
 
