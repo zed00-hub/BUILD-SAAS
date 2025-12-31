@@ -10,11 +10,15 @@ import { AuthScreen } from './components/AuthScreen';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 
+import { auth } from './src/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [apiKeyReady, setApiKeyReady] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
   // Get language from context to handle RTL logic explicitly
   const { t, language } = useLanguage();
@@ -33,19 +37,25 @@ const AppContent: React.FC = () => {
     return false;
   };
 
-  // Set API key ready immediately - the key is loaded from .env when API is called
+  // Monitor Auth State
   useEffect(() => {
-    setApiKeyReady(true);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoadingAuth(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleAuthSuccess = () => {
-    setApiKeyReady(true);
+    // Managed automatically by onAuthStateChanged
   };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const renderContent = () => {
-    if (!apiKeyReady) {
+    if (loadingAuth) return <div className="h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
+
+    if (!user) {
       return <AuthScreen onLogin={handleAuthSuccess} />;
     }
 
@@ -283,7 +293,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex bg-slate-50 text-slate-800 font-sans">
       {/* Mobile Menu Button - Correctly Positioned for LTR and RTL */}
-      {apiKeyReady && (
+      {user && (
         <button
           onClick={toggleSidebar}
           className="fixed top-4 left-4 rtl:left-auto rtl:right-4 z-50 p-2 bg-white rounded-lg shadow-md md:hidden text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors"
@@ -296,7 +306,7 @@ const AppContent: React.FC = () => {
       <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
 
       {/* Sidebar Overlay */}
-      {isSidebarOpen && apiKeyReady && (
+      {isSidebarOpen && user && (
         <div
           className="fixed inset-0 bg-black/20 z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
@@ -304,7 +314,7 @@ const AppContent: React.FC = () => {
       )}
 
       {/* Sidebar - Improved LTR/RTL Logic */}
-      {apiKeyReady && (
+      {user && (
         <aside
           className={`
             fixed top-0 bottom-0 z-50 w-72 bg-white border-r rtl:border-r-0 rtl:border-l border-slate-100 shadow-xl transition-transform duration-300 ease-in-out
@@ -369,7 +379,7 @@ const AppContent: React.FC = () => {
       <main className="flex-1 relative overflow-x-hidden">
 
         {/* Points Display - Correctly Positioned for LTR and RTL */}
-        {apiKeyReady && (
+        {user && (
           <div className="fixed top-4 right-4 rtl:right-auto rtl:left-4 sm:top-6 sm:right-8 rtl:sm:left-8 z-50 pointer-events-none">
             <div
               onClick={() => setIsPricingOpen(true)}
