@@ -17,8 +17,9 @@ export const fileToBase64 = (file: File): Promise<string> => {
 };
 
 export const getGeminiClient = () => {
-  // Ensure we check for the API key in the environment or window if injected later
+  // Use process.env.API_KEY exclusively as per guidelines
   const apiKey = process.env.API_KEY;
+  
   if (!apiKey) {
     throw new Error("API Key not found");
   }
