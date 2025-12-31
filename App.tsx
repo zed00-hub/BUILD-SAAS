@@ -14,6 +14,7 @@ import { auth } from './src/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 import { VerifyEmailScreen } from './components/VerifyEmailScreen';
+import { WalletService } from './src/services/walletService';
 
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
@@ -41,8 +42,25 @@ const AppContent: React.FC = () => {
 
   // Monitor Auth State
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          // 1. Initialize Wallet if not exists
+          await WalletService.initializeUserWallet(
+            currentUser.uid,
+            currentUser.email || '',
+            currentUser.displayName || undefined,
+            currentUser.photoURL || undefined
+          );
+
+          // 2. Fetch Real Balance
+          const balance = await WalletService.getUserBalance(currentUser.uid);
+          setPoints(balance);
+        } catch (error) {
+          console.error("Error fetching wallet:", error);
+        }
+      }
       setLoadingAuth(false);
     });
     return () => unsubscribe();
