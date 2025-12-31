@@ -15,6 +15,7 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 import { VerifyEmailScreen } from './components/VerifyEmailScreen';
 import { WalletService } from './src/services/walletService';
+import { OrderService } from './src/services/orderService';
 
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
@@ -27,17 +28,47 @@ const AppContent: React.FC = () => {
   const { t, language } = useLanguage();
   const isRtl = language === 'ar';
 
-  // Points System State (Simulation)
-  const [points, setPoints] = useState<number>(500);
+  // Points System Handling
+  const [points, setPoints] = useState<number>(0);
 
-  const deductPoints = (amount: number): boolean => {
-    if (points >= amount) {
-      setPoints(prev => prev - amount);
-      return true;
+  const handleDeduction = async (amount: number, description: string): Promise<boolean> => {
+    if (!user) return false;
+
+    // Optimistic local check
+    if (points < amount) {
+      setIsPricingOpen(true);
+      return false;
     }
-    // Open pricing modal instead of alert if insufficient funds
-    setIsPricingOpen(true);
-    return false;
+
+    try {
+      // 1. Create Order (Pending)
+      const orderId = await OrderService.createOrder(
+        user.uid,
+        currentTool as any, // Current selected tool
+        { description, amount },
+        amount
+      );
+
+      // 2. Attempt Deduction
+      const success = await WalletService.deductPoints(user.uid, amount, description, orderId);
+
+      if (success) {
+        // Update local state immediately
+        setPoints(prev => prev - amount);
+        // Mark order as completed
+        await OrderService.updateOrderStatus(orderId, 'completed', { resultCode: 'SUCCESS' });
+        return true;
+      } else {
+        // Mark order as failed
+        await OrderService.updateOrderStatus(orderId, 'failed', { error: 'Insufficient funds transaction' });
+        setIsPricingOpen(true);
+        return false;
+      }
+    } catch (e) {
+      console.error("Deduction error:", e);
+      setIsPricingOpen(true); // Assume error might be funds or network, safer to stop
+      return false;
+    }
   };
 
   // Monitor Auth State
@@ -86,11 +117,11 @@ const AppContent: React.FC = () => {
 
     switch (currentTool) {
       case 'social-media':
-        return <SocialMediaTool points={points} deductPoints={deductPoints} />;
+        return <SocialMediaTool points={points} deductPoints={handleDeduction} />;
       case 'ad-creative':
-        return <AdCreativeTool points={points} deductPoints={deductPoints} />;
+        return <AdCreativeTool points={points} deductPoints={handleDeduction} />;
       case 'landing-page':
-        return <LandingPageTool points={points} deductPoints={deductPoints} />;
+        return <LandingPageTool points={points} deductPoints={handleDeduction} />;
       case 'home':
       default:
         return (

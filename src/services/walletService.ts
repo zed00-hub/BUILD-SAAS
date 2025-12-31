@@ -27,7 +27,7 @@ export const WalletService = {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-            const initialBalance = 50; // رصيد مجاني للتجربة
+            const initialBalance = 0; // الرصيد الافتراضي 0
             const userData: UserData = {
                 uid,
                 email,
@@ -39,14 +39,7 @@ export const WalletService = {
             };
             await setDoc(userRef, userData);
 
-            // تسجيل عملية الإيداع الأولية
-            await addDoc(collection(db, TRANSACTIONS_COLLECTION), {
-                userId: uid,
-                amount: initialBalance,
-                type: 'credit',
-                description: 'Welcome Bonus',
-                createdAt: serverTimestamp()
-            });
+            // لا حاجة لتسجيل عملية إذا كان الرصيد 0
         }
     },
 

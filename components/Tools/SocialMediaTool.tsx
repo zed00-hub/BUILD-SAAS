@@ -9,7 +9,7 @@ import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/s
 
 interface SocialMediaToolProps {
   points: number;
-  deductPoints: (amount: number) => boolean;
+  deductPoints: (amount: number, description: string) => Promise<boolean>;
 }
 
 export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deductPoints }) => {
@@ -24,10 +24,10 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [generatedPlan, setGeneratedPlan] = useState<SlidePlan[] | null>(null);
-  
+
   // History State
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  
+
   // Edit State
   const [selectedSlideIndex, setSelectedSlideIndex] = useState<number | null>(null);
   const [editInstruction, setEditInstruction] = useState('');
@@ -37,7 +37,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
   const [isPlanning, setIsPlanning] = useState(false);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const resultsRef = useRef<HTMLDivElement>(null);
 
   // Load history on mount
@@ -51,7 +51,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
   const handleLoadHistory = (item: HistoryItem) => {
     if (!item.inputs || !item.results) return;
-    
+
     // Restore inputs
     setDescription(item.inputs.description || '');
     setManualContent(item.inputs.manualContent || '');
@@ -59,14 +59,14 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
     setSlideCount(item.inputs.slideCount || 3);
     // Note: We might not want to restore large base64 input images to state to keep it clean, 
     // or we can if they are in inputs. Assuming they are stored in inputs for full restore.
-    
+
     // Restore results
     setGeneratedImages(item.results as string[]);
     setGeneratedPlan(item.meta?.plan || null);
-    
+
     // Scroll to results
     setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
@@ -109,9 +109,11 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!deductPoints(totalCost)) {
-        return;
+
+    // Deduct Points Async
+    const hasPoints = await deductPoints(totalCost, `Generate ${slideCount} Social Slides`);
+    if (!hasPoints) {
+      return;
     }
 
     setIsPlanning(false);
@@ -142,8 +144,8 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
         let prompt = '';
 
         if (shouldAutoPlan) {
-            const slide = currentPlan[i];
-            prompt = `Create a high-quality social media design for Slide ${slide.slideNumber} of ${loopCount}.
+          const slide = currentPlan[i];
+          prompt = `Create a high-quality social media design for Slide ${slide.slideNumber} of ${loopCount}.
             
             STRATEGY & CONTENT:
             - Role: ${slide.role}
@@ -157,7 +159,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
             ${slide.designNotes}
             Modern, clean, engaging aesthetic. High resolution.`;
         } else {
-            prompt = `Create a high-quality social media design for Slide ${i + 1} of ${loopCount}.
+          prompt = `Create a high-quality social media design for Slide ${i + 1} of ${loopCount}.
             
             GENERAL CONTEXT:
             ${description}
@@ -179,7 +181,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
         if (styleImage) {
           prompt += ` Use the attached style reference image as a strict visual theme guide.`;
         }
-        
+
         if (additionalElementsText) {
           prompt += ` Include these specific design elements: ${additionalElementsText}.`;
         }
@@ -195,23 +197,23 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
       }
 
       setGeneratedImages(images);
-      
+
       // Save to History
       saveHistoryItem({
         tool: 'social',
         results: images,
         inputs: {
-            description,
-            manualContent,
-            additionalElementsText,
-            slideCount
+          description,
+          manualContent,
+          additionalElementsText,
+          slideCount
         },
         meta: {
-            plan: shouldAutoPlan ? currentPlan : null
+          plan: shouldAutoPlan ? currentPlan : null
         }
       });
       refreshHistory();
-      
+
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
@@ -226,16 +228,17 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
   const handleEditSlide = async () => {
     if (selectedSlideIndex === null || !editInstruction) return;
-    
-    if (!deductPoints(editCost)) {
-        return;
+
+    const hasPoints = await deductPoints(editCost, `Edit Social Slide ${selectedSlideIndex + 1}`);
+    if (!hasPoints) {
+      return;
     }
 
     setIsEditing(true);
     try {
       const currentImage = generatedImages[selectedSlideIndex];
       const newImage = await editGeneratedImage(currentImage, editInstruction);
-      
+
       const updatedImages = [...generatedImages];
       updatedImages[selectedSlideIndex] = newImage;
       setGeneratedImages(updatedImages);
@@ -259,160 +262,160 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
         <div className="lg:col-span-5 space-y-8">
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="input-group">
+              <div className="input-group">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    {t('topic_label')}
+                  {t('topic_label')}
                 </label>
                 <textarea
-                    required
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none min-h-[80px] bg-white text-slate-900 placeholder:text-slate-400 transition-colors"
-                    placeholder={t('topic_ph')}
+                  required
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none min-h-[80px] bg-white text-slate-900 placeholder:text-slate-400 transition-colors"
+                  placeholder={t('topic_ph')}
                 />
-                </div>
+              </div>
 
-                <div className="input-group">
+              <div className="input-group">
                 <label className="block text-sm font-semibold text-slate-700 mb-2 flex justify-between">
-                    <span>{t('manual_content_label')}</span>
-                    <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{t('skips_ai')}</span>
+                  <span>{t('manual_content_label')}</span>
+                  <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{t('skips_ai')}</span>
                 </label>
                 <textarea
-                    value={manualContent}
-                    onChange={(e) => setManualContent(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none min-h-[100px] bg-white text-slate-900 placeholder:text-slate-400 transition-colors"
-                    placeholder={t('manual_content_ph')}
+                  value={manualContent}
+                  onChange={(e) => setManualContent(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none min-h-[100px] bg-white text-slate-900 placeholder:text-slate-400 transition-colors"
+                  placeholder={t('manual_content_ph')}
                 />
-                </div>
+              </div>
 
-                <div className="input-group">
+              <div className="input-group">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">{t('num_slides')}</label>
                 <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                    <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={decrementSlides}
                     className="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border border-slate-200"
-                    >
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
-                    </button>
-                    
-                    <div className="flex-1 text-center font-bold text-xl text-indigo-700">
-                        {slideCount} <span className="text-sm font-normal text-slate-400">/ 10</span>
-                    </div>
+                  </button>
 
-                    <button 
-                    type="button" 
+                  <div className="flex-1 text-center font-bold text-xl text-indigo-700">
+                    {slideCount} <span className="text-sm font-normal text-slate-400">/ 10</span>
+                  </div>
+
+                  <button
+                    type="button"
                     onClick={incrementSlides}
                     className="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border border-slate-200"
-                    >
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                    </button>
+                  </button>
                 </div>
-                </div>
+              </div>
 
-                <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="input-group">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('style_opt')}</label>
-                    <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${styleImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('style_opt')}</label>
+                  <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${styleImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
                     <span className="text-xl mb-1">🎨</span>
                     <span className="text-[10px] text-slate-500 text-center px-1 truncate w-full">
-                        {styleImage ? t('loaded') : t('ref_image')}
+                      {styleImage ? t('loaded') : t('ref_image')}
                     </span>
                     <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setStyleImage)} className="hidden" />
-                    </label>
+                  </label>
                 </div>
 
                 <div className="input-group">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('logo_opt')}</label>
-                    <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('logo_opt')}</label>
+                  <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
                     <span className="text-xl mb-1">©️</span>
                     <span className="text-[10px] text-slate-500 text-center px-1 truncate w-full">
-                        {logoImage ? t('loaded') : "Logo PNG"}
+                      {logoImage ? t('loaded') : "Logo PNG"}
                     </span>
                     <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setLogoImage)} className="hidden" />
-                    </label>
+                  </label>
                 </div>
-                </div>
-                
-                <div className="input-group">
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('add_element_opt')}</label>
-                    <div className="flex gap-2">
-                    <label className={`cursor-pointer flex-shrink-0 w-20 flex flex-col items-center justify-center h-[50px] border-2 border-dashed rounded-lg transition-all ${elementImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
-                        <span className="text-lg">🖼️</span>
-                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setElementImage)} className="hidden" />
-                    </label>
-                    <input
-                        type="text"
-                        value={additionalElementsText}
-                        onChange={(e) => setAdditionalElementsText(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-slate-900 placeholder:text-slate-400 text-sm"
-                        placeholder={t('element_ph')}
-                    />
-                    </div>
-                </div>
+              </div>
 
-                <Button type="submit" isLoading={isPlanning || isGeneratingImages} className="w-full py-4 text-lg shadow-indigo-200 mt-4">
-                {isPlanning ? t('planning_content') : isGeneratingImages ? t('designing') : (
-                    <span className="flex items-center gap-1">
-                    {t('generate')} ({totalCost} <CoinIcon className="w-5 h-5 inline-block" />)
-                    </span>
-                )}
-                </Button>
-                
-                {error && (
-                <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {error}
+              <div className="input-group">
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('add_element_opt')}</label>
+                <div className="flex gap-2">
+                  <label className={`cursor-pointer flex-shrink-0 w-20 flex flex-col items-center justify-center h-[50px] border-2 border-dashed rounded-lg transition-all ${elementImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                    <span className="text-lg">🖼️</span>
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setElementImage)} className="hidden" />
+                  </label>
+                  <input
+                    type="text"
+                    value={additionalElementsText}
+                    onChange={(e) => setAdditionalElementsText(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-slate-900 placeholder:text-slate-400 text-sm"
+                    placeholder={t('element_ph')}
+                  />
                 </div>
+              </div>
+
+              <Button type="submit" isLoading={isPlanning || isGeneratingImages} className="w-full py-4 text-lg shadow-indigo-200 mt-4">
+                {isPlanning ? t('planning_content') : isGeneratingImages ? t('designing') : (
+                  <span className="flex items-center gap-1">
+                    {t('generate')} ({totalCost} <CoinIcon className="w-5 h-5 inline-block" />)
+                  </span>
                 )}
+              </Button>
+
+              {error && (
+                <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {error}
+                </div>
+              )}
             </form>
           </div>
 
           {/* History Section */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-             <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex justify-between items-center">
-                {t('history_title')}
-                <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{history.length}</span>
-             </h3>
-             {history.length === 0 ? (
-                <div className="text-center text-slate-400 py-6 text-sm">
-                   {t('history_empty')}
-                </div>
-             ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                   {history.map(item => (
-                      <div key={item.id} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
-                         <div className="w-16 h-16 bg-slate-100 rounded-md overflow-hidden flex-shrink-0">
-                            {Array.isArray(item.results) && item.results[0] && (
-                                <img src={item.results[0]} className="w-full h-full object-cover" alt="History" />
-                            )}
-                         </div>
-                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-slate-800 truncate leading-tight mb-1">
-                                {item.inputs.description || item.inputs.manualContent || "Untitled Project"}
-                            </p>
-                            <p className="text-[10px] text-slate-400 mb-2">
-                               {new Date(item.timestamp).toLocaleDateString()} • {item.inputs.slideCount} slides
-                            </p>
-                            <div className="flex gap-2">
-                               <button 
-                                onClick={() => handleLoadHistory(item)}
-                                className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 font-medium transition-colors"
-                               >
-                                  {t('history_load')}
-                               </button>
-                               <button 
-                                onClick={(e) => handleDeleteHistory(e, item.id)}
-                                className="text-[10px] text-red-400 hover:text-red-600 px-1 py-1 transition-colors opacity-0 group-hover:opacity-100"
-                               >
-                                  {t('history_delete')}
-                               </button>
-                            </div>
-                         </div>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex justify-between items-center">
+              {t('history_title')}
+              <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{history.length}</span>
+            </h3>
+            {history.length === 0 ? (
+              <div className="text-center text-slate-400 py-6 text-sm">
+                {t('history_empty')}
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {history.map(item => (
+                  <div key={item.id} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
+                    <div className="w-16 h-16 bg-slate-100 rounded-md overflow-hidden flex-shrink-0">
+                      {Array.isArray(item.results) && item.results[0] && (
+                        <img src={item.results[0]} className="w-full h-full object-cover" alt="History" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate leading-tight mb-1">
+                        {item.inputs.description || item.inputs.manualContent || "Untitled Project"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mb-2">
+                        {new Date(item.timestamp).toLocaleDateString()} • {item.inputs.slideCount} slides
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleLoadHistory(item)}
+                          className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 font-medium transition-colors"
+                        >
+                          {t('history_load')}
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteHistory(e, item.id)}
+                          className="text-[10px] text-red-400 hover:text-red-600 px-1 py-1 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          {t('history_delete')}
+                        </button>
                       </div>
-                   ))}
-                </div>
-             )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -424,18 +427,18 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">{t('ai_content_strategy')}</h3>
               <div className="space-y-4">
                 {generatedPlan.map((slide) => (
-                   <div key={slide.slideNumber} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                        {slide.slideNumber}
+                  <div key={slide.slideNumber} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex gap-4 items-start">
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      {slide.slideNumber}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{slide.role}</span>
+                        <h4 className="font-semibold text-slate-900">{slide.title}</h4>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{slide.role}</span>
-                          <h4 className="font-semibold text-slate-900">{slide.title}</h4>
-                        </div>
-                        <p className="text-sm text-slate-500 mb-2">{slide.subtitle}</p>
-                      </div>
-                   </div>
+                      <p className="text-sm text-slate-500 mb-2">{slide.subtitle}</p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -449,7 +452,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
                 <div className="flex gap-2">
                   <span className="text-xs text-slate-500 self-center hidden sm:block">{t('click_to_edit')}</span>
                   {generatedImages.length > 1 && (
-                    <button 
+                    <button
                       onClick={handleDownloadAll}
                       className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
                     >
@@ -464,8 +467,8 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
                 ${generatedImages.length > 1 ? 'flex overflow-x-auto pb-6 snap-x snap-mandatory gap-0.5' : 'grid grid-cols-1 gap-6'}
               `}>
                 {generatedImages.map((img, idx) => (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     onClick={() => setSelectedSlideIndex(idx)}
                     className={`
                       relative group bg-white cursor-pointer transition-all duration-200
@@ -474,7 +477,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
                     `}
                   >
                     <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-auto object-cover" />
-                    
+
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-3 backdrop-blur-sm pointer-events-none">
                       <span className="text-white font-medium">{t('click_to_edit')} {idx + 1}</span>
@@ -485,31 +488,31 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
               {/* Live Editing Interface for Carousel */}
               {selectedSlideIndex !== null && (
-                 <div className="bg-white p-5 rounded-2xl border border-indigo-200 shadow-lg animate-fade-in relative ring-4 ring-indigo-50/50">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-bold text-indigo-900">Editing Slide {selectedSlideIndex + 1}</h4>
-                      <button onClick={() => setSelectedSlideIndex(null)} className="text-slate-400 hover:text-slate-600 text-sm">{t('cancel')}</button>
-                    </div>
-                    <div className="flex gap-2">
-                       <input 
-                        type="text" 
-                        value={editInstruction}
-                        onChange={(e) => setEditInstruction(e.target.value)}
-                        placeholder={t('edit_placeholder')}
-                        className="flex-1 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
-                        onKeyDown={(e) => e.key === 'Enter' && handleEditSlide()}
-                       />
-                       <Button onClick={handleEditSlide} isLoading={isEditing} variant="primary" className="px-6">
-                         <span className="flex items-center gap-1">
-                           {t('update')} ({editCost} <CoinIcon className="w-4 h-4 inline-block" />)
-                         </span>
-                       </Button>
-                    </div>
-                 </div>
+                <div className="bg-white p-5 rounded-2xl border border-indigo-200 shadow-lg animate-fade-in relative ring-4 ring-indigo-50/50">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-bold text-indigo-900">Editing Slide {selectedSlideIndex + 1}</h4>
+                    <button onClick={() => setSelectedSlideIndex(null)} className="text-slate-400 hover:text-slate-600 text-sm">{t('cancel')}</button>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editInstruction}
+                      onChange={(e) => setEditInstruction(e.target.value)}
+                      placeholder={t('edit_placeholder')}
+                      className="flex-1 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      onKeyDown={(e) => e.key === 'Enter' && handleEditSlide()}
+                    />
+                    <Button onClick={handleEditSlide} isLoading={isEditing} variant="primary" className="px-6">
+                      <span className="flex items-center gap-1">
+                        {t('update')} ({editCost} <CoinIcon className="w-4 h-4 inline-block" />)
+                      </span>
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
           ) : (
-             !isPlanning && !isGeneratingImages && (
+            !isPlanning && !isGeneratingImages && (
               <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
                 <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                   <span className="text-4xl">✨</span>
@@ -519,18 +522,18 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
               </div>
             )
           )}
-          
+
           {/* Loading States Visuals */}
           {(isPlanning || isGeneratingImages) && (
-             <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-indigo-100 rounded-3xl bg-indigo-50/20">
-                <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p className="text-lg font-medium text-indigo-800">
-                  {isPlanning ? `🧠 ${t('ai_planning_msg')}` : `🎨 ${t('generating_designs_msg')}`}
-                </p>
-             </div>
+            <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-indigo-100 rounded-3xl bg-indigo-50/20">
+              <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-lg font-medium text-indigo-800">
+                {isPlanning ? `🧠 ${t('ai_planning_msg')}` : `🎨 ${t('generating_designs_msg')}`}
+              </p>
+            </div>
           )}
         </div>
       </div>
