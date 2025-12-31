@@ -34,6 +34,12 @@ jobs:
         run: npm run build
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VITE_FIREBASE_API_KEY: "AIzaSyAA1wXAUNZIdkzK2Dl6WtlopggXqkhDLR0"
+          VITE_FIREBASE_AUTH_DOMAIN: "saas-017.firebaseapp.com"
+          VITE_FIREBASE_PROJECT_ID: "saas-017"
+          VITE_FIREBASE_STORAGE_BUCKET: "saas-017.firebasestorage.app"
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "323956351854"
+          VITE_FIREBASE_APP_ID: "1:323956351854:web:e70b30fa08771362f8577f"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
