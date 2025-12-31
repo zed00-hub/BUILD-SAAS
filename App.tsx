@@ -11,7 +11,7 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 
 import { auth } from './src/firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
@@ -366,6 +366,30 @@ const AppContent: React.FC = () => {
             </nav>
 
             <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-4">
+              {user && (
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-2">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg overflow-hidden shrink-0 border-2 border-white shadow-sm">
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
+                      ) : (
+                        user.email?.[0].toUpperCase() || "U"
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || t('welcome_back')}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => signOut(auth)}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 bg-white border border-red-100 hover:bg-red-50 hover:border-red-200 rounded-lg transition-all shadow-sm"
+                  >
+                    <span>🚪</span>
+                    <span>{t('sign_out')}</span>
+                  </button>
+                </div>
+              )}
               <LanguageSwitcher className="justify-center" />
               <div className="text-xs text-slate-400 text-center">
                 {t('powered_by')}
