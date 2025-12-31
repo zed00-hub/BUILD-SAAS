@@ -13,6 +13,8 @@ import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { auth } from './src/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
+import { VerifyEmailScreen } from './components/VerifyEmailScreen';
+
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -57,6 +59,11 @@ const AppContent: React.FC = () => {
 
     if (!user) {
       return <AuthScreen onLogin={handleAuthSuccess} />;
+    }
+
+    // Force Email Verification
+    if (!user.emailVerified) {
+      return <VerifyEmailScreen />;
     }
 
     switch (currentTool) {
