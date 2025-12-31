@@ -4,7 +4,7 @@ import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { auth, googleProvider } from '../src/firebase';
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
 interface AuthScreenProps {
   onLogin: () => void;
@@ -112,7 +112,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
           setIsLoading(true);
           try {
             if (isSignUp) {
-              await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+              const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+              // Send verification email
+              await sendEmailVerification(userCredential.user);
+              alert(t('verification_email_sent'));
+
               // Ideally, update user profile with name here:
               // await updateProfile(auth.currentUser!, { displayName: formData.name });
             } else {

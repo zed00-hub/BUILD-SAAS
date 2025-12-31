@@ -8,6 +8,7 @@ export const translations = {
     create_account: "Create an Account",
     auth_desc_login: "Enter your details to access your workspace.",
     auth_desc_signup: "Start designing like a pro today.",
+    verification_email_sent: "Verification email sent. Please check your inbox.",
     continue_google: "Continue with Google",
     continue_email: "Or continue with email",
     full_name: "Full Name",
@@ -18,7 +19,7 @@ export const translations = {
     already_have_account: "Already have an account?",
     dont_have_account: "Don't have an account?",
     terms_agree: "By clicking continue, you agree to our Terms of Service and Privacy Policy.",
-    
+
     // Sidebar & Nav
     home: "Home",
     tools: "TOOLS",
@@ -39,7 +40,7 @@ export const translations = {
     before: "BEFORE",
     after: "AFTER",
     upload_text: "Product Image Uploaded",
-    
+
     // Steps
     how_it_works: "How it Works",
     steps_title: "From Idea to Result in 3 Steps",
@@ -58,12 +59,12 @@ export const translations = {
     buy_credits: "Buy Credits",
     contact_sales: "Contact Sales",
     secure_payment: "Secure payment via CIB, Eddahabia, or PayPal.",
-    
+
     // Plans
     plan_basic_desc: "Perfect for testing the waters and small campaigns.",
     plan_pro_desc: "Best value for active marketers and dropshippers.",
     plan_elite_desc: "For agencies requiring bulk generation and API access.",
-    
+
     // Features
     feat_social: "Social Media Posts",
     feat_landing: "Landing Page Designs",
@@ -97,14 +98,14 @@ export const translations = {
     market: "Market",
     region: "Region",
     edit_placeholder: "What do you want to change?",
-    
+
     // History
     history_title: "Previous Work",
     history_empty: "No saved work yet.",
     history_load: "Load",
     history_delete: "Delete",
     history_saved: "Saved",
-    
+
     // Social Media Tool
     social_title: "Social Media Designer",
     social_desc: "Smart content planning & design generation.",
@@ -159,7 +160,7 @@ export const translations = {
     refine_result: "Refine Result",
     ai_editor: "AI Editor",
     download_4k: "Download 4K",
-    
+
     // Dropdown Values (Landing)
     pay_cod: "Cash on Delivery",
     pay_online: "Online Payment",
@@ -171,6 +172,7 @@ export const translations = {
     create_account: "Créer un compte",
     auth_desc_login: "Entrez vos coordonnées pour accéder à votre espace.",
     auth_desc_signup: "Commencez à concevoir comme un pro aujourd'hui.",
+    verification_email_sent: "Email de vérification envoyé. Veuillez vérifier votre boîte de réception.",
     continue_google: "Continuer avec Google",
     continue_email: "Ou continuer avec email",
     full_name: "Nom complet",
@@ -260,14 +262,14 @@ export const translations = {
     market: "Marché",
     region: "Région",
     edit_placeholder: "Que voulez-vous changer ?",
-    
+
     // History
     history_title: "Travaux Précédents",
     history_empty: "Aucun travail enregistré.",
     history_load: "Charger",
     history_delete: "Supprimer",
     history_saved: "Enregistré",
-    
+
     // Social Media Tool
     social_title: "Designer Réseaux Sociaux",
     social_desc: "Planification de contenu intelligente et génération de design.",
@@ -322,7 +324,7 @@ export const translations = {
     refine_result: "Affiner Résultat",
     ai_editor: "Éditeur IA",
     download_4k: "Télécharger 4K",
-    
+
     // Dropdown Values (Landing)
     pay_cod: "Paiement à la livraison",
     pay_online: "Paiement en ligne",
@@ -334,6 +336,7 @@ export const translations = {
     create_account: "إنشاء حساب جديد",
     auth_desc_login: "أدخل بياناتك للوصول إلى مساحة العمل الخاصة بك.",
     auth_desc_signup: "ابدأ التصميم باحترافية اليوم.",
+    verification_email_sent: "تم إرسال بريد التحقق. يرجى مراجعة صندوق الوارد.",
     continue_google: "المتابعة باستخدام Google",
     continue_email: "أو المتابعة بالبريد الإلكتروني",
     full_name: "الاسم الكامل",
@@ -423,14 +426,14 @@ export const translations = {
     market: "السوق",
     region: "المنطقة",
     edit_placeholder: "ما الذي تريد تغييره؟",
-    
+
     // History
     history_title: "الأعمال السابقة",
     history_empty: "لا توجد أعمال محفوظة.",
     history_load: "تحميل",
     history_delete: "حذف",
     history_saved: "تم الحفظ",
-    
+
     // Social Media Tool
     social_title: "مصمم وسائل التواصل",
     social_desc: "تخطيط ذكي للمحتوى وتوليد التصاميم.",
@@ -485,7 +488,7 @@ export const translations = {
     refine_result: "تحسين النتيجة",
     ai_editor: "المحرر الذكي",
     download_4k: "تحميل بدقة 4K",
-    
+
     // Dropdown Values (Landing)
     pay_cod: "الدفع عند الاستلام",
     pay_online: "الدفع الإلكتروني",
