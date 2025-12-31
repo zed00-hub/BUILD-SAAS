@@ -33,18 +33,9 @@ const AppContent: React.FC = () => {
     return false;
   };
 
-  // Check for API key on mount - use env variable directly
+  // Set API key ready immediately - the key is loaded from .env when API is called
   useEffect(() => {
-    const checkApiKey = () => {
-      // Check if API key is available in environment variables
-      const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
-      if (apiKey) {
-        setApiKeyReady(true);
-      } else {
-        console.warn("API Key not found in environment variables. Please set GEMINI_API_KEY in .env file.");
-      }
-    };
-    checkApiKey();
+    setApiKeyReady(true);
   }, []);
 
   const handleAuthSuccess = () => {
