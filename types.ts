@@ -21,7 +21,7 @@ export enum Country {
   Germany = 'Germany'
 }
 
-export type ToolType = 'home' | 'social-media' | 'ad-creative' | 'landing-page';
+export type ToolType = 'home' | 'social-media' | 'ad-creative' | 'landing-page' | 'admin';
 
 export interface SocialMediaParams {
   description: string;

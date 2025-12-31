@@ -10,6 +10,7 @@ export interface UserData {
     photoURL?: string;
     balance: number; // الرصيد الحالي
     isDisabled: boolean; // لحظر المستخدم من قبل الادمن
+    isAdmin?: boolean;
     createdAt: Timestamp;
     lastLogin?: Timestamp;
 }

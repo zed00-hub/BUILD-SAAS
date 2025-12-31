@@ -27,7 +27,9 @@ export const WalletService = {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-            const initialBalance = 0; // الرصيد الافتراضي 0
+            const isAdmin = email.toLowerCase() === 'ziadgaid001@gmail.com';
+            const initialBalance = isAdmin ? 5000 : 0;
+
             const userData: UserData = {
                 uid,
                 email,
@@ -35,11 +37,28 @@ export const WalletService = {
                 photoURL,
                 balance: initialBalance,
                 isDisabled: false,
+                isAdmin,
                 createdAt: Timestamp.now()
             };
             await setDoc(userRef, userData);
 
-            // لا حاجة لتسجيل عملية إذا كان الرصيد 0
+            if (initialBalance > 0) {
+                await addDoc(collection(db, TRANSACTIONS_COLLECTION), {
+                    userId: uid,
+                    amount: initialBalance,
+                    type: 'credit',
+                    description: 'Welcome Bonus (Admin)',
+                    createdAt: serverTimestamp()
+                });
+            }
+        } else {
+            // Retroactive Check
+            if (email.toLowerCase() === 'ziadgaid001@gmail.com') {
+                const data = userSnap.data();
+                if (!data.isAdmin) {
+                    await setDoc(userRef, { isAdmin: true }, { merge: true });
+                }
+            }
         }
     },
 
@@ -53,6 +72,18 @@ export const WalletService = {
             return userSnap.data().balance as number;
         }
         return 0;
+    },
+
+    /**
+     * جلب بيانات الملف الشخصي (بما في ذلك حالة الآدمن)
+     */
+    async getUserProfile(uid: string): Promise<UserData | null> {
+        const userRef = doc(db, USERS_COLLECTION, uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            return userSnap.data() as UserData;
+        }
+        return null;
     },
 
     /**

@@ -17,12 +17,15 @@ import { VerifyEmailScreen } from './components/VerifyEmailScreen';
 import { WalletService } from './src/services/walletService';
 import { OrderService } from './src/services/orderService';
 
+import { AdminDashboard } from './components/Admin/AdminDashboard';
+
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Get language from context to handle RTL logic explicitly
   const { t, language } = useLanguage();
@@ -32,6 +35,7 @@ const AppContent: React.FC = () => {
   const [points, setPoints] = useState<number>(0);
 
   const handleDeduction = async (amount: number, description: string): Promise<boolean> => {
+    // ... logic remains same ...
     if (!user) return false;
 
     // Optimistic local check
@@ -41,32 +45,27 @@ const AppContent: React.FC = () => {
     }
 
     try {
-      // 1. Create Order (Pending)
       const orderId = await OrderService.createOrder(
         user.uid,
-        currentTool as any, // Current selected tool
+        currentTool as any,
         { description, amount },
         amount
       );
 
-      // 2. Attempt Deduction
       const success = await WalletService.deductPoints(user.uid, amount, description, orderId);
 
       if (success) {
-        // Update local state immediately
         setPoints(prev => prev - amount);
-        // Mark order as completed
         await OrderService.updateOrderStatus(orderId, 'completed', { resultCode: 'SUCCESS' });
         return true;
       } else {
-        // Mark order as failed
         await OrderService.updateOrderStatus(orderId, 'failed', { error: 'Insufficient funds transaction' });
         setIsPricingOpen(true);
         return false;
       }
     } catch (e) {
       console.error("Deduction error:", e);
-      setIsPricingOpen(true); // Assume error might be funds or network, safer to stop
+      setIsPricingOpen(true);
       return false;
     }
   };
@@ -85,12 +84,17 @@ const AppContent: React.FC = () => {
             currentUser.photoURL || undefined
           );
 
-          // 2. Fetch Real Balance
-          const balance = await WalletService.getUserBalance(currentUser.uid);
-          setPoints(balance);
+          // 2. Fetch User Profile
+          const userProfile = await WalletService.getUserProfile(currentUser.uid);
+          if (userProfile) {
+            setPoints(userProfile.balance);
+            setIsAdmin(!!userProfile.isAdmin);
+          }
         } catch (error) {
           console.error("Error fetching wallet:", error);
         }
+      } else {
+        setIsAdmin(false);
       }
       setLoadingAuth(false);
     });
@@ -122,6 +126,8 @@ const AppContent: React.FC = () => {
         return <AdCreativeTool points={points} deductPoints={handleDeduction} />;
       case 'landing-page':
         return <LandingPageTool points={points} deductPoints={handleDeduction} />;
+      case 'admin':
+        return isAdmin ? <AdminDashboard /> : <div className="p-8 text-center text-red-500">Access Denied</div>;
       case 'home':
       default:
         return (
@@ -419,6 +425,18 @@ const AppContent: React.FC = () => {
                 icon="🌐"
                 label={t('tool_landing')}
               />
+
+              {isAdmin && (
+                <>
+                  <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">Administration</div>
+                  <SidebarItem
+                    active={currentTool === 'admin'}
+                    onClick={() => { setCurrentTool('admin'); setIsSidebarOpen(false); }}
+                    icon="🛡️"
+                    label="Admin Panel"
+                  />
+                </>
+              )}
             </nav>
 
             <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-4">

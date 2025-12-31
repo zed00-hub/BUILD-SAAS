@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if user is admin based on their user document
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Check if user is accessing their own data
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if request.auth != null; // Allow new users to sign up
+      allow update: if isAdmin(); // Only admin can update critical fields (balance, isDisabled, isAdmin)
+      // Note: If users need to update their own profile (name/photo), we might need conditional allow update.
+    }
+
+    // Transactions Collection
+    match /transactions/{transactionId} {
+      allow read: if resource.data.userId == request.auth.uid || isAdmin();
+      allow create: if request.auth != null; // Allow client to create transaction (TEMPORARY: Client-side logic)
+      // Ideally, write should be disallowed and done via Cloud Functions only.
+    }
+    
+    // Orders Collection
+    match /orders/{orderId} {
+      allow read: if resource.data.userId == request.auth.uid || isAdmin();
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin(); // Only admin (or backend process) changes status
+    }
+  }
+}
