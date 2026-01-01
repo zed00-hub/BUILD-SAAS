@@ -162,6 +162,17 @@ const AppContent: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  // Subscribe to wallet changes in real-time (so admin-added points appear instantly)
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribeWallet = WalletService.subscribeToWallet(user.uid, (newBalance) => {
+      setPoints(newBalance);
+    });
+
+    return () => unsubscribeWallet();
+  }, [user]);
+
   const handleAuthSuccess = () => {
     // Managed automatically by onAuthStateChanged
   };
