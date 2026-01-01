@@ -38,6 +38,8 @@ export const WalletService = {
                 balance: initialBalance,
                 isDisabled: false,
                 isAdmin,
+                accountType: isAdmin ? 'paid' : 'trial', // الأدمن مدفوع افتراضياً
+                planType: isAdmin ? 'enterprise' : null,
                 createdAt: Timestamp.now()
             };
             await setDoc(userRef, userData);

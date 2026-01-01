@@ -3,6 +3,10 @@ import { Timestamp } from 'firebase/firestore';
 export type TransactionType = 'credit' | 'debit' | 'refund';
 export type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
+// Account Types
+export type AccountType = 'trial' | 'paid';
+export type PlanType = 'starter' | 'pro' | 'enterprise' | null;
+
 export interface UserData {
     uid: string;
     email: string;
@@ -11,6 +15,13 @@ export interface UserData {
     balance: number; // الرصيد الحالي
     isDisabled: boolean; // لحظر المستخدم من قبل الادمن
     isAdmin?: boolean;
+
+    // Account & Plan Info
+    accountType: AccountType; // نوع الحساب: تجريبي أو مدفوع
+    planType?: PlanType; // الخطة: starter, pro, enterprise (للمدفوع فقط)
+    planStartDate?: Timestamp; // تاريخ بدء الخطة
+    planEndDate?: Timestamp; // تاريخ انتهاء الخطة
+
     createdAt: Timestamp;
     lastLogin?: Timestamp;
 }

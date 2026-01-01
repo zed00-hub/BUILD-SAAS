@@ -19,6 +19,36 @@ import { OrderService } from './src/services/orderService';
 
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 
+// Trial Account Warning Banner
+const TrialBanner: React.FC = () => {
+  const { t, language } = useLanguage();
+  const isRtl = language === 'ar';
+
+  return (
+    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200 px-4 py-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">⚠️</span>
+          <div>
+            <p className="text-amber-800 font-semibold text-sm">
+              {isRtl ? 'حساب تجريبي' : 'Trial Account'}
+            </p>
+            <p className="text-amber-600 text-xs">
+              {isRtl
+                ? 'سيتم حذف أعمالك المحفوظة تلقائياً بعد 30 يوماً. قم بالترقية للحفظ الدائم.'
+                : 'Your saved work will be automatically deleted after 30 days. Upgrade for permanent storage.'
+              }
+            </p>
+          </div>
+        </div>
+        <button className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-sm">
+          {isRtl ? '💎 ترقية الآن' : '💎 Upgrade Now'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const AppContent: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<ToolType>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -26,6 +56,7 @@ const AppContent: React.FC = () => {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPaidUser, setIsPaidUser] = useState(false); // هل المستخدم مدفوع أم تجريبي
 
   // Get language from context to handle RTL logic explicitly
   const { t, language } = useLanguage();
@@ -106,12 +137,14 @@ const AppContent: React.FC = () => {
           if (userProfile) {
             setPoints(userProfile.balance);
             setIsAdmin(!!userProfile.isAdmin);
+            setIsPaidUser(userProfile.accountType === 'paid');
           }
         } catch (error) {
           console.error("Error fetching wallet:", error);
         }
       } else {
         setIsAdmin(false);
+        setIsPaidUser(false);
       }
       setLoadingAuth(false);
     });
@@ -138,11 +171,26 @@ const AppContent: React.FC = () => {
 
     switch (currentTool) {
       case 'social-media':
-        return <SocialMediaTool points={points} deductPoints={handleDeduction} />;
+        return (
+          <>
+            {!isPaidUser && <TrialBanner />}
+            <SocialMediaTool points={points} deductPoints={handleDeduction} />
+          </>
+        );
       case 'ad-creative':
-        return <AdCreativeTool points={points} deductPoints={handleDeduction} />;
+        return (
+          <>
+            {!isPaidUser && <TrialBanner />}
+            <AdCreativeTool points={points} deductPoints={handleDeduction} />
+          </>
+        );
       case 'landing-page':
-        return <LandingPageTool points={points} deductPoints={handleDeduction} />;
+        return (
+          <>
+            {!isPaidUser && <TrialBanner />}
+            <LandingPageTool points={points} deductPoints={handleDeduction} />
+          </>
+        );
       case 'admin':
         return isAdmin ? <AdminDashboard /> : <div className="p-8 text-center text-red-500">Access Denied</div>;
       case 'home':
