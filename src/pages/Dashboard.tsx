@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut, User, getRedirectResult } from 'firebase/auth';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 
 // Adjust paths based on file location: src/pages/Dashboard.tsx -> ../../filename
-import { ToolType } from '../../types';
-import { SocialMediaTool } from '../../components/Tools/SocialMediaTool';
-import { AdCreativeTool } from '../../components/Tools/AdCreativeTool';
-import { LandingPageTool } from '../../components/Tools/LandingPageTool';
 import { CoinIcon } from '../../components/CoinIcon';
 import { Logo } from '../../components/Logo';
 import { PricingModal } from '../../components/PricingModal';
@@ -18,10 +14,17 @@ import { auth } from '../firebase'; // src/pages/.. -> src/firebase
 import { VerifyEmailScreen } from '../../components/VerifyEmailScreen';
 import { WalletService } from '../services/walletService'; // src/pages/.. -> src/services
 import { OrderService } from '../services/orderService';
-import { AdminDashboard } from '../../components/Admin/AdminDashboard';
+
+export interface DashboardContextType {
+    user: User | null;
+    points: number;
+    deductPoints: (amount: number, description: string, count?: number) => Promise<boolean>;
+    isPaidUser: boolean;
+    isAdmin: boolean;
+}
 
 // Trial Account Warning Banner
-const TrialBanner: React.FC = () => {
+export const TrialBanner: React.FC = () => {
     const { t, language } = useLanguage();
     const isRtl = language === 'ar';
 
@@ -65,7 +68,6 @@ const SidebarItem: React.FC<{ active: boolean; onClick: () => void; icon: string
 );
 
 export const Dashboard: React.FC = () => {
-    const [currentTool, setCurrentTool] = useState<ToolType>('social-media'); // Default to first tool
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [user, setUser] = useState<User | null>(null);
     const [isPricingOpen, setIsPricingOpen] = useState(false);
@@ -76,6 +78,7 @@ export const Dashboard: React.FC = () => {
     const { t, language } = useLanguage();
     const isRtl = language === 'ar';
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Points System Handling
     const [points, setPoints] = useState<number>(0);
@@ -89,9 +92,12 @@ export const Dashboard: React.FC = () => {
 
         let orderId = '';
         try {
+            // Determine tool type from URL roughly or pass generic 'tool'
+            const toolType = location.pathname.split('/').pop() || 'unknown-tool';
+
             orderId = await OrderService.createOrder(
                 user.uid,
-                currentTool as any,
+                toolType as any,
                 { description, amount, count },
                 amount
             );
@@ -155,8 +161,6 @@ export const Dashboard: React.FC = () => {
             } else {
                 setIsAdmin(false);
                 setIsPaidUser(false);
-                // If not logged in, wait a bit then maybe redirect? 
-                // For now we show AuthScreen inside Dashboard if someone navigates here directly.
             }
             setLoadingAuth(false);
         });
@@ -174,6 +178,8 @@ export const Dashboard: React.FC = () => {
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+    const isActive = (path: string) => location.pathname.includes(path);
+
     const renderContent = () => {
         if (loadingAuth) return <div className="h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
 
@@ -185,33 +191,8 @@ export const Dashboard: React.FC = () => {
             return <VerifyEmailScreen />;
         }
 
-        switch (currentTool) {
-            case 'social-media':
-                return (
-                    <>
-                        {!isPaidUser && <TrialBanner />}
-                        <SocialMediaTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
-                    </>
-                );
-            case 'ad-creative':
-                return (
-                    <>
-                        {!isPaidUser && <TrialBanner />}
-                        <AdCreativeTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
-                    </>
-                );
-            case 'landing-page':
-                return (
-                    <>
-                        {!isPaidUser && <TrialBanner />}
-                        <LandingPageTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
-                    </>
-                );
-            case 'admin':
-                return isAdmin ? <AdminDashboard /> : <div className="p-8 text-center text-red-500">Access Denied</div>;
-            default:
-                return <div>Select a tool</div>;
-        }
+        // Context provider for nested routes (Tools)
+        return <Outlet context={{ user, points, deductPoints: handleDeduction, isPaidUser, isAdmin } as DashboardContextType} />;
     };
 
     return (
@@ -253,27 +234,27 @@ export const Dashboard: React.FC = () => {
 
                         <nav className="flex-1 space-y-2">
                             <SidebarItem
-                                active={false}
-                                onClick={() => navigate('/')}
+                                active={location.pathname === '/' || location.pathname === '/app' || location.pathname === '/app/'}
+                                onClick={() => { navigate('/'); setIsSidebarOpen(false); }}
                                 icon="🏠"
                                 label={t('home')}
                             />
                             <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('tools')}</div>
                             <SidebarItem
-                                active={currentTool === 'social-media'}
-                                onClick={() => { setCurrentTool('social-media'); setIsSidebarOpen(false); }}
+                                active={isActive('social-media')}
+                                onClick={() => { navigate('social-media'); setIsSidebarOpen(false); }}
                                 icon="📱"
                                 label={t('tool_social')}
                             />
                             <SidebarItem
-                                active={currentTool === 'ad-creative'}
-                                onClick={() => { setCurrentTool('ad-creative'); setIsSidebarOpen(false); }}
+                                active={isActive('ad-creative')}
+                                onClick={() => { navigate('ad-creative'); setIsSidebarOpen(false); }}
                                 icon="📢"
                                 label={t('tool_ad')}
                             />
                             <SidebarItem
-                                active={currentTool === 'landing-page'}
-                                onClick={() => { setCurrentTool('landing-page'); setIsSidebarOpen(false); }}
+                                active={isActive('landing-page')}
+                                onClick={() => { navigate('landing-page'); setIsSidebarOpen(false); }}
                                 icon="🌐"
                                 label={t('tool_landing')}
                             />
@@ -282,8 +263,8 @@ export const Dashboard: React.FC = () => {
                                 <>
                                     <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">Administration</div>
                                     <SidebarItem
-                                        active={currentTool === 'admin'}
-                                        onClick={() => { setCurrentTool('admin'); setIsSidebarOpen(false); }}
+                                        active={isActive('admin')}
+                                        onClick={() => { navigate('admin'); setIsSidebarOpen(false); }}
                                         icon="🛡️"
                                         label="Admin Panel"
                                     />
