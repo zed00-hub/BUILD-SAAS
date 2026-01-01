@@ -65,38 +65,49 @@ const AppContent: React.FC = () => {
   // Points System Handling
   const [points, setPoints] = useState<number>(0);
 
-  const handleDeduction = async (amount: number, description: string): Promise<boolean> => {
-    // ... logic remains same ...
+  const handleDeduction = async (amount: number, description: string, count: number = 1): Promise<boolean> => {
     if (!user) return false;
-
-    // Optimistic local check
     if (points < amount) {
       setIsPricingOpen(true);
       return false;
     }
 
+    let orderId = '';
     try {
-      const orderId = await OrderService.createOrder(
+      // 1. Create Order Record
+      orderId = await OrderService.createOrder(
         user.uid,
         currentTool as any,
-        { description, amount },
+        { description, amount, count },
         amount
       );
 
-      const success = await WalletService.deductPoints(user.uid, amount, description, orderId);
+      // 2. Attempt Deduction (Checks limits inside)
+      await WalletService.deductPoints(user.uid, amount, description, orderId, count);
 
-      if (success) {
-        setPoints(prev => prev - amount);
-        await OrderService.updateOrderStatus(orderId, 'completed', { resultCode: 'SUCCESS' });
-        return true;
-      } else {
-        await OrderService.updateOrderStatus(orderId, 'failed', { error: 'Insufficient funds transaction' });
-        setIsPricingOpen(true);
-        return false;
+      // 3. Mark Order Success
+      await OrderService.updateOrderStatus(orderId, 'completed', { resultCode: 'SUCCESS' });
+
+      // Update local state (optimistic) - though subscription handles it too
+      setPoints(prev => Math.max(0, prev - amount));
+
+      return true;
+
+    } catch (error: any) {
+      console.error("Deduction failed:", error);
+
+      // Mark order failed if created
+      if (orderId) {
+        await OrderService.updateOrderStatus(orderId, 'failed', { error: error.message });
       }
-    } catch (e) {
-      console.error("Deduction error:", e);
-      setIsPricingOpen(true);
+
+      if (error.message === "INSUFFICIENT_FUNDS") {
+        setIsPricingOpen(true);
+      } else if (error.message && (error.message.includes("DAILY_LIMIT") || error.message.includes("COOLDOWN"))) {
+        alert(error.message);
+      } else {
+        alert("Transaction failed. Please try again.");
+      }
       return false;
     }
   };

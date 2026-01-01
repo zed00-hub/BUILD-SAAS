@@ -9,7 +9,7 @@ import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/s
 
 interface LandingPageToolProps {
   points: number;
-  deductPoints: (amount: number, description: string) => Promise<boolean>;
+  deductPoints: (amount: number, description: string, count?: number) => Promise<boolean>;
   isPaidUser: boolean;
 }
 

@@ -19,6 +19,14 @@ import { UserData, WalletTransaction, TransactionType } from '../types/dbTypes';
 const USERS_COLLECTION = 'users';
 const TRANSACTIONS_COLLECTION = 'transactions';
 
+// Limits Configuration
+const LIMITS = {
+    trial: { maxDaily: 2, cooldownMin: 0 },
+    basic: { maxDaily: 20, cooldownMin: 30 },
+    pro: { maxDaily: 30, cooldownMin: 15 }, // Distributed usage
+    elite: { maxDaily: 9999, cooldownMin: 0 }
+};
+
 export const WalletService = {
     /**
      * تهيئة محفظة المستخدم الجديد (تعطى رصيد افتراضي)
@@ -29,7 +37,8 @@ export const WalletService = {
 
         if (!userSnap.exists()) {
             const isAdmin = email.toLowerCase() === 'ziadgaid001@gmail.com';
-            const initialBalance = isAdmin ? 5000 : 50;
+            // Trial gets 0 points by default logic, Admin manual add required
+            const initialBalance = isAdmin ? 5000 : 0;
 
             const userData: UserData = {
                 uid,
@@ -39,9 +48,13 @@ export const WalletService = {
                 balance: initialBalance,
                 isDisabled: false,
                 isAdmin,
-                accountType: isAdmin ? 'paid' : 'trial', // الأدمن مدفوع افتراضياً
-                planType: isAdmin ? 'enterprise' : null,
-                createdAt: Timestamp.now()
+                accountType: isAdmin ? 'paid' : 'trial',
+                planType: isAdmin ? 'elite' : null, // Admin gets Elite
+                createdAt: Timestamp.now(),
+
+                // Initialize usage tracking
+                dailyUsageCount: 0,
+                lastResetDate: new Date().toISOString().split('T')[0]
             };
             await setDoc(userRef, userData);
 
@@ -50,7 +63,7 @@ export const WalletService = {
                     userId: uid,
                     amount: initialBalance,
                     type: 'credit',
-                    description: 'Welcome Bonus (Admin)',
+                    description: 'Welcome Bonus',
                     createdAt: serverTimestamp()
                 });
             }
@@ -59,7 +72,7 @@ export const WalletService = {
             if (email.toLowerCase() === 'ziadgaid001@gmail.com') {
                 const data = userSnap.data();
                 if (!data.isAdmin) {
-                    await setDoc(userRef, { isAdmin: true }, { merge: true });
+                    await setDoc(userRef, { isAdmin: true, planType: 'elite' }, { merge: true });
                 }
             }
         }
@@ -91,8 +104,9 @@ export const WalletService = {
 
     /**
      * خصم رصيد مقابل خدمة (عملية آمنة باستخدام Transaction)
+     * includesUsageCount: عدد الصور/المحاولات في هذا الطلب (لحساب الحد اليومي)
      */
-    async deductPoints(uid: string, amount: number, description: string, orderId?: string): Promise<boolean> {
+    async deductPoints(uid: string, amount: number, description: string, orderId?: string, usageDelta: number = 1): Promise<boolean> {
         try {
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, USERS_COLLECTION, uid);
@@ -102,18 +116,66 @@ export const WalletService = {
                     throw new Error("User does not exist!");
                 }
 
-                const currentBalance = userDoc.data().balance;
+                const userData = userDoc.data() as UserData;
+                const currentBalance = userData.balance;
+
+                // 1. Check Balance
                 if (currentBalance < amount) {
-                    // سنرمي خطأ مخصص للتعامل معه في الواجهة
                     throw new Error("INSUFFICIENT_FUNDS");
+                }
+
+                // 2. Check Plan Limits
+                const plan = userData.planType || 'trial'; // if paid but no planType set, assuming basic? no, let's treat 'paid' without plan as 'basic' or fallback. 
+                // Actually trial users have accountType='trial'. Paid have 'paid'.
+                // Let's determine the key for LIMITS
+                let limitKey: 'trial' | 'basic' | 'pro' | 'elite' = 'trial';
+
+                if (userData.accountType === 'paid') {
+                    if (userData.planType === 'pro') limitKey = 'pro';
+                    else if (userData.planType === 'elite') limitKey = 'elite';
+                    else limitKey = 'basic'; // Default paid is basic
+                } else {
+                    limitKey = 'trial';
+                }
+
+                const limits = LIMITS[limitKey];
+
+                // Date Check for Reset
+                const today = new Date().toISOString().split('T')[0];
+                let currentDailyCount = userData.dailyUsageCount || 0;
+
+                if (userData.lastResetDate !== today) {
+                    currentDailyCount = 0; // New day, reset count
+                }
+
+                // A. Check Max Daily
+                if (currentDailyCount + usageDelta > limits.maxDaily) {
+                    throw new Error(`DAILY_LIMIT_EXCEEDED: You have reached your daily limit of ${limits.maxDaily} generations.`);
+                }
+
+                // B. Check Cooldown (Only if usageDelta > 0 meaning it's a generation request)
+                if (usageDelta > 0 && limits.cooldownMin > 0 && userData.lastUsageTime) {
+                    const lastTime = userData.lastUsageTime.toDate().getTime();
+                    const now = Date.now();
+                    const diffMinutes = (now - lastTime) / (1000 * 60);
+
+                    if (diffMinutes < limits.cooldownMin) {
+                        const waitTime = Math.ceil(limits.cooldownMin - diffMinutes);
+                        throw new Error(`COOLDOWN_ACTIVE: Please wait ${waitTime} minutes before next generation.`);
+                    }
                 }
 
                 const newBalance = currentBalance - amount;
 
-                // 1. تحديث رصيد المستخدم
-                transaction.update(userRef, { balance: newBalance });
+                // 3. Update User (Balance + Usage Stats)
+                transaction.update(userRef, {
+                    balance: newBalance,
+                    dailyUsageCount: currentDailyCount + usageDelta,
+                    lastResetDate: today,
+                    lastUsageTime: serverTimestamp()
+                });
 
-                // 2. إضافة سجل المعاملة
+                // 4. Add Transaction Record
                 const newTransactionRef = doc(collection(db, TRANSACTIONS_COLLECTION));
                 transaction.set(newTransactionRef, {
                     userId: uid,
@@ -125,12 +187,16 @@ export const WalletService = {
                 });
             });
 
-            return true; // تمت العملية بنجاح
+            return true;
 
         } catch (e: any) {
             if (e.message === "INSUFFICIENT_FUNDS") {
                 console.warn("Insufficient funds for user:", uid);
-                return false;
+                throw e; // Let UI handle it
+            }
+            if (e.message.startsWith("DAILY_LIMIT") || e.message.startsWith("COOLDOWN")) {
+                console.warn(e.message);
+                throw e; // Let UI handle it to show message
             }
             console.error("Transaction failed: ", e);
             throw e;
@@ -138,7 +204,7 @@ export const WalletService = {
     },
 
     /**
-     * استرجاع النقاط (Refund) في حالة فشل الطلب
+     * استرجاع النقاط (Refund)
      */
     async refundPoints(uid: string, amount: number, description: string, orderId?: string) {
         try {
@@ -151,6 +217,10 @@ export const WalletService = {
                 }
 
                 const newBalance = (userDoc.data().balance || 0) + amount;
+
+                // Note: Refunds do not revert the 'dailyUsageCount' to avoid exploiting limits, 
+                // but if fairness is strictly required, we could decrement it. 
+                // For now, we keep the usage count as is (attempt consumed).
 
                 transaction.update(userRef, { balance: newBalance });
 
@@ -189,8 +259,6 @@ export const WalletService = {
      * الاشتراك في تحديثات المحفظة لحظياً
      */
     subscribeToWallet(uid: string, callback: (balance: number) => void) {
-        // استيراد onSnapshot ديناميكياً لتجنب مشاكل دائرية إذا وجدت، أو استخدام المستورد أعلاه إذا كان موجوداً
-        // لكننا لم نستورده في الأعلى، يجب إضافته للواردات
         const userRef = doc(db, USERS_COLLECTION, uid);
         return onSnapshot(userRef, (doc) => {
             if (doc.exists()) {

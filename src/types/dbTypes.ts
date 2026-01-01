@@ -5,7 +5,7 @@ export type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'c
 
 // Account Types
 export type AccountType = 'trial' | 'paid';
-export type PlanType = 'starter' | 'pro' | 'enterprise' | null;
+export type PlanType = 'basic' | 'pro' | 'elite' | null;
 
 export interface UserData {
     uid: string;
@@ -18,9 +18,14 @@ export interface UserData {
 
     // Account & Plan Info
     accountType: AccountType; // نوع الحساب: تجريبي أو مدفوع
-    planType?: PlanType; // الخطة: starter, pro, enterprise (للمدفوع فقط)
+    planType?: PlanType; // الخطة: basic, pro, elite (للمدفوع فقط)
     planStartDate?: Timestamp; // تاريخ بدء الخطة
     planEndDate?: Timestamp; // تاريخ انتهاء الخطة
+
+    // Usage Tracking (Rate Limiting)
+    lastUsageTime?: Timestamp; // وقت آخر عملية توليد (لحساب فترة الانتظار)
+    dailyUsageCount?: number; // عدد العمليات/الصور المولدة اليوم
+    lastResetDate?: string; // تاريخ آخر تصفير للعداد (YYYY-MM-DD)
 
     createdAt: Timestamp;
     lastLogin?: Timestamp;
