@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation, Link, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link, Outlet, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase'; // Adjust import if necessary
@@ -86,9 +86,19 @@ const MainLayout = ({
   const { t, language, setLanguage } = useLanguage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isRtl = language === 'ar';
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  // Handle Redirect from 404.html (for GitHub Pages SPA support)
+  useEffect(() => {
+    const redirect = sessionStorage.redirect;
+    if (redirect) {
+      delete sessionStorage.redirect;
+      navigate(redirect);
+    }
+  }, []);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
