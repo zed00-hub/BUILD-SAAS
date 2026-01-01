@@ -29,6 +29,11 @@ export const translations = {
     terms_agree: "By clicking continue, you agree to our Terms of Service and Privacy Policy.",
 
     // Sidebar & Nav
+    nav_home: "Home",
+    nav_features: "Features",
+    nav_pricing: "Pricing",
+    nav_contact: "Contact",
+    start_free: "Start Free",
     home: "Home",
     tools: "TOOLS",
     tool_social: "Social Media",
@@ -201,6 +206,11 @@ export const translations = {
     terms_agree: "En continuant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.",
 
     // Sidebar & Nav
+    nav_home: "Accueil",
+    nav_features: "Fonctionnalités",
+    nav_pricing: "Tarifs",
+    nav_contact: "Contact",
+    start_free: "Commencer Gratuitement",
     home: "Accueil",
     tools: "OUTILS",
     tool_social: "Réseaux Sociaux",
@@ -373,6 +383,11 @@ export const translations = {
     terms_agree: "بالمتابعة، أنت توافق على شروط الخدمة وسياسة الخصوصية.",
 
     // Sidebar & Nav
+    nav_home: "الرئيسية",
+    nav_features: "المميزات",
+    nav_pricing: "الأسعار",
+    nav_contact: "اتصل بنا",
+    start_free: "ابدأ مجاناً",
     home: "الرئيسية",
     tools: "الأدوات",
     tool_social: "وسائل التواصل",
