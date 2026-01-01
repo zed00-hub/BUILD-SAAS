@@ -37,14 +37,20 @@ exports.generateContent = functions
                 config: config
             });
 
-            // Handle response
-            const candidates = result.response.candidates;
+            // Handle response - check both paths
+            console.log("Gemini API Response Keys:", Object.keys(result));
+            const candidates = result.candidates || result.response?.candidates;
+
+            if (!candidates) {
+                console.warn("Gemini API returned no candidates. Full result:", JSON.stringify(result));
+            }
+
             // Helper to get text safely
             const text = candidates?.[0]?.content?.parts?.[0]?.text || "";
 
             return {
                 text: text,
-                candidates: candidates
+                candidates: candidates || []
             };
         } catch (error) {
             console.error("Gemini API Error:", error);
