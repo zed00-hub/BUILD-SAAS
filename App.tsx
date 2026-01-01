@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Link, Outlet, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from './firebase'; // Adjust import if necessary
+import { auth, db } from './src/firebase'; // Adjust import if necessary
 import { SocialMediaTool } from './components/Tools/SocialMediaTool';
 import { AdCreativeTool } from './components/Tools/AdCreativeTool';
 import { LandingPageTool } from './components/Tools/LandingPageTool';
@@ -362,7 +362,7 @@ const AppContent: React.FC = () => {
   }
 
   // Auth Guard Component
-  const RequireAuth = ({ children }: { children: JSX.Element }) => {
+  const RequireAuth = ({ children }: { children: React.ReactElement }) => {
     if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
     // Check email verification
     // if (!user.emailVerified) return <VerifyEmailScreen />; // Uncomment if verification is enforced
@@ -370,7 +370,7 @@ const AppContent: React.FC = () => {
   };
 
   // Admin Guard Component
-  const RequireAdmin = ({ children }: { children: JSX.Element }) => {
+  const RequireAdmin = ({ children }: { children: React.ReactElement }) => {
     if (!user) return <Navigate to="/login" replace />;
     if (!isAdmin) return <div className="p-8 text-center text-red-500">Access Denied. Admins Only.</div>;
     return children;
