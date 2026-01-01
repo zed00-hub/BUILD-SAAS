@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation, Link, Outlet, useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from './src/firebase'; // Adjust import if necessary
+import { ToolType } from './types';
 import { SocialMediaTool } from './components/Tools/SocialMediaTool';
 import { AdCreativeTool } from './components/Tools/AdCreativeTool';
 import { LandingPageTool } from './components/Tools/LandingPageTool';
-import { AdminDashboard } from './components/Admin/AdminDashboard';
-import { AuthScreen } from './components/AuthScreen';
-import { VerifyEmailScreen } from './components/VerifyEmailScreen';
 import { CoinIcon } from './components/CoinIcon';
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import { WalletService } from './src/services/walletService';
-import { PricingModal } from './components/PricingModal';
 import { Logo } from './components/Logo';
-import { UserData } from './src/types/dbTypes';
+import { PricingModal } from './components/PricingModal';
+import { AuthScreen } from './components/AuthScreen';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 
-// --- Components ---
+import { auth } from './src/firebase';
+import { onAuthStateChanged, signOut, User, getRedirectResult } from 'firebase/auth';
+
+import { VerifyEmailScreen } from './components/VerifyEmailScreen';
+import { WalletService } from './src/services/walletService';
+import { OrderService } from './src/services/orderService';
+
+import { AdminDashboard } from './components/Admin/AdminDashboard';
 
 // Trial Account Warning Banner
 const TrialBanner: React.FC = () => {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const isRtl = language === 'ar';
 
   return (
@@ -40,10 +41,7 @@ const TrialBanner: React.FC = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => document.dispatchEvent(new CustomEvent('open-pricing'))}
-          className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-sm"
-        >
+        <button className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-sm">
           {isRtl ? '💎 ترقية للحفظ' : '💎 Upgrade to Save'}
         </button>
       </div>
@@ -51,154 +49,508 @@ const TrialBanner: React.FC = () => {
   );
 };
 
-// Sidebar Item Component
-const SidebarItem: React.FC<{ to: string; active: boolean; icon: string; label: string; onClick?: () => void }> = ({ to, active, icon, label, onClick }) => (
-  <Link
-    to={to}
-    onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left rtl:text-right
-      ${active
-        ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-sm'
-        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-    `}
-  >
-    <span className="text-lg">{icon}</span>
-    <span>{label}</span>
-  </Link>
-);
-
-// Layout Component (Sidebar + Content)
-const MainLayout = ({
-  children,
-  user,
-  isAdmin,
-  isPaidUser,
-  points,
-  setIsPricingOpen
-}: {
-  children: React.ReactNode,
-  user: User | null,
-  isAdmin: boolean,
-  isPaidUser: boolean,
-  points: number,
-  setIsPricingOpen: (v: boolean) => void
-}) => {
-  const { t, language, setLanguage } = useLanguage();
+const AppContent: React.FC = () => {
+  const [currentTool, setCurrentTool] = useState<ToolType>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isPaidUser, setIsPaidUser] = useState(false); // هل المستخدم مدفوع أم تجريبي
+
+  // Get language from context to handle RTL logic explicitly
+  const { t, language } = useLanguage();
   const isRtl = language === 'ar';
+
+  // Points System Handling
+  const [points, setPoints] = useState<number>(0);
+
+  const handleDeduction = async (amount: number, description: string): Promise<boolean> => {
+    // ... logic remains same ...
+    if (!user) return false;
+
+    // Optimistic local check
+    if (points < amount) {
+      setIsPricingOpen(true);
+      return false;
+    }
+
+    try {
+      const orderId = await OrderService.createOrder(
+        user.uid,
+        currentTool as any,
+        { description, amount },
+        amount
+      );
+
+      const success = await WalletService.deductPoints(user.uid, amount, description, orderId);
+
+      if (success) {
+        setPoints(prev => prev - amount);
+        await OrderService.updateOrderStatus(orderId, 'completed', { resultCode: 'SUCCESS' });
+        return true;
+      } else {
+        await OrderService.updateOrderStatus(orderId, 'failed', { error: 'Insufficient funds transaction' });
+        setIsPricingOpen(true);
+        return false;
+      }
+    } catch (e) {
+      console.error("Deduction error:", e);
+      setIsPricingOpen(true);
+      return false;
+    }
+  };
+
+  // Handle Google Redirect Result (must be called on app load)
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("Google Sign-In Redirect successful:", result.user.email);
+          // User will be picked up by onAuthStateChanged below
+        }
+      } catch (error: any) {
+        console.error("Google Redirect Error:", error);
+        // Don't alert here as onAuthStateChanged will handle the state
+      }
+    };
+    handleRedirectResult();
+  }, []);
+
+  // Monitor Auth State
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        try {
+          // 1. Initialize Wallet if not exists
+          await WalletService.initializeUserWallet(
+            currentUser.uid,
+            currentUser.email || '',
+            currentUser.displayName || undefined,
+            currentUser.photoURL || undefined
+          );
+
+          // 2. Fetch User Profile
+          const userProfile = await WalletService.getUserProfile(currentUser.uid);
+          if (userProfile) {
+            setPoints(userProfile.balance);
+            setIsAdmin(!!userProfile.isAdmin);
+            setIsPaidUser(userProfile.accountType === 'paid');
+          }
+        } catch (error) {
+          console.error("Error fetching wallet:", error);
+        }
+      } else {
+        setIsAdmin(false);
+        setIsPaidUser(false);
+      }
+      setLoadingAuth(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleAuthSuccess = () => {
+    // Managed automatically by onAuthStateChanged
+  };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Handle Redirect from 404.html (for GitHub Pages SPA support)
-  useEffect(() => {
-    const redirect = sessionStorage.redirect;
-    if (redirect) {
-      delete sessionStorage.redirect;
-      navigate(redirect);
-    }
-  }, []);
+  const renderContent = () => {
+    if (loadingAuth) return <div className="h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
 
-  // Close sidebar on route change (mobile)
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [location.pathname]);
+    if (!user) {
+      return <AuthScreen onLogin={handleAuthSuccess} />;
+    }
+
+    // Force Email Verification
+    if (!user.emailVerified) {
+      return <VerifyEmailScreen />;
+    }
+
+    switch (currentTool) {
+      case 'social-media':
+        return (
+          <>
+            {!isPaidUser && <TrialBanner />}
+            <SocialMediaTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
+          </>
+        );
+      case 'ad-creative':
+        return (
+          <>
+            {!isPaidUser && <TrialBanner />}
+            <AdCreativeTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
+          </>
+        );
+      case 'landing-page':
+        return (
+          <>
+            {!isPaidUser && <TrialBanner />}
+            <LandingPageTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
+          </>
+        );
+      case 'admin':
+        return isAdmin ? <AdminDashboard /> : <div className="p-8 text-center text-red-500">Access Denied</div>;
+      case 'home':
+      default:
+        return (
+          <div className="bg-white">
+            {/* 1. Hero Section */}
+            <section className="relative pt-20 pb-12 lg:pt-32 lg:pb-20 overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white pointer-events-none" />
+
+              <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
+
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 shadow-sm text-indigo-600 text-sm font-bold uppercase tracking-wide mb-8 animate-fade-in">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                  {t('hero_badge')}
+                </div>
+
+                {/* Main Headline */}
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-slate-900 tracking-tight mb-8 leading-[1.1]">
+                  {t('hero_title_1')} <br className="hidden md:block" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"> {t('hero_title_highlight')} </span>
+                  {t('hero_title_2')}
+                </h1>
+
+                {/* Subheadline */}
+                <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+                  {t('hero_subtitle')}
+                </p>
+
+                {/* CTA */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
+                  <button
+                    onClick={() => {
+                      const element = document.getElementById('tools-section');
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-10 py-5 bg-slate-900 text-white text-lg font-bold rounded-2xl hover:bg-slate-800 hover:shadow-2xl hover:-translate-y-1 transition-all"
+                  >
+                    {t('cta_start_free')}
+                  </button>
+                </div>
+
+                {/* Visual Graduation: Before & After */}
+                <div className="relative mx-auto max-w-4xl">
+                  {/* Speed Badge */}
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-green-500 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-green-200 animate-bounce flex items-center gap-2 border-4 border-white whitespace-nowrap">
+                    <span>{t('speed_badge')}</span>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-3xl p-4 md:p-8 border border-slate-200 shadow-2xl flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none" style={{ backgroundSize: '20px 20px' }}></div>
+
+                    {/* BEFORE CARD */}
+                    <div className="relative group w-64 md:w-72 flex-shrink-0">
+                      <div className="absolute -top-3 left-4 bg-slate-800 text-white text-xs font-bold px-3 py-1 rounded shadow-md z-20 rtl:left-auto rtl:right-4">{t('before')}</div>
+                      <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-200 transform group-hover:rotate-0 rotate-[-2deg] rtl:rotate-[2deg] transition-all duration-500">
+                        <div className="aspect-square bg-slate-100 rounded-xl overflow-hidden mb-4 border border-slate-100 relative">
+                          <img src="https://images.unsplash.com/photo-1551732993-e778438fc7da?w=500&q=80" alt="Raw Product Input" className="w-full h-full object-cover mix-blend-multiply opacity-90 p-4" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-slate-100 rounded-md w-3/4"></div>
+                          <div className="h-3 bg-slate-50 rounded-md w-1/2"></div>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2 text-slate-400 text-xs font-medium">
+                          <span>📸</span>
+                          <span>{t('upload_text')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ARROW */}
+                    <div className="flex-shrink-0 z-10">
+                      <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-indigo-600 text-2xl font-bold border border-indigo-50 rtl:rotate-180">
+                        ➔
+                      </div>
+                    </div>
+
+                    {/* AFTER CARD */}
+                    <div className="relative w-full max-w-sm mx-auto md:mx-0 flex-grow">
+                      <div className="absolute -top-3 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-20 animate-pulse rtl:right-auto rtl:left-4">{t('after')}</div>
+                      <div className="bg-slate-900 p-2 rounded-[2.5rem] shadow-2xl transform hover:scale-[1.02] transition-transform duration-500 border-4 border-slate-800">
+                        <div className="bg-white rounded-[2rem] overflow-hidden relative h-[400px] w-full">
+                          {/* Mockup Content */}
+                          <div className="absolute top-0 left-0 w-full animate-[translateY_15s_linear_infinite] hover:pause">
+                            <div className="bg-blue-600 text-white p-4 text-center pb-8 rounded-b-3xl relative overflow-hidden">
+                              <div className="flex justify-between items-center text-[10px] mb-4 opacity-80">
+                                <span>🚛 Free Shipping</span>
+                                <span>💰 Cash on Delivery</span>
+                              </div>
+                              <h3 className="text-xl font-bold mb-2 leading-tight">Instant Control for all devices!</h3>
+                              <div className="w-full h-32 bg-slate-200 rounded-xl mt-4 overflow-hidden shadow-lg border-2 border-white/20">
+                                <img src="https://images.unsplash.com/photo-1593784653056-4912e4000392?w=500&q=80" className="w-full h-full object-cover" alt="Family TV" />
+                              </div>
+                            </div>
+                            <div className="p-4 bg-white">
+                              <div className="flex gap-2 mb-4">
+                                <div className="flex-1 bg-red-50 p-2 rounded-lg border border-red-100 text-center">
+                                  <span className="text-xs text-red-500 font-bold block mb-1">Before</span>
+                                  <div className="h-12 bg-red-200/50 rounded flex items-center justify-center text-[10px] text-red-400">❌</div>
+                                </div>
+                                <div className="flex-1 bg-green-50 p-2 rounded-lg border border-green-100 text-center">
+                                  <span className="text-xs text-green-600 font-bold block mb-1">After</span>
+                                  <div className="h-12 bg-green-200/50 rounded flex items-center justify-center text-[10px] text-green-500">✅</div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="p-6 bg-white text-center">
+                              <img src="https://images.unsplash.com/photo-1551732993-e778438fc7da?w=500&q=80" className="w-32 mx-auto drop-shadow-2xl mb-4" />
+                              <button className="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-200 text-lg">Order Now</button>
+                            </div>
+                            <div className="h-20 bg-slate-50"></div>
+                          </div>
+                          <div className="absolute bottom-0 left-0 w-full h-12 bg-white/90 backdrop-blur border-t border-slate-100 flex items-center justify-around px-4 z-10">
+                            <div className="w-8 h-1 bg-slate-300 rounded-full"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* 2. Tools Grid */}
+            <section id="tools-section" className="py-24 bg-slate-50">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-4">Three Powerful Engines.</h2>
+                  <p className="text-lg text-slate-600">Choose your tool and let AI handle the rest.</p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8">
+                  <div onClick={() => setCurrentTool('social-media')} className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-blue-600 rtl:right-0 rtl:left-auto"></div>
+                    <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📱</div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3">{t('tool_social')}</h3>
+                    <p className="text-slate-500 mb-6 leading-relaxed">Perfect for Instagram & LinkedIn strategies.</p>
+                    <div className="flex items-center text-blue-600 font-bold group-hover:gap-2 transition-all">
+                      Create Post <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                    </div>
+                  </div>
+
+                  <div onClick={() => setCurrentTool('ad-creative')} className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-400 to-pink-600 rtl:right-0 rtl:left-auto"></div>
+                    <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📢</div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3">{t('tool_ad')}</h3>
+                    <p className="text-slate-500 mb-6 leading-relaxed">High-conversion square ads for any market.</p>
+                    <div className="flex items-center text-purple-600 font-bold group-hover:gap-2 transition-all">
+                      Design Ad <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                    </div>
+                  </div>
+
+                  <div onClick={() => setCurrentTool('landing-page')} className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-600 rtl:right-0 rtl:left-auto"></div>
+                    <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">🌐</div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3">{t('tool_landing')}</h3>
+                    <p className="text-slate-500 mb-6 leading-relaxed">Turn a product shot into a full mobile landing page UI.</p>
+                    <div className="flex items-center text-emerald-600 font-bold group-hover:gap-2 transition-all">
+                      Build Page <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 3. Workflow */}
+            <section className="py-24 bg-white">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-16">
+                  <span className="text-indigo-600 font-bold uppercase tracking-wider text-sm">{t('how_it_works')}</span>
+                  <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mt-2">{t('steps_title')}</h2>
+                </div>
+                <div className="grid md:grid-cols-3 gap-12 text-center relative">
+                  <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-slate-200 via-indigo-200 to-slate-200 z-0"></div>
+                  <div className="relative z-10 group">
+                    <div className="w-24 h-24 mx-auto bg-white border-4 border-white shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 relative">
+                      <div className="absolute inset-0 bg-indigo-50 rounded-full transform scale-90"></div>
+                      <span className="relative text-4xl">📤</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('step1_title')}</h3>
+                    <p className="text-slate-500 max-w-xs mx-auto">{t('step1_desc')}</p>
+                  </div>
+                  <div className="relative z-10 group">
+                    <div className="w-24 h-24 mx-auto bg-white border-4 border-white shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 relative">
+                      <div className="absolute inset-0 bg-indigo-50 rounded-full transform scale-90"></div>
+                      <span className="relative text-4xl">🎛️</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('step2_title')}</h3>
+                    <p className="text-slate-500 max-w-xs mx-auto">{t('step2_desc')}</p>
+                  </div>
+                  <div className="relative z-10 group">
+                    <div className="w-24 h-24 mx-auto bg-white border-4 border-white shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 relative">
+                      <div className="absolute inset-0 bg-indigo-50 rounded-full transform scale-90"></div>
+                      <span className="relative text-4xl">🚀</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('step3_title')}</h3>
+                    <p className="text-slate-500 max-w-xs mx-auto">{t('step3_desc')}</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-white border-t border-slate-100 py-12">
+              <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Logo className="w-8 h-8" showText={true} />
+                </div>
+                <div className="flex gap-6 text-sm text-slate-500">
+                  <a href="#" className="hover:text-indigo-600">{t('privacy')}</a>
+                  <a href="#" className="hover:text-indigo-600">{t('terms')}</a>
+                  <a href="#" className="hover:text-indigo-600">{t('contact')}</a>
+                </div>
+                <div className="text-sm text-slate-400">
+                  {t('rights')}
+                </div>
+              </div>
+            </footer>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className={`min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-800 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={toggleSidebar} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-          <Logo className="h-8 w-auto" />
-        </div>
-        {/* Points Display Mobile */}
+    <div className="min-h-screen flex bg-slate-50 text-slate-800 font-sans">
+      {/* Mobile Menu Button - Correctly Positioned for LTR and RTL */}
+      {user && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-4 left-4 rtl:left-auto rtl:right-4 z-50 p-2 bg-white rounded-lg shadow-md md:hidden text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+      )}
+
+      {/* Pricing Modal */}
+      <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && user && (
+        <div
+          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Improved LTR/RTL Logic */}
+      {user && (
+        <aside
+          className={`
+            fixed top-0 bottom-0 z-50 w-72 bg-white border-r rtl:border-r-0 rtl:border-l border-slate-100 shadow-xl transition-transform duration-300 ease-in-out
+            
+            /* Horizontal Positioning */
+            left-0 rtl:left-auto rtl:right-0
+            
+            /* Desktop Overrides - Force Visible and In-Flow */
+            md:relative md:!translate-x-0 md:shadow-none
+            
+            /* Mobile Transform Logic based on language state */
+            ${isSidebarOpen
+              ? 'translate-x-0'
+              : (isRtl ? 'translate-x-full' : '-translate-x-full')
+            }
+          `}
+        >
+          <div className="p-6 h-full flex flex-col">
+            <div className="mb-8 flex items-center gap-2 cursor-pointer" onClick={() => { setCurrentTool('home'); setIsSidebarOpen(false); }}>
+              <Logo className="w-10 h-10" textClassName="text-xl" />
+            </div>
+
+            <nav className="flex-1 space-y-2">
+              <SidebarItem
+                active={currentTool === 'home'}
+                onClick={() => { setCurrentTool('home'); setIsSidebarOpen(false); }}
+                icon="🏠"
+                label={t('home')}
+              />
+              <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('tools')}</div>
+              <SidebarItem
+                active={currentTool === 'social-media'}
+                onClick={() => { setCurrentTool('social-media'); setIsSidebarOpen(false); }}
+                icon="📱"
+                label={t('tool_social')}
+              />
+              <SidebarItem
+                active={currentTool === 'ad-creative'}
+                onClick={() => { setCurrentTool('ad-creative'); setIsSidebarOpen(false); }}
+                icon="📢"
+                label={t('tool_ad')}
+              />
+              <SidebarItem
+                active={currentTool === 'landing-page'}
+                onClick={() => { setCurrentTool('landing-page'); setIsSidebarOpen(false); }}
+                icon="🌐"
+                label={t('tool_landing')}
+              />
+
+              {isAdmin && (
+                <>
+                  <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">Administration</div>
+                  <SidebarItem
+                    active={currentTool === 'admin'}
+                    onClick={() => { setCurrentTool('admin'); setIsSidebarOpen(false); }}
+                    icon="🛡️"
+                    label="Admin Panel"
+                  />
+                </>
+              )}
+            </nav>
+
+            <div className="mt-auto pt-6 border-t border-slate-100 flex flex-col gap-4">
+              <div className="text-xs text-slate-400 text-center">
+                {t('powered_by')}
+              </div>
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 relative overflow-x-hidden">
+
+        {/* Top Header Controls - Correctly Positioned for LTR and RTL */}
         {user && (
-          <div
-            onClick={() => setIsPricingOpen(true)}
-            className="cursor-pointer bg-slate-50 border border-slate-200 rounded-full px-3 py-1 flex items-center gap-2"
-          >
-            <span className="font-bold text-slate-900 text-sm">{points}</span>
-            <CoinIcon className="w-4 h-4" />
-          </div>
-        )}
-      </header>
+          <div className="fixed top-4 right-4 rtl:right-auto rtl:left-4 sm:top-6 sm:right-8 rtl:sm:left-8 z-50 flex items-center gap-3">
 
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 rtl:left-auto rtl:right-0 z-40 w-72 bg-white border-r rtl:border-r-0 rtl:border-l border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')} pt-20 lg:pt-0`}>
-        <div className="h-full flex flex-col p-6">
-          <div className="mb-10 hidden lg:block">
-            <Logo className="h-10 w-auto" />
-          </div>
-
-          <nav className="space-y-2 flex-1">
-            <SidebarItem to="/" active={location.pathname === '/'} icon="🏠" label={t('home')} />
-            <div className="pt-4 pb-2">
-              <p className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t('tools')}</p>
-              <div className="space-y-1">
-                <SidebarItem
-                  to="/tools/social-media"
-                  active={location.pathname.includes('/tools/social-media')}
-                  icon="📱"
-                  label={t('nav_social')}
-                />
-                <SidebarItem
-                  to="/tools/ad-creative"
-                  active={location.pathname.includes('/tools/ad-creative')}
-                  icon="🎨"
-                  label={t('nav_ads')}
-                />
-                <SidebarItem
-                  to="/tools/landing-page"
-                  active={location.pathname.includes('/tools/landing-page')}
-                  icon="📄"
-                  label={t('nav_landing')}
-                />
-              </div>
-            </div>
-
-            {isAdmin && (
-              <div className="pt-4 border-t border-slate-100 mt-4">
-                <p className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Admin</p>
-                <SidebarItem to="/admin" active={location.pathname === '/admin'} icon="⚡" label="Dashboard" />
-              </div>
-            )}
-          </nav>
-
-          <div className="mt-auto pt-6 border-t border-slate-100 space-y-4">
             {/* Language Switcher */}
-            <div className="bg-slate-50 p-1 rounded-xl flex gap-1">
-              <button onClick={() => setLanguage('en')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${language === 'en' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-900'}`}>English</button>
-              <button onClick={() => setLanguage('fr')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${language === 'fr' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-900'}`}>Français</button>
-              <button onClick={() => setLanguage('ar')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${language === 'ar' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-900'}`}>العربية</button>
+            <div className="bg-white/90 backdrop-blur-md shadow-lg border border-slate-200 rounded-full px-1 py-1">
+              <LanguageSwitcher className="!mb-0" />
             </div>
 
-            {user && (
-              <div className="flex items-center gap-3 px-2">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                  {user.email?.[0].toUpperCase()}
+            {/* Account Dropdown (Simplified as Icon for now, can be expanded) */}
+            <div className="relative group">
+              <div className="w-10 h-10 rounded-full bg-white shadow-lg border border-slate-200 cursor-pointer overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-indigo-100 transition-all">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-indigo-700 font-bold">{user.email?.[0].toUpperCase() || "U"}</span>
+                )}
+              </div>
+
+              {/* Dropdown Menu */}
+              <div className="absolute top-12 right-0 rtl:right-auto rtl:left-0 w-48 bg-white rounded-xl shadow-xl border border-slate-100 p-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all transform origin-top-right rtl:origin-top-left z-50">
+                <div className="px-3 py-2 border-b border-slate-50 mb-1">
+                  <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || t('welcome_back')}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate">{user.email}</p>
-                  <p className="text-xs text-slate-500 capitalize">{isPaidUser ? 'Pro Account' : 'Trial Account'}</p>
-                </div>
-                <button onClick={() => auth.signOut()} className="text-slate-400 hover:text-red-500 transition-colors">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                <button
+                  onClick={() => signOut(auth)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left rtl:text-right"
+                >
+                  <span>🚪</span> {t('sign_out')}
                 </button>
               </div>
-            )}
-          </div>
-        </div>
-      </aside>
+            </div>
 
-      {/* Main Content Area */}
-      <main className="lg:pl-72 lg:rtl:pl-0 lg:rtl:pr-72 pt-16 lg:pt-0 min-h-screen transition-all duration-300">
-        {/* Floating Points Widget (Desktop) */}
-        {user && (
-          <div className="fixed top-6 right-6 rtl:right-auto rtl:left-6 z-30 hidden lg:block">
+            {/* Points Display */}
             <div
               onClick={() => setIsPricingOpen(true)}
               className="cursor-pointer bg-white/90 backdrop-blur-md shadow-lg border border-slate-200 rounded-full pl-5 pr-2 rtl:pl-2 rtl:pr-5 py-2 flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 group"
@@ -216,229 +568,25 @@ const MainLayout = ({
           </div>
         )}
 
-        {children}
+        {renderContent()}
       </main>
-
-      {/* Overlay for mobile sidebar */}
-      {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/20 z-30 lg:hidden backdrop-blur-sm" onClick={toggleSidebar}></div>
-      )}
     </div>
   );
 };
 
-
-// --- Pages ---
-
-const HomePage = () => {
-  const { t } = useLanguage();
-  return (
-    <div className="bg-white">
-      {/* 1. Hero Section */}
-      <section className="relative pt-20 pb-12 lg:pt-32 lg:pb-20 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white pointer-events-none" />
-
-        <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 shadow-sm text-indigo-600 text-sm font-bold uppercase tracking-wide mb-8 animate-fade-in">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-            {t('hero_badge')}
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-slate-900 tracking-tight mb-8 leading-[1.1]">
-            {t('hero_title_1')} <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"> {t('hero_title_highlight')} </span>
-            {t('hero_title_2')}
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            {t('hero_subtitle')}
-          </p>
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
-            <Link
-              to="/tools/social-media"
-              className="px-10 py-5 bg-slate-900 text-white text-lg font-bold rounded-2xl hover:bg-slate-800 hover:shadow-2xl hover:-translate-y-1 transition-all"
-            >
-              {t('cta_start_free')}
-            </Link>
-          </div>
-
-          {/* Quick Tools Grid - Visual only for homepage */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-3xl mb-3">📱</div>
-              <h3 className="font-bold text-lg mb-1">{t('social_title')}</h3>
-              <p className="text-slate-500 text-sm">{t('social_desc')}</p>
-            </div>
-            <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-3xl mb-3">🎨</div>
-              <h3 className="font-bold text-lg mb-1">{t('ad_title')}</h3>
-              <p className="text-slate-500 text-sm">{t('ad_desc')}</p>
-            </div>
-            <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-3xl mb-3">📄</div>
-              <h3 className="font-bold text-lg mb-1">{t('landing_title')}</h3>
-              <p className="text-slate-500 text-sm">{t('landing_desc')}</p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-    </div>
-  );
-};
-
-// --- App Container ---
-
-const AppContent: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
-  const [points, setPoints] = useState(0);
-  const [isPricingOpen, setIsPricingOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isPaidUser, setIsPaidUser] = useState(false);
-
-  // Auth & Wallet Hook
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        // Fetch User Data for Admin Check & Account Type
-        try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data() as UserData;
-            setIsAdmin(userData.isAdmin || false);
-            setIsPaidUser(userData.accountType === 'paid');
-          }
-
-          // Wallet Listener
-          WalletService.subscribeToWallet(currentUser.uid, (newBalance) => {
-            setPoints(newBalance);
-          });
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      } else {
-        setIsAdmin(false);
-        setIsPaidUser(false);
-        setPoints(0);
-      }
-      setLoadingAuth(false);
-    });
-
-    // Listen for custom event to open pricing
-    const handleOpenPricing = () => setIsPricingOpen(true);
-    document.addEventListener('open-pricing', handleOpenPricing);
-
-    return () => {
-      unsubscribe();
-      document.removeEventListener('open-pricing', handleOpenPricing);
-    };
-  }, []);
-
-  const handleDeduction = async (amount: number, description: string): Promise<boolean> => {
-    if (!user) return false;
-    if (points < amount) {
-      setIsPricingOpen(true);
-      return false;
-    }
-
-    // Optimistic UI update handled by subscription
-    const success = await WalletService.deductPoints(user.uid, amount, description);
-    if (!success) {
-      alert("Transaction failed. Please try again.");
-    }
-    return success;
-  };
-
-  if (loadingAuth) {
-    return <div className="h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
-  }
-
-  // Auth Guard Component
-  const RequireAuth = ({ children }: { children: React.ReactElement }) => {
-    if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
-    // Check email verification
-    // if (!user.emailVerified) return <VerifyEmailScreen />; // Uncomment if verification is enforced
-    return children;
-  };
-
-  // Admin Guard Component
-  const RequireAdmin = ({ children }: { children: React.ReactElement }) => {
-    if (!user) return <Navigate to="/login" replace />;
-    if (!isAdmin) return <div className="p-8 text-center text-red-500">Access Denied. Admins Only.</div>;
-    return children;
-  };
-
-  return (
-    <BrowserRouter>
-      <MainLayout
-        user={user}
-        isAdmin={isAdmin}
-        isPaidUser={isPaidUser}
-        points={points}
-        setIsPricingOpen={setIsPricingOpen}
-      >
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={!user ? <AuthScreen onLogin={() => { }} /> : <Navigate to="/" replace />} />
-
-          {/* Protected Tool Routes */}
-          <Route path="/tools/social-media" element={
-            <RequireAuth>
-              <>
-                {!isPaidUser && <TrialBanner />}
-                <SocialMediaTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
-              </>
-            </RequireAuth>
-          } />
-
-          <Route path="/tools/ad-creative" element={
-            <RequireAuth>
-              <>
-                {!isPaidUser && <TrialBanner />}
-                <AdCreativeTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
-              </>
-            </RequireAuth>
-          } />
-
-          <Route path="/tools/landing-page" element={
-            <RequireAuth>
-              <>
-                {!isPaidUser && <TrialBanner />}
-                <LandingPageTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
-              </>
-            </RequireAuth>
-          } />
-
-          {/* Admin Route */}
-          <Route path="/admin" element={
-            <RequireAdmin>
-              <AdminDashboard />
-            </RequireAdmin>
-          } />
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-
-        {/* Global Modals */}
-        <PricingModal
-          isOpen={isPricingOpen}
-          onClose={() => setIsPricingOpen(false)}
-          userId={user?.uid || ''}
-        />
-      </MainLayout>
-    </BrowserRouter>
-  );
-};
+const SidebarItem: React.FC<{ active: boolean; onClick: () => void; icon: string; label: string }> = ({ active, onClick, icon, label }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left rtl:text-right
+      ${active
+        ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-sm'
+        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+    `}
+  >
+    <span className="text-lg">{icon}</span>
+    <span>{label}</span>
+  </button>
+);
 
 const App: React.FC = () => {
   return (
