@@ -5,8 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
-    // Base path for GitHub Pages - use '/' for root or '/REPO_NAME/' for project pages
-    base: mode === 'production' ? '/BUILD-SAAS/' : '/',
+    // Base path should be '/' for custom domain (creakits.app)
+    base: '/',
     server: {
       port: 3000,
       host: '0.0.0.0',

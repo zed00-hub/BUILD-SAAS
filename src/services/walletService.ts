@@ -10,7 +10,8 @@ import {
     runTransaction,
     serverTimestamp,
     Timestamp,
-    setDoc
+    setDoc,
+    onSnapshot
 } from 'firebase/firestore';
 import { db } from '../firebase'; // تأكد أن ملف firebase exports db
 import { UserData, WalletTransaction, TransactionType } from '../types/dbTypes';
@@ -182,5 +183,20 @@ export const WalletService = {
 
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WalletTransaction));
+    },
+
+    /**
+     * الاشتراك في تحديثات المحفظة لحظياً
+     */
+    subscribeToWallet(uid: string, callback: (balance: number) => void) {
+        // استيراد onSnapshot ديناميكياً لتجنب مشاكل دائرية إذا وجدت، أو استخدام المستورد أعلاه إذا كان موجوداً
+        // لكننا لم نستورده في الأعلى، يجب إضافته للواردات
+        const userRef = doc(db, USERS_COLLECTION, uid);
+        return onSnapshot(userRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                callback(data.balance || 0);
+            }
+        });
     }
 };
