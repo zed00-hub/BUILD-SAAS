@@ -29,7 +29,7 @@ export const WalletService = {
 
         if (!userSnap.exists()) {
             const isAdmin = email.toLowerCase() === 'ziadgaid001@gmail.com';
-            const initialBalance = isAdmin ? 5000 : 0;
+            const initialBalance = isAdmin ? 5000 : 50;
 
             const userData: UserData = {
                 uid,
