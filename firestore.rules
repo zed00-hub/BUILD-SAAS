@@ -26,15 +26,16 @@ service cloud.firestore {
     // Transactions Collection
     match /transactions/{transactionId} {
       allow read: if resource.data.userId == request.auth.uid || isAdmin();
-      allow create: if request.auth != null; // Allow client to create transaction (TEMPORARY: Client-side logic)
-      // Ideally, write should be disallowed and done via Cloud Functions only.
+      // Allow creation only if the transaction belongs to the authenticated user
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
     
     // Orders Collection
     match /orders/{orderId} {
       allow read: if resource.data.userId == request.auth.uid || isAdmin();
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin(); // Only admin (or backend process) changes status
+      // Allow users to update their own orders (e.g. marking as completed)
+      allow update: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
     }
   }
 }
