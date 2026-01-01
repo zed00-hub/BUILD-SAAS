@@ -3,36 +3,57 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Logo } from '../../components/Logo';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { PricingSection } from '../../components/PricingSection';
 
 export const LandingPage: React.FC = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
 
-    return (
-        <div className="bg-white min-h-screen flex flex-col">
-            {/* Header */}
-            <header className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <Logo className="w-8 h-8" showText={true} />
+    const scrollToSection = (id: string) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
-                    <div className="flex items-center gap-4">
+    return (
+        <div className="bg-slate-50 min-h-screen flex flex-col font-inter">
+            {/* Header / Floating Navbar */}
+            <header className="fixed top-4 left-0 right-0 z-50 px-4 md:px-6 pointer-events-none">
+                <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-md shadow-xl shadow-slate-200/40 rounded-2xl border border-white/50 px-6 h-20 flex items-center justify-between pointer-events-auto transition-all duration-300 hover:bg-white/95">
+                    {/* Logo Area */}
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                        <Logo className="w-8 h-8" showText={true} />
+                    </div>
+
+                    {/* Nav Links - Desktop */}
+                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-indigo-600 transition-colors">{t('nav_home') || 'Home'}</button>
+                        <button onClick={() => scrollToSection('features-section')} className="hover:text-indigo-600 transition-colors">{t('nav_features') || 'Features'}</button>
+                        <button onClick={() => scrollToSection('pricing-section')} className="hover:text-indigo-600 transition-colors">{t('nav_pricing') || 'Pricing'}</button>
+                        <a href="mailto:contact@creakits.com" className="hover:text-indigo-600 transition-colors">{t('nav_contact') || 'Contact'}</a>
+                    </nav>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 md:gap-4">
                         <LanguageSwitcher />
-                        <a href="/login" className="text-slate-600 font-medium hover:text-indigo-600 text-sm hidden sm:block">
+                        <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+                        <a href="/login" className="text-slate-600 font-bold hover:text-indigo-600 text-sm hidden sm:block px-2">
                             {t('sign_in') || 'Sign In'}
                         </a>
                         <button
                             onClick={() => navigate('/app')}
-                            className="px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+                            className="px-6 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 hover:-translate-y-0.5 active:translate-y-0"
                         >
-                            {t('start_free') || 'Get Started'}
+                            {t('start_free') || 'Start Free'}
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* 1. Hero Section */}
-            <section className="relative pt-32 pb-12 lg:pt-48 lg:pb-20 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white pointer-events-none" />
+            <section className="relative pt-40 pb-12 lg:pt-52 lg:pb-20 overflow-hidden bg-white rounded-b-[3rem] shadow-sm z-10">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-50/60 via-white to-white pointer-events-none" />
 
                 <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
 
@@ -43,199 +64,200 @@ export const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Main Headline */}
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-slate-900 tracking-tight mb-8 leading-[1.1]">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 tracking-tight mb-8 leading-[1.1] md:leading-[1.1] drop-shadow-sm">
                         {t('hero_title_1')} <br className="hidden md:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600"> {t('hero_title_highlight')} </span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-300% animate-gradient"> {t('hero_title_highlight')} </span>
                         {t('hero_title_2')}
                     </h1>
 
                     {/* Subheadline */}
-                    <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-xl md:text-2xl text-slate-500 mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
                         {t('hero_subtitle')}
                     </p>
 
                     {/* CTA */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-24">
                         <button
                             onClick={() => navigate('/app')}
-                            className="px-10 py-5 bg-slate-900 text-white text-lg font-bold rounded-2xl hover:bg-slate-800 hover:shadow-2xl hover:-translate-y-1 transition-all"
+                            className="px-10 py-5 bg-slate-900 text-white text-lg font-bold rounded-2xl hover:bg-slate-800 hover:shadow-2xl hover:shadow-indigo-200 hover:-translate-y-1 transition-all"
                         >
                             {t('cta_start_free')}
                         </button>
                     </div>
 
                     {/* Visual Graduation: Before & After */}
-                    <div className="relative mx-auto max-w-4xl">
+                    <div className="relative mx-auto max-w-5xl">
                         {/* Speed Badge */}
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30 bg-green-500 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-green-200 animate-bounce flex items-center gap-2 border-4 border-white whitespace-nowrap">
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-30 bg-green-500 text-white px-8 py-3 rounded-full font-bold shadow-xl shadow-green-200 animate-bounce flex items-center gap-2 border-[6px] border-white whitespace-nowrap">
                             <span>{t('speed_badge')}</span>
                         </div>
 
-                        <div className="bg-slate-50 rounded-3xl p-4 md:p-8 border border-slate-200 shadow-2xl flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none" style={{ backgroundSize: '20px 20px' }}></div>
+                        <div className="bg-slate-50 rounded-[2.5rem] p-6 md:p-10 border border-slate-200 shadow-2xl flex flex-col md:flex-row items-center gap-8 md:gap-16 relative overflow-hidden group hover:shadow-3xl transition-shadow duration-500">
+                            <div className="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none" style={{ backgroundSize: '30px 30px' }}></div>
 
                             {/* BEFORE CARD */}
-                            <div className="relative group w-64 md:w-72 flex-shrink-0">
-                                <div className="absolute -top-3 left-4 bg-slate-800 text-white text-xs font-bold px-3 py-1 rounded shadow-md z-20 rtl:left-auto rtl:right-4">{t('before')}</div>
-                                <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-200 transform group-hover:rotate-0 rotate-[-2deg] rtl:rotate-[2deg] transition-all duration-500">
-                                    <div className="aspect-square bg-slate-100 rounded-xl overflow-hidden mb-4 border border-slate-100 relative">
-                                        <img src="https://images.unsplash.com/photo-1551732993-e778438fc7da?w=500&q=80" alt="Raw Product Input" className="w-full h-full object-cover mix-blend-multiply opacity-90 p-4" />
+                            <div className="relative w-72 flex-shrink-0 transform transition-transform duration-500 group-hover:scale-95 group-hover:blur-[1px] hover:!blur-0 hover:!scale-105">
+                                <div className="absolute -top-4 left-6 bg-slate-800 text-white text-sm font-bold px-4 py-1.5 rounded-lg shadow-lg z-20 rtl:left-auto rtl:right-6 tracking-wide">{t('before')}</div>
+                                <div className="bg-white p-5 rounded-3xl shadow-xl border border-slate-100 rotate-[-3deg] rtl:rotate-[3deg]">
+                                    <div className="aspect-square bg-slate-100 rounded-2xl overflow-hidden mb-5 border border-slate-50 relative flex items-center justify-center">
+                                        <img src="/placeholder-before.jpg" onError={(e) => e.currentTarget.src = "https://images.unsplash.com/photo-1551732993-e778438fc7da?w=500&q=80"} alt="Raw Product Input" className="w-full h-full object-cover opacity-80 mix-blend-multiply transition-opacity" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <div className="h-4 bg-slate-100 rounded-md w-3/4"></div>
-                                        <div className="h-3 bg-slate-50 rounded-md w-1/2"></div>
-                                    </div>
-                                    <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2 text-slate-400 text-xs font-medium">
-                                        <span>📸</span>
-                                        <span>{t('upload_text')}</span>
+                                    <div className="space-y-3 opacity-50">
+                                        <div className="h-4 bg-slate-200 rounded-full w-3/4"></div>
+                                        <div className="h-3 bg-slate-100 rounded-full w-1/2"></div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* ARROW */}
-                            <div className="flex-shrink-0 z-10">
-                                <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-indigo-600 text-2xl font-bold border border-indigo-50 rtl:rotate-180">
+                            <div className="flex-shrink-0 z-10 relative">
+                                <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center text-indigo-600 text-3xl font-black border-4 border-slate-50 rtl:rotate-180 relative z-10">
                                     ➔
                                 </div>
+                                <div className="absolute inset-0 bg-indigo-500 rounded-full blur-xl opacity-20"></div>
                             </div>
 
                             {/* AFTER CARD */}
-                            <div className="relative w-full max-w-sm mx-auto md:mx-0 flex-grow">
-                                <div className="absolute -top-3 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-20 animate-pulse rtl:right-auto rtl:left-4">{t('after')}</div>
-                                <div className="bg-slate-900 p-2 rounded-[2.5rem] shadow-2xl transform hover:scale-[1.02] transition-transform duration-500 border-4 border-slate-800">
-                                    <div className="bg-white rounded-[2rem] overflow-hidden relative h-[400px] w-full">
-                                        {/* Mockup Content */}
-                                        <div className="absolute top-0 left-0 w-full animate-[translateY_15s_linear_infinite] hover:pause">
-                                            <div className="bg-blue-600 text-white p-4 text-center pb-8 rounded-b-3xl relative overflow-hidden">
-                                                <div className="flex justify-between items-center text-[10px] mb-4 opacity-80">
-                                                    <span>🚛 Free Shipping</span>
-                                                    <span>💰 Cash on Delivery</span>
+                            <div className="relative w-full max-w-sm mx-auto md:mx-0 flex-grow transform transition-transform duration-500 hover:scale-105 z-10">
+                                <div className="absolute -top-4 right-6 bg-indigo-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg shadow-indigo-200 z-20 animate-pulse rtl:right-auto rtl:left-6 tracking-wide">{t('after')}</div>
+                                <div className="bg-slate-900 p-3 rounded-[3rem] shadow-2xl border-4 border-slate-800 ring-4 ring-indigo-50">
+                                    <div className="bg-white rounded-[2.5rem] overflow-hidden relative h-[420px] w-full">
+                                        {/* Mockup Content - Animated Scroll */}
+                                        <div className="absolute top-0 left-0 w-full animate-[translateY_20s_linear_infinite] hover:pause cursor-pointer">
+                                            {/* Design Block 1 */}
+                                            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 text-center pb-10 rounded-b-[2.5rem] relative overflow-hidden">
+                                                <div className="flex justify-between items-center text-[10px] mb-6 opacity-70 font-mono">
+                                                    <span>📦 FREE SHIPPING</span>
+                                                    <span>⭐ 4.9/5 RATING</span>
                                                 </div>
-                                                <h3 className="text-xl font-bold mb-2 leading-tight">Instant Control for all devices!</h3>
-                                                <div className="w-full h-32 bg-slate-200 rounded-xl mt-4 overflow-hidden shadow-lg border-2 border-white/20">
-                                                    <img src="https://images.unsplash.com/photo-1593784653056-4912e4000392?w=500&q=80" className="w-full h-full object-cover" alt="Family TV" />
+                                                <h3 className="text-2xl font-black mb-3 leading-tight tracking-tight">Level Up Your<br />Home Entertainment</h3>
+                                                <div className="w-full h-40 bg-white/10 rounded-2xl mt-6 overflow-hidden shadow-inner backdrop-blur-sm border border-white/10 p-2">
+                                                    <img src="https://images.unsplash.com/photo-1593784653056-4912e4000392?w=500&q=80" className="w-full h-full object-cover rounded-xl" alt="TV" />
                                                 </div>
                                             </div>
-                                            <div className="p-4 bg-white">
-                                                <div className="flex gap-2 mb-4">
-                                                    <div className="flex-1 bg-red-50 p-2 rounded-lg border border-red-100 text-center">
-                                                        <span className="text-xs text-red-500 font-bold block mb-1">Before</span>
-                                                        <div className="h-12 bg-red-200/50 rounded flex items-center justify-center text-[10px] text-red-400">❌</div>
+                                            {/* Design Block 2 */}
+                                            <div className="p-6 bg-white space-y-4">
+                                                <div className="flex gap-3">
+                                                    <div className="flex-1 bg-red-50 p-3 rounded-2xl border border-red-100 text-center">
+                                                        <span className="text-[10px] uppercase text-red-400 font-bold block mb-1">Old Way</span>
+                                                        <div className="text-2xl">😫</div>
                                                     </div>
-                                                    <div className="flex-1 bg-green-50 p-2 rounded-lg border border-green-100 text-center">
-                                                        <span className="text-xs text-green-600 font-bold block mb-1">After</span>
-                                                        <div className="h-12 bg-green-200/50 rounded flex items-center justify-center text-[10px] text-green-500">✅</div>
+                                                    <div className="flex-1 bg-green-50 p-3 rounded-2xl border border-green-100 text-center ring-2 ring-green-500/20">
+                                                        <span className="text-[10px] uppercase text-green-500 font-bold block mb-1">New Way</span>
+                                                        <div className="text-2xl">🤩</div>
                                                     </div>
                                                 </div>
+                                                <button className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-xl shadow-slate-200 text-lg hover:scale-[1.02] transition-transform">
+                                                    Shop Now 👉
+                                                </button>
                                             </div>
-                                            <div className="p-6 bg-white text-center">
-                                                <img src="https://images.unsplash.com/photo-1551732993-e778438fc7da?w=500&q=80" className="w-32 mx-auto drop-shadow-2xl mb-4" />
-                                                <button className="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-200 text-lg">Order Now</button>
+                                            {/* Spacer */}
+                                            <div className="h-32 bg-slate-50 p-6 flex flex-col items-center justify-center text-slate-300">
+                                                <div className="w-12 h-1 bg-slate-200 rounded-full mb-2"></div>
+                                                <div className="w-8 h-1 bg-slate-200 rounded-full"></div>
                                             </div>
-                                            <div className="h-20 bg-slate-50"></div>
                                         </div>
-                                        <div className="absolute bottom-0 left-0 w-full h-12 bg-white/90 backdrop-blur border-t border-slate-100 flex items-center justify-around px-4 z-10">
-                                            <div className="w-8 h-1 bg-slate-300 rounded-full"></div>
-                                        </div>
+
+                                        {/* Phone Bottom Bar */}
+                                        <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white via-white/90 to-transparent backdrop-blur-[2px] z-20 pointer-events-none"></div>
+                                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-200 rounded-full z-30"></div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </section>
 
-            {/* 2. Tools Grid */}
-            <section id="tools-section" className="py-24 bg-slate-50">
+            {/* 2. Features Grid */}
+            <section id="features-section" className="py-32 bg-slate-50">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-4">Three Powerful Engines.</h2>
-                        <p className="text-lg text-slate-600">Choose your tool and let AI handle the rest.</p>
+                    <div className="text-center mb-20">
+                        <span className="text-indigo-600 font-bold uppercase tracking-wider text-sm bg-indigo-50 px-4 py-1.5 rounded-full">{t('features_badge') || 'POWERFUL TOOLS'}</span>
+                        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mt-6 mb-6">Three Engines.<br />One Platform.</h2>
+                        <p className="text-xl text-slate-600 max-w-2xl mx-auto font-medium">Everything you need to create high-converting marketing assets in seconds.</p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <div onClick={() => navigate('/app')} className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-blue-600 rtl:right-0 rtl:left-auto"></div>
-                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📱</div>
-                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{t('tool_social')}</h3>
-                            <p className="text-slate-500 mb-6 leading-relaxed">Perfect for Instagram & LinkedIn strategies.</p>
-                            <div className="flex items-center text-blue-600 font-bold group-hover:gap-2 transition-all">
-                                Create Post <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                    <div className="grid md:grid-cols-3 gap-8 px-4">
+                        <div onClick={() => navigate('/app')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
+                            <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-inner">📱</div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_social')}</h3>
+                            <p className="text-slate-500 mb-8 leading-relaxed text-lg">Generate engaging content for your social media channels tailored to your brand voice.</p>
+                            <div className="flex items-center text-blue-600 font-bold group-hover:gap-3 transition-all">
+                                Try functionality <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
                             </div>
                         </div>
 
-                        <div onClick={() => navigate('/app')} className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-400 to-pink-600 rtl:right-0 rtl:left-auto"></div>
-                            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">📢</div>
-                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{t('tool_ad')}</h3>
-                            <p className="text-slate-500 mb-6 leading-relaxed">High-conversion square ads for any market.</p>
-                            <div className="flex items-center text-purple-600 font-bold group-hover:gap-2 transition-all">
-                                Design Ad <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                        <div onClick={() => navigate('/app')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
+                            <div className="w-20 h-20 bg-purple-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-inner">📢</div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_ad')}</h3>
+                            <p className="text-slate-500 mb-8 leading-relaxed text-lg">Create high-conversion ad creatives perfectly sized for Facebook, Instagram & Google Ads.</p>
+                            <div className="flex items-center text-purple-600 font-bold group-hover:gap-3 transition-all">
+                                Create Ads <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
                             </div>
                         </div>
 
-                        <div onClick={() => navigate('/app')} className="group relative bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-600 rtl:right-0 rtl:left-auto"></div>
-                            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">🌐</div>
-                            <h3 className="text-2xl font-bold text-slate-900 mb-3">{t('tool_landing')}</h3>
-                            <p className="text-slate-500 mb-6 leading-relaxed">Turn a product shot into a full mobile landing page UI.</p>
-                            <div className="flex items-center text-emerald-600 font-bold group-hover:gap-2 transition-all">
-                                Build Page <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                        <div onClick={() => navigate('/app')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
+                            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-inner">🌐</div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_landing')}</h3>
+                            <p className="text-slate-500 mb-8 leading-relaxed text-lg">Instant landing page layouts based on your product. Turn visitors into customers.</p>
+                            <div className="flex items-center text-emerald-600 font-bold group-hover:gap-3 transition-all">
+                                Build Pages <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* 3. Workflow */}
-            <section className="py-24 bg-white">
+            {/* 3. Pricing Section (NEW) */}
+            <PricingSection />
+
+            {/* 4. Workflow (Simplified) */}
+            <section className="py-24 bg-slate-900 text-white rounded-t-[3rem] mt-0">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16">
-                        <span className="text-indigo-600 font-bold uppercase tracking-wider text-sm">{t('how_it_works')}</span>
-                        <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mt-2">{t('steps_title')}</h2>
+                        <span className="text-indigo-400 font-bold uppercase tracking-wider text-sm">{t('how_it_works')}</span>
+                        <h2 className="text-3xl lg:text-4xl font-extrabold mt-4 mb-4">{t('steps_title')}</h2>
                     </div>
                     <div className="grid md:grid-cols-3 gap-12 text-center relative">
-                        <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-slate-200 via-indigo-200 to-slate-200 z-0"></div>
+                        {/* Connecting Line */}
+                        <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-slate-700 z-0"></div>
+
                         <div className="relative z-10 group">
-                            <div className="w-24 h-24 mx-auto bg-white border-4 border-white shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 relative">
-                                <div className="absolute inset-0 bg-indigo-50 rounded-full transform scale-90"></div>
-                                <span className="relative text-4xl">📤</span>
+                            <div className="w-24 h-24 mx-auto bg-slate-800 border-4 border-slate-700 shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300">
+                                <span className="text-4xl">📤</span>
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">{t('step1_title')}</h3>
-                            <p className="text-slate-500 max-w-xs mx-auto">{t('step1_desc')}</p>
+                            <h3 className="text-xl font-bold mb-2">{t('step1_title')}</h3>
+                            <p className="text-slate-400 max-w-xs mx-auto text-sm">{t('step1_desc')}</p>
                         </div>
                         <div className="relative z-10 group">
-                            <div className="w-24 h-24 mx-auto bg-white border-4 border-white shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 relative">
-                                <div className="absolute inset-0 bg-indigo-50 rounded-full transform scale-90"></div>
-                                <span className="relative text-4xl">🎛️</span>
+                            <div className="w-24 h-24 mx-auto bg-slate-800 border-4 border-slate-700 shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300">
+                                <span className="text-4xl">🎛️</span>
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">{t('step2_title')}</h3>
-                            <p className="text-slate-500 max-w-xs mx-auto">{t('step2_desc')}</p>
+                            <h3 className="text-xl font-bold mb-2">{t('step2_title')}</h3>
+                            <p className="text-slate-400 max-w-xs mx-auto text-sm">{t('step2_desc')}</p>
                         </div>
                         <div className="relative z-10 group">
-                            <div className="w-24 h-24 mx-auto bg-white border-4 border-white shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300 relative">
-                                <div className="absolute inset-0 bg-indigo-50 rounded-full transform scale-90"></div>
-                                <span className="relative text-4xl">🚀</span>
+                            <div className="w-24 h-24 mx-auto bg-slate-800 border-4 border-slate-700 shadow-xl rounded-full flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300">
+                                <span className="text-4xl">🚀</span>
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">{t('step3_title')}</h3>
-                            <p className="text-slate-500 max-w-xs mx-auto">{t('step3_desc')}</p>
+                            <h3 className="text-xl font-bold mb-2">{t('step3_title')}</h3>
+                            <p className="text-slate-400 max-w-xs mx-auto text-sm">{t('step3_desc')}</p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="bg-white border-t border-slate-100 py-12 mt-auto">
+            <footer className="bg-white py-12">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all">
                         <Logo className="w-8 h-8" showText={true} />
                     </div>
-                    <div className="flex gap-6 text-sm text-slate-500">
-                        <a href="/privacy" className="hover:text-indigo-600">{t('privacy')}</a>
-                        <a href="/terms" className="hover:text-indigo-600">{t('terms')}</a>
-                        <a href="#" className="hover:text-indigo-600">{t('contact')}</a>
+                    <div className="flex gap-8 text-sm text-slate-500 font-medium">
+                        <a href="/privacy" className="hover:text-indigo-600 transition-colors">{t('privacy')}</a>
+                        <a href="/terms" className="hover:text-indigo-600 transition-colors">{t('terms')}</a>
+                        <a href="mailto:support@creakits.com" className="hover:text-indigo-600 transition-colors">{t('contact')}</a>
                     </div>
                     <div className="text-sm text-slate-400">
                         {t('rights')}
