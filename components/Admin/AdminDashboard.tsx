@@ -17,7 +17,7 @@ export const AdminDashboard: React.FC = () => {
     const [adjustmentType, setAdjustmentType] = useState<AdjustmentType>('trial');
     const [amountToAdjust, setAmountToAdjust] = useState<string>('');
     const [adjustReason, setAdjustReason] = useState<string>('');
-    const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro' | 'enterprise'>('starter');
+    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro' | 'elite'>('basic');
 
     useEffect(() => {
         loadData();
@@ -102,7 +102,7 @@ export const AdminDashboard: React.FC = () => {
         setAmountToAdjust('');
         setAdjustReason('');
         setAdjustmentType('trial');
-        setSelectedPlan('starter');
+        setSelectedPlan('basic');
     };
 
     const getAccountBadge = (user: UserData) => {
@@ -310,8 +310,8 @@ export const AdminDashboard: React.FC = () => {
                                 type="button"
                                 onClick={() => setAdjustmentType('trial')}
                                 className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${adjustmentType === 'trial'
-                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
                                     }`}
                             >
                                 🆓 Trial Points
@@ -321,8 +321,8 @@ export const AdminDashboard: React.FC = () => {
                                 type="button"
                                 onClick={() => setAdjustmentType('paid')}
                                 className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${adjustmentType === 'paid'
-                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
                                     }`}
                             >
                                 💎 Paid Plan
@@ -360,7 +360,7 @@ export const AdminDashboard: React.FC = () => {
 
                                     {/* Warning for Trial accounts */}
                                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                                        ⚠️ <strong>Trial Account Note:</strong> Work history for trial users will be automatically deleted after 30 days.
+                                        ⚠️ <strong>Trial Account Note:</strong> Trial users cannot save work history. They must download their work immediately.
                                     </div>
                                 </div>
                             ) : (
@@ -368,19 +368,21 @@ export const AdminDashboard: React.FC = () => {
                                     <div>
                                         <label className="block text-sm font-bold text-slate-700 mb-2">Select Plan</label>
                                         <div className="grid grid-cols-3 gap-3">
-                                            {(['starter', 'pro', 'enterprise'] as const).map(plan => (
+                                            {(['basic', 'pro', 'elite'] as const).map(plan => (
                                                 <button
                                                     key={plan}
                                                     type="button"
                                                     onClick={() => setSelectedPlan(plan)}
                                                     className={`p-4 rounded-xl border-2 text-center transition-all ${selectedPlan === plan
-                                                            ? 'border-emerald-500 bg-emerald-50'
-                                                            : 'border-slate-200 hover:border-slate-300'
+                                                        ? 'border-emerald-500 bg-emerald-50'
+                                                        : 'border-slate-200 hover:border-slate-300'
                                                         }`}
                                                 >
                                                     <div className="text-lg font-bold text-slate-900">{PLAN_CONFIGS[plan].name}</div>
                                                     <div className="text-2xl font-black text-emerald-600 my-1">{PLAN_CONFIGS[plan].points}</div>
-                                                    <div className="text-xs text-slate-500">points/month</div>
+                                                    <div className="text-xs text-slate-500">
+                                                        {PLAN_CONFIGS[plan].price > 0 ? `$${PLAN_CONFIGS[plan].price}` : 'Custom'}
+                                                    </div>
                                                 </button>
                                             ))}
                                         </div>
@@ -398,7 +400,7 @@ export const AdminDashboard: React.FC = () => {
 
                                     {/* Info for Paid accounts */}
                                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
-                                        ✅ <strong>Paid Account Benefits:</strong> Work history is saved permanently. No auto-deletion.
+                                        ✅ <strong>Paid Account Benefits:</strong> Work history is saved for 30 days. Can download anytime.
                                     </div>
                                 </div>
                             )}

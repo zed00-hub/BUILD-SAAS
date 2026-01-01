@@ -49,43 +49,43 @@ exports.generateContent = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
-
 /**
- * Scheduled function to cleanup old trial user orders
+ * Scheduled function to cleanup old PAID user orders
  * Runs daily at midnight UTC
- * Deletes orders older than 30 days for users with accountType = 'trial'
+ * Deletes orders older than 30 days for users with accountType = 'paid'
+ * Note: Trial users don't have saved work (they must download immediately)
  */
-exports.cleanupTrialUserOrders = functions.pubsub
+exports.cleanupPaidUserOrders = functions.pubsub
     .schedule('0 0 * * *') // Every day at midnight UTC
     .timeZone('UTC')
     .onRun(async (context) => {
-        console.log('Starting trial user orders cleanup...');
+        console.log('Starting paid user orders cleanup (30 day retention)...');
 
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const cutoffTimestamp = admin.firestore.Timestamp.fromDate(thirtyDaysAgo);
 
         try {
-            // 1. Get all trial users
-            const trialUsersSnapshot = await db.collection('users')
-                .where('accountType', '==', 'trial')
+            // 1. Get all paid users
+            const paidUsersSnapshot = await db.collection('users')
+                .where('accountType', '==', 'paid')
                 .get();
 
-            if (trialUsersSnapshot.empty) {
-                console.log('No trial users found.');
+            if (paidUsersSnapshot.empty) {
+                console.log('No paid users found.');
                 return null;
             }
 
-            const trialUserIds = trialUsersSnapshot.docs.map(doc => doc.id);
-            console.log(`Found ${trialUserIds.length} trial users.`);
+            const paidUserIds = paidUsersSnapshot.docs.map(doc => doc.id);
+            console.log(`Found ${paidUserIds.length} paid users.`);
 
             let totalDeleted = 0;
 
-            // 2. For each trial user, delete old orders
+            // 2. For each paid user, delete orders older than 30 days
             // Process in batches to avoid timeout
             const batchSize = 500;
 
-            for (const userId of trialUserIds) {
+            for (const userId of paidUserIds) {
                 const oldOrdersSnapshot = await db.collection('orders')
                     .where('userId', '==', userId)
                     .where('createdAt', '<', cutoffTimestamp)
@@ -101,7 +101,7 @@ exports.cleanupTrialUserOrders = functions.pubsub
                 });
 
                 await batch.commit();
-                console.log(`Deleted ${oldOrdersSnapshot.size} old orders for user ${userId}`);
+                console.log(`Deleted ${oldOrdersSnapshot.size} old orders for paid user ${userId}`);
             }
 
             console.log(`Cleanup complete. Total orders deleted: ${totalDeleted}`);
@@ -116,8 +116,9 @@ exports.cleanupTrialUserOrders = functions.pubsub
 /**
  * HTTP endpoint to manually trigger cleanup (for testing)
  * Can be called by admin only
+ * Cleans up paid user orders older than 30 days
  */
-exports.manualCleanupTrialOrders = functions.https.onCall(async (data, context) => {
+exports.manualCleanupPaidOrders = functions.https.onCall(async (data, context) => {
     // Check if user is admin
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated.');
@@ -135,14 +136,14 @@ exports.manualCleanupTrialOrders = functions.https.onCall(async (data, context) 
     const cutoffTimestamp = admin.firestore.Timestamp.fromDate(thirtyDaysAgo);
 
     try {
-        const trialUsersSnapshot = await db.collection('users')
-            .where('accountType', '==', 'trial')
+        const paidUsersSnapshot = await db.collection('users')
+            .where('accountType', '==', 'paid')
             .get();
 
-        const trialUserIds = trialUsersSnapshot.docs.map(doc => doc.id);
+        const paidUserIds = paidUsersSnapshot.docs.map(doc => doc.id);
         let totalDeleted = 0;
 
-        for (const userId of trialUserIds) {
+        for (const userId of paidUserIds) {
             const oldOrdersSnapshot = await db.collection('orders')
                 .where('userId', '==', userId)
                 .where('createdAt', '<', cutoffTimestamp)
@@ -162,7 +163,7 @@ exports.manualCleanupTrialOrders = functions.https.onCall(async (data, context) 
         return {
             success: true,
             deletedCount: totalDeleted,
-            message: `Deleted ${totalDeleted} old orders from trial users.`
+            message: `Deleted ${totalDeleted} old orders from paid users (30+ days old).`
         };
 
     } catch (error) {

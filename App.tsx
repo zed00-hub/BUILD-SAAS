@@ -35,14 +35,14 @@ const TrialBanner: React.FC = () => {
             </p>
             <p className="text-amber-600 text-xs">
               {isRtl
-                ? 'سيتم حذف أعمالك المحفوظة تلقائياً بعد 30 يوماً. قم بالترقية للحفظ الدائم.'
-                : 'Your saved work will be automatically deleted after 30 days. Upgrade for permanent storage.'
+                ? 'لا يتم حفظ أعمالك. يرجى تحميلها مباشرة قبل مغادرة الصفحة!'
+                : "Your work is NOT saved. Please download immediately before leaving the page!"
               }
             </p>
           </div>
         </div>
         <button className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-sm">
-          {isRtl ? '💎 ترقية الآن' : '💎 Upgrade Now'}
+          {isRtl ? '💎 ترقية للحفظ' : '💎 Upgrade to Save'}
         </button>
       </div>
     </div>

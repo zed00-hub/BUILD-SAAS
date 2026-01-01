@@ -17,11 +17,11 @@ const USERS_COLLECTION = 'users';
 const ORDERS_COLLECTION = 'orders';
 const TRANSACTIONS_COLLECTION = 'transactions';
 
-// Plan configurations with points
+// Plan configurations with points (matching website pricing)
 export const PLAN_CONFIGS = {
-    starter: { name: 'Starter', points: 100, durationDays: 30 },
-    pro: { name: 'Pro', points: 500, durationDays: 30 },
-    enterprise: { name: 'Enterprise', points: 2000, durationDays: 30 }
+    basic: { name: 'Basic', points: 300, price: 7.99, durationDays: 30 },
+    pro: { name: 'Pro', points: 1290, price: 30.99, durationDays: 30 },
+    elite: { name: 'Elite', points: 5000, price: 0, durationDays: 30 } // Custom pricing - contact sales
 };
 
 export const AdminService = {
@@ -80,7 +80,7 @@ export const AdminService = {
     /**
      * ترقية مستخدم إلى حساب مدفوع مع خطة محددة
      */
-    async upgradeToPaidPlan(userId: string, planType: 'starter' | 'pro' | 'enterprise', description: string): Promise<boolean> {
+    async upgradeToPaidPlan(userId: string, planType: 'basic' | 'pro' | 'elite', description: string): Promise<boolean> {
         try {
             const planConfig = PLAN_CONFIGS[planType];
             const now = Timestamp.now();
