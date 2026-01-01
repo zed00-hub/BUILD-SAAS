@@ -9,7 +9,11 @@ admin.initializeApp();
 const db = admin.firestore();
 
 exports.generateContent = functions
-    .runWith({ secrets: ["GEMINI_API_KEY"] })
+    .runWith({
+        secrets: ["GEMINI_API_KEY"],
+        timeoutSeconds: 300,
+        memory: "1GB"
+    })
     .https.onCall(async (data, context) => {
         // Get API key from secret (injected as environment variable)
         const API_KEY = process.env.GEMINI_API_KEY;

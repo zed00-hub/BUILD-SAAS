@@ -102,9 +102,16 @@ export const LandingPage: React.FC = () => {
                                     <div className="aspect-square bg-slate-100 rounded-2xl overflow-hidden mb-5 border border-slate-50 relative flex items-center justify-center">
                                         <img src="/placeholder-before.jpg" onError={(e) => e.currentTarget.src = "https://images.unsplash.com/photo-1551732993-e778438fc7da?w=500&q=80"} alt="Raw Product Input" className="w-full h-full object-cover opacity-80 mix-blend-multiply transition-opacity" />
                                     </div>
-                                    <div className="space-y-3 opacity-50">
-                                        <div className="h-4 bg-slate-200 rounded-full w-3/4"></div>
-                                        <div className="h-3 bg-slate-100 rounded-full w-1/2"></div>
+                                    <div className="mt-4 px-2">
+                                        <div className="flex gap-2 mb-2 opacity-40">
+                                            <div className="w-8 h-1 bg-slate-400 rounded-full"></div>
+                                            <div className="w-12 h-1 bg-slate-300 rounded-full"></div>
+                                        </div>
+                                        <div className="w-full h-1 bg-slate-200 rounded-full mb-1.5 opacity-40"></div>
+                                        <div className="w-2/3 h-1 bg-slate-200 rounded-full opacity-40"></div>
+                                        <div className="mt-3 text-[10px] text-slate-400 font-bold tracking-widest uppercase text-center opacity-60">
+                                            Raw Product
+                                        </div>
                                     </div>
                                 </div>
                             </div>
