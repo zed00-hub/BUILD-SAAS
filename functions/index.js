@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+// Note: @google/genai is used inside the function to avoid global scope issues or conflicts
+// const { GoogleGenAI } = require("@google/genai");
 const cors = require('cors')({ origin: true });
 
 // Initialize Firebase Admin
@@ -19,26 +20,31 @@ exports.generateContent = functions
 
         const { modelName, prompt, parts, config } = data;
 
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: modelName || 'gemini-1.5-flash' });
+        // Initialize the new GenAI Client
+        const { GoogleGenAI } = require("@google/genai");
+        const client = new GoogleGenAI({ apiKey: API_KEY });
 
         try {
-            let result;
-            if (parts) {
-                // Multi-part content (images + text)
-                result = await model.generateContent({
-                    contents: { role: 'user', parts: parts },
-                    ...config
-                });
-            } else {
-                // Simple text prompt
-                result = await model.generateContent(prompt);
-            }
+            // Prepare contents
+            const contents = parts ?
+                [{ role: 'user', parts: parts }] :
+                [{ role: 'user', parts: [{ text: prompt }] }];
 
-            const response = await result.response;
+            // Call the new API method
+            const result = await client.models.generateContent({
+                model: modelName || 'gemini-1.5-flash',
+                contents: contents,
+                config: config
+            });
+
+            // Handle response
+            const candidates = result.response.candidates;
+            // Helper to get text safely
+            const text = candidates?.[0]?.content?.parts?.[0]?.text || "";
+
             return {
-                text: response.text(),
-                candidates: response.candidates
+                text: text,
+                candidates: candidates
             };
         } catch (error) {
             console.error("Gemini API Error:", error);
