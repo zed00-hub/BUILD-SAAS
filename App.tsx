@@ -11,7 +11,7 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 
 import { auth } from './src/firebase';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User, getRedirectResult } from 'firebase/auth';
 
 import { VerifyEmailScreen } from './components/VerifyEmailScreen';
 import { WalletService } from './src/services/walletService';
@@ -69,6 +69,23 @@ const AppContent: React.FC = () => {
       return false;
     }
   };
+
+  // Handle Google Redirect Result (must be called on app load)
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("Google Sign-In Redirect successful:", result.user.email);
+          // User will be picked up by onAuthStateChanged below
+        }
+      } catch (error: any) {
+        console.error("Google Redirect Error:", error);
+        // Don't alert here as onAuthStateChanged will handle the state
+      }
+    };
+    handleRedirectResult();
+  }, []);
 
   // Monitor Auth State
   useEffect(() => {
