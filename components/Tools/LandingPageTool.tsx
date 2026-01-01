@@ -10,9 +10,10 @@ import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/s
 interface LandingPageToolProps {
   points: number;
   deductPoints: (amount: number, description: string) => Promise<boolean>;
+  isPaidUser: boolean;
 }
 
-export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deductPoints }) => {
+export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deductPoints, isPaidUser }) => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     description: '',
@@ -179,15 +180,17 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       });
       setResultImage(result);
 
-      // Save History
-      saveHistoryItem({
-        tool: 'landing',
-        results: result,
-        inputs: {
-          formData
-        }
-      });
-      refreshHistory();
+      // Save History ONLY for Paid Users
+      if (isPaidUser) {
+        saveHistoryItem({
+          tool: 'landing',
+          results: result,
+          inputs: {
+            formData
+          }
+        });
+        refreshHistory();
+      }
 
     } catch (err: any) {
       setError(err.message || "Failed to generate design.");

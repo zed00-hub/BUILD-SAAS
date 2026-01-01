@@ -12,7 +12,7 @@ interface AdCreativeToolProps {
   deductPoints: (amount: number, description: string) => Promise<boolean>;
 }
 
-export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPoints }) => {
+export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPoints, isPaidUser }) => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     headline: '',
@@ -133,15 +133,18 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
       const results = await Promise.all(promises);
       setResultImages(results);
 
-      saveHistoryItem({
-        tool: 'ad',
-        results: results,
-        inputs: {
-          formData,
-          // Saving small metadata about request
-        }
-      });
-      refreshHistory();
+      // Save to History ONLY for Paid Users
+      if (isPaidUser) {
+        saveHistoryItem({
+          tool: 'ad',
+          results: results,
+          inputs: {
+            formData,
+            // Saving small metadata about request
+          }
+        });
+        refreshHistory();
+      }
 
     } catch (err: any) {
       setError(err.message || "Failed to generate ad creative.");

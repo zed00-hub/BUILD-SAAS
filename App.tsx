@@ -174,21 +174,21 @@ const AppContent: React.FC = () => {
         return (
           <>
             {!isPaidUser && <TrialBanner />}
-            <SocialMediaTool points={points} deductPoints={handleDeduction} />
+            <SocialMediaTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
           </>
         );
       case 'ad-creative':
         return (
           <>
             {!isPaidUser && <TrialBanner />}
-            <AdCreativeTool points={points} deductPoints={handleDeduction} />
+            <AdCreativeTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
           </>
         );
       case 'landing-page':
         return (
           <>
             {!isPaidUser && <TrialBanner />}
-            <LandingPageTool points={points} deductPoints={handleDeduction} />
+            <LandingPageTool points={points} deductPoints={handleDeduction} isPaidUser={isPaidUser} />
           </>
         );
       case 'admin':

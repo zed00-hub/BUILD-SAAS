@@ -12,7 +12,7 @@ interface SocialMediaToolProps {
   deductPoints: (amount: number, description: string) => Promise<boolean>;
 }
 
-export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deductPoints }) => {
+export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deductPoints, isPaidUser }) => {
   const { t } = useLanguage();
   const [description, setDescription] = useState('');
   const [manualContent, setManualContent] = useState('');
@@ -198,21 +198,23 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
       setGeneratedImages(images);
 
-      // Save to History
-      saveHistoryItem({
-        tool: 'social',
-        results: images,
-        inputs: {
-          description,
-          manualContent,
-          additionalElementsText,
-          slideCount
-        },
-        meta: {
-          plan: shouldAutoPlan ? currentPlan : null
-        }
-      });
-      refreshHistory();
+      // Save to History ONLY for Paid Users
+      if (isPaidUser) {
+        saveHistoryItem({
+          tool: 'social',
+          results: images,
+          inputs: {
+            description,
+            manualContent,
+            additionalElementsText,
+            slideCount
+          },
+          meta: {
+            plan: shouldAutoPlan ? currentPlan : null
+          }
+        });
+        refreshHistory();
+      }
 
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
