@@ -4,7 +4,7 @@ import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { auth, googleProvider } from '../src/firebase';
-import { signInWithPopup, signInWithRedirect, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
 // Country codes with flags
 const COUNTRY_CODES = [
@@ -98,14 +98,22 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
           onClick={async () => {
             try {
               setIsLoading(true);
-              // Using signInWithRedirect to avoid popup blockers and COOP issues
-              await signInWithRedirect(auth, googleProvider);
-              // No need to call onLogin() here, the page will redirect.
-              // After redirect, onAuthStateChanged in App.tsx will handle the login state.
-            } catch (error) {
+              // Using signInWithPopup for faster and more reliable sign-in
+              await signInWithPopup(auth, googleProvider);
+              // onAuthStateChanged in App.tsx will handle the login state automatically
+              onLogin();
+            } catch (error: any) {
               console.error("Google Sign-In Error:", error);
+              // If popup was blocked, show a friendly message
+              if (error.code === 'auth/popup-blocked') {
+                alert('Please allow popups for this site to sign in with Google.');
+              } else if (error.code === 'auth/popup-closed-by-user') {
+                // User closed the popup, no need to show error
+              } else {
+                alert(t('auth_error'));
+              }
+            } finally {
               setIsLoading(false);
-              alert(t('auth_error'));
             }
           }}
           className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all font-medium py-3 px-4 rounded-xl mb-6 focus:ring-2 focus:ring-offset-1 focus:ring-slate-200"
