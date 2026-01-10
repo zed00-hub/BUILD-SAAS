@@ -26,7 +26,7 @@ interface GenerateImageOptions {
   prompt: string;
   referenceImage?: string; // Base64 (Product or Style)
   logoImage?: string; // Base64 (Brand Logo)
-  elementImage?: string; // Base64 (Additional Element)
+  elementImages?: string[]; // Base64 (Additional Elements)
   aspectRatio: "1:1" | "16:9" | "9:16" | "4:3" | "3:4";
   imageSize?: "1K" | "2K" | "4K";
 }
@@ -108,13 +108,15 @@ export const generateImage = async (options: GenerateImageOptions): Promise<stri
     });
   }
 
-  // 3. Additional Element Image (if provided)
-  if (options.elementImage) {
-    parts.push({
-      inlineData: {
-        mimeType: 'image/png',
-        data: options.elementImage
-      }
+  // 3. Additional Element Images (if provided)
+  if (options.elementImages && options.elementImages.length > 0) {
+    options.elementImages.forEach((img) => {
+      parts.push({
+        inlineData: {
+          mimeType: 'image/png',
+          data: img
+        }
+      });
     });
   }
 
@@ -125,8 +127,8 @@ export const generateImage = async (options: GenerateImageOptions): Promise<stri
     finalPrompt += " \n\nIMPORTANT: Use the second provided image (the Logo) and place it clearly and professionally in the bottom-right corner of the design.";
   }
 
-  if (options.elementImage) {
-    finalPrompt += " \n\nIMPORTANT: Use the third provided image (the Element) and integrate it naturally into the composition as a key visual component.";
+  if (options.elementImages && options.elementImages.length > 0) {
+    finalPrompt += ` \n\nIMPORTANT: Use the provided additional element images (after the logo) and integrate them naturally into the composition as key visual components.`;
   }
 
   parts.push({ text: finalPrompt });

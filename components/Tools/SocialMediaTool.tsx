@@ -20,7 +20,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
   const [additionalElementsText, setAdditionalElementsText] = useState('');
   const [styleImage, setStyleImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
-  const [elementImage, setElementImage] = useState<string | null>(null);
+  const [elementImages, setElementImages] = useState<string[]>([]);
   const [slideCount, setSlideCount] = useState<number>(3);
 
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
@@ -139,14 +139,14 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
       setIsGeneratingImages(true);
 
       const images: string[] = [];
-      const loopCount = shouldAutoPlan ? currentPlan.length : slideCount;
+      const loopCount = slideCount; // Strictly enforce user selected count
 
       for (let i = 0; i < loopCount; i++) {
         let prompt = '';
 
-        if (shouldAutoPlan) {
+        if (shouldAutoPlan && currentPlan[i]) {
           const slide = currentPlan[i];
-          prompt = `Create a high-quality social media design for Slide ${slide.slideNumber} of ${loopCount}.
+          prompt = `Create a premium, high-quality social media design for Slide ${i + 1} of ${loopCount}.
             
             STRATEGY & CONTENT:
             - Role: ${slide.role}
@@ -158,7 +158,13 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
             
             STYLE & ATMOSPHERE:
             ${slide.designNotes}
-            Modern, clean, engaging aesthetic. High resolution.`;
+            
+            DESIGN RULES:
+            - AESTHETIC: Modern, minimal, vibrant, and premium. Use high-resolution assets.
+            - VISUALS: No artifacts. Clean, professional composition.
+            - COHERENCE: Ensure this slide visually connects with the previous/next slides (panoramic flow). No awkward white gaps.
+            - NO NUMBERING: Do NOT include visuals like "1.", "01", "Slide 1" unless explicitly part of the headline text.
+            `;
         } else {
           prompt = `Create a high-quality social media design for Slide ${i + 1} of ${loopCount}.
             
@@ -172,6 +178,8 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
             - Focus on the content relevant to Slide ${i + 1} if specified in the script above.
             - Maintain visual consistency with previous/next slides.
             - High resolution, professional finish.
+            - Modern and Premium aesthetic.
+            - Do NOT include slide numbers visually.
             `;
         }
 
@@ -191,7 +199,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
           prompt,
           referenceImage: styleImage || undefined,
           logoImage: logoImage || undefined,
-          elementImage: elementImage || undefined,
+          elementImages: elementImages.length > 0 ? elementImages : undefined,
           aspectRatio: "1:1"
         });
         images.push(result);
@@ -342,10 +350,29 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
               <div className="input-group">
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('add_element_opt')}</label>
+
+                {/* Element List */}
+                {elementImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {elementImages.map((img, idx) => (
+                      <div key={idx} className="relative w-16 h-16 rounded-lg border border-slate-200 overflow-hidden group">
+                        <img src={img} alt="Element" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setElementImages(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="flex gap-2">
-                  <label className={`cursor-pointer flex-shrink-0 w-20 flex flex-col items-center justify-center h-[50px] border-2 border-dashed rounded-lg transition-all ${elementImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
-                    <span className="text-lg">🖼️</span>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setElementImage)} className="hidden" />
+                  <label className={`cursor-pointer flex-shrink-0 w-20 flex flex-col items-center justify-center h-[50px] border-2 border-dashed rounded-lg transition-all border-slate-300 hover:border-indigo-400 hover:bg-slate-50`}>
+                    <span className="text-lg">➕</span>
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (base64) => setElementImages(prev => [...prev, base64]))} className="hidden" />
                   </label>
                   <input
                     type="text"
