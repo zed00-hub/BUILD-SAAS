@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Country, Language, HistoryItem } from '../../types';
+import { UserData as DbUserData } from '../../src/types/dbTypes';
 import { Button } from '../Button';
 import { fileToBase64, generateImage, editGeneratedImage } from '../../services/geminiService';
 import { CoinIcon } from '../CoinIcon';
@@ -11,9 +11,10 @@ interface AdCreativeToolProps {
   points: number;
   deductPoints: (amount: number, description: string, count?: number) => Promise<boolean>;
   isPaidUser: boolean;
+  userProfile?: DbUserData | null; // Use correct type
 }
 
-export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPoints, isPaidUser }) => {
+export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPoints, isPaidUser, userProfile }) => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     headline: '',
@@ -27,6 +28,7 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
 
   const [productImage, setProductImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [useBrandKit, setUseBrandKit] = useState(false); // Default OFF for Ads
   const [imageCount, setImageCount] = useState<number>(1);
 
   const [resultImages, setResultImages] = useState<string[]>([]);
@@ -42,9 +44,25 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
   const totalCost = costPerImage * imageCount;
   const editCost = 15;
 
+
   useEffect(() => {
     setHistory(getHistory('ad'));
   }, []);
+
+  // Brand Kit Effect
+  useEffect(() => {
+    if (useBrandKit && userProfile?.brandKit?.logo) {
+      setLogoImage(userProfile.brandKit.logo);
+    }
+  }, [useBrandKit, userProfile]);
+
+  const toggleBrandKit = () => {
+    setUseBrandKit(!useBrandKit);
+    if (useBrandKit) {
+      // Turning OFF: maybe clear or leave? User said "activateable".
+      // If I turn it off, I should probably allow manual upload again.
+    }
+  };
 
   const refreshHistory = () => {
     setHistory(getHistory('ad'));
@@ -205,13 +223,31 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
                 </div>
 
                 <div className="input-group">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">{t('logo_opt')}</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 flex justify-between">
+                    {t('logo_opt')}
+                    {userProfile?.brandKit?.logo && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-indigo-600 font-bold">Use Brand Logo</span>
+                        <input
+                          type="checkbox"
+                          checked={useBrandKit}
+                          onChange={toggleBrandKit}
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                    )}
+                  </label>
                   <label className={`cursor-pointer flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-xl transition-all ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
                     <span className="text-2xl mb-1">©️</span>
                     <span className="text-xs text-slate-500 text-center font-medium px-1">
-                      {logoImage ? t('ready') : t('upload')}
+                      {logoImage ? (useBrandKit ? "Brand Logo Applied" : t('ready')) : t('upload')}
                     </span>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setLogoImage)} className="hidden" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => { setLogoImage(null); setUseBrandKit(false); handleImageUpload(e, setLogoImage); }}
+                      className="hidden"
+                    />
                   </label>
                 </div>
               </div>

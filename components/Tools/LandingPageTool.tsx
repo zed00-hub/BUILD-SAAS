@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Country, Language, HistoryItem } from '../../types';
+import { UserData } from '../../src/types/dbTypes';
 import { Button } from '../Button';
 import { fileToBase64, generateImage, editGeneratedImage } from '../../services/geminiService';
 import { CoinIcon } from '../CoinIcon';
@@ -11,9 +12,10 @@ interface LandingPageToolProps {
   points: number;
   deductPoints: (amount: number, description: string, count?: number) => Promise<boolean>;
   isPaidUser: boolean;
+  userProfile?: UserData | null;
 }
 
-export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deductPoints, isPaidUser }) => {
+export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deductPoints, isPaidUser, userProfile }) => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     description: '',
@@ -36,6 +38,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   });
 
   const [productImage, setProductImage] = useState<string | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [useBrandKit, setUseBrandKit] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -66,6 +70,16 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     setHistory(getHistory('landing'));
   }, []);
 
+  useEffect(() => {
+    if (useBrandKit && userProfile?.brandKit?.logo) {
+      setLogoImage(userProfile.brandKit.logo);
+    }
+  }, [useBrandKit, userProfile]);
+
+  const toggleBrandKit = () => {
+    setUseBrandKit(!useBrandKit);
+  };
+
   const refreshHistory = () => {
     setHistory(getHistory('landing'));
   };
@@ -83,11 +97,11 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     refreshHistory();
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
     if (e.target.files && e.target.files[0]) {
       try {
         const base64 = await fileToBase64(e.target.files[0]);
-        setProductImage(base64);
+        setter(base64);
         setError(null);
       } catch (err) {
         console.error("Error converting image", err);
@@ -175,6 +189,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       const result = await generateImage({
         prompt,
         referenceImage: productImage,
+        logoImage: logoImage || undefined,
         aspectRatio: "9:16",
         imageSize: "4K" // Upgraded to 4K
       });
@@ -241,8 +256,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
               {/* 1. Visual Asset */}
               <div className="space-y-3">
                 <label className="block text-sm font-bold text-slate-800">{t('product_req')}</label>
-                <div className="flex gap-4">
-                  <label className={`flex-1 cursor-pointer flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-xl transition-all relative overflow-hidden ${productImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className={`cursor-pointer flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-xl transition-all relative overflow-hidden ${productImage ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
                     {productImage ? (
                       <>
                         <img src={`data:image/png;base64,${productImage}`} className="absolute inset-0 w-full h-full object-cover opacity-50" />
@@ -250,12 +265,38 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                       </>
                     ) : (
                       <>
-                        <span className="text-3xl mb-2">📤</span>
-                        <span className="text-xs font-medium text-slate-500">{t('upload')}</span>
+                        <span className="text-3xl mb-2">📸</span>
+                        <span className="text-xs font-medium text-slate-500">{t('upload_product')}</span>
                       </>
                     )}
-                    <input type="file" accept="image/png, image/webp, image/jpeg, image/jpg" onChange={handleImageUpload} className="hidden" />
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setProductImage)} className="hidden" />
                   </label>
+
+                  <div className="input-group flex flex-col h-32">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 flex justify-between">
+                      <span>{t('logo_opt')}</span>
+                      {userProfile?.brandKit?.logo && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-indigo-600">Brand Kit</span>
+                          <input type="checkbox" checked={useBrandKit} onChange={toggleBrandKit} />
+                        </div>
+                      )}
+                    </label>
+                    <label className={`flex-1 cursor-pointer flex flex-col items-center justify-center border-2 border-dashed rounded-xl transition-all relative overflow-hidden ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                      {logoImage ? (
+                        <>
+                          <span className="text-2xl mb-1">©️</span>
+                          <span className="text-xs font-medium text-indigo-600">{useBrandKit ? "Brand Logo" : t('loaded')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-2xl mb-1">©️</span>
+                          <span className="text-xs font-medium text-slate-500">{t('upload_logo')}</span>
+                        </>
+                      )}
+                      <input type="file" accept="image/*" onChange={(e) => { setLogoImage(null); setUseBrandKit(false); handleImageUpload(e, setLogoImage); }} className="hidden" />
+                    </label>
+                  </div>
                 </div>
               </div>
 

@@ -103,6 +103,20 @@ export const WalletService = {
     },
 
     /**
+     * تحديث بيانات الملف الشخصي (الاسم، الصورة، Brand Kit)
+     */
+    async updateUserProfile(uid: string, data: Partial<UserData>): Promise<boolean> {
+        try {
+            const userRef = doc(db, USERS_COLLECTION, uid);
+            await setDoc(userRef, data, { merge: true });
+            return true;
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            return false;
+        }
+    },
+
+    /**
      * خصم رصيد مقابل خدمة (عملية آمنة باستخدام Transaction)
      * includesUsageCount: عدد الصور/المحاولات في هذا الطلب (لحساب الحد اليومي)
      */

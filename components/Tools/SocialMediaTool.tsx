@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../Button';
 import { fileToBase64, generateImage, generateSocialPlan, editGeneratedImage } from '../../services/geminiService';
 import { SlidePlan, HistoryItem } from '../../types';
+import { UserData } from '../../src/types/dbTypes';
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
@@ -11,9 +12,10 @@ interface SocialMediaToolProps {
   points: number;
   deductPoints: (amount: number, description: string, count?: number) => Promise<boolean>;
   isPaidUser: boolean;
+  userProfile?: UserData | null;
 }
 
-export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deductPoints, isPaidUser }) => {
+export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deductPoints, isPaidUser, userProfile }) => {
   const { t } = useLanguage();
   const [description, setDescription] = useState('');
   const [manualContent, setManualContent] = useState('');
@@ -21,6 +23,7 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
   const [styleImage, setStyleImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [elementImages, setElementImages] = useState<string[]>([]);
+  const [useBrandKit, setUseBrandKit] = useState(true); // Default ON for Social Media
   const [slideCount, setSlideCount] = useState<number>(3);
 
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
@@ -48,6 +51,25 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
 
   const refreshHistory = () => {
     setHistory(getHistory('social'));
+  };
+
+  // Brand Kit Application Effect
+  useEffect(() => {
+    // Only apply if toggle is ON and we have profile data
+    if (useBrandKit && userProfile?.brandKit) {
+      if (userProfile.brandKit.logo) setLogoImage(userProfile.brandKit.logo);
+      if (userProfile.brandKit.styleImage) setStyleImage(userProfile.brandKit.styleImage);
+    }
+  }, [useBrandKit, userProfile]);
+
+  const toggleBrandKit = () => {
+    const newState = !useBrandKit;
+    setUseBrandKit(newState);
+    if (!newState) {
+      // If turning OFF, maybe clear? or just let user override. User request implies "activation".
+      // Let's clear to show it's "off", or at least stop enforcing.
+      // Better UX: If turning OFF, don't clear immediately, just unlock. But if turning ON, overwrite.
+    }
   };
 
   const handleLoadHistory = (item: HistoryItem) => {
@@ -324,249 +346,278 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="input-group">
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('style_opt')}</label>
-                  <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${styleImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
-                    <span className="text-xl mb-1">🎨</span>
-                    <span className="text-[10px] text-slate-500 text-center px-1 truncate w-full">
-                      {styleImage ? t('loaded') : t('ref_image')}
-                    </span>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setStyleImage)} className="hidden" />
-                  </label>
-                </div>
-
-                <div className="input-group">
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('logo_opt')}</label>
-                  <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
-                    <span className="text-xl mb-1">©️</span>
-                    <span className="text-[10px] text-slate-500 text-center px-1 truncate w-full">
-                      {logoImage ? t('loaded') : "Logo PNG"}
-                    </span>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setLogoImage)} className="hidden" />
-                  </label>
-                </div>
-              </div>
-
-              <div className="input-group">
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('add_element_opt')}</label>
-
-                {/* Element List */}
-                {elementImages.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {elementImages.map((img, idx) => (
-                      <div key={idx} className="relative w-16 h-16 rounded-lg border border-slate-200 overflow-hidden group">
-                        <img src={img} alt="Element" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setElementImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex gap-2">
-                  <label className={`cursor-pointer flex-shrink-0 w-20 flex flex-col items-center justify-center h-[50px] border-2 border-dashed rounded-lg transition-all border-slate-300 hover:border-indigo-400 hover:bg-slate-50`}>
-                    <span className="text-lg">➕</span>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (base64) => setElementImages(prev => [...prev, base64]))} className="hidden" />
-                  </label>
-                  <input
-                    type="text"
-                    value={additionalElementsText}
-                    onChange={(e) => setAdditionalElementsText(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-slate-900 placeholder:text-slate-400 text-sm"
-                    placeholder={t('element_ph')}
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" isLoading={isPlanning || isGeneratingImages} className="w-full py-4 text-lg shadow-indigo-200 mt-4">
-                {isPlanning ? t('planning_content') : isGeneratingImages ? t('designing') : (
-                  <span className="flex items-center gap-1">
-                    {t('generate')} ({totalCost} <CoinIcon className="w-5 h-5 inline-block" />)
-                  </span>
-                )}
-              </Button>
-
-              {error && (
-                <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  {error}
-                </div>
-              )}
-            </form>
           </div>
 
-          {/* History Section */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex justify-between items-center">
-              {t('history_title')}
-              <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{history.length}</span>
-            </h3>
-            {history.length === 0 ? (
-              <div className="text-center text-slate-400 py-6 text-sm">
-                {t('history_empty')}
+          {/* Brand Kit Toggle */}
+          {userProfile?.brandKit && (userProfile.brandKit.logo || userProfile.brandKit.styleImage) && (
+            <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎨</span>
+                <div>
+                  <p className="text-sm font-bold text-indigo-900">Brand Kit Assets</p>
+                  <p className="text-xs text-indigo-700">Apply your saved Logo & Style automatically</p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                {history.map(item => (
-                  <div key={item.id} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
-                    <div className="w-16 h-16 bg-slate-100 rounded-md overflow-hidden flex-shrink-0">
-                      {Array.isArray(item.results) && item.results[0] && (
-                        <img src={item.results[0]} className="w-full h-full object-cover" alt="History" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-800 truncate leading-tight mb-1">
-                        {item.inputs.description || item.inputs.manualContent || "Untitled Project"}
-                      </p>
-                      <p className="text-[10px] text-slate-400 mb-2">
-                        {new Date(item.timestamp).toLocaleDateString()} • {item.inputs.slideCount} slides
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleLoadHistory(item)}
-                          className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 font-medium transition-colors"
-                        >
-                          {t('history_load')}
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteHistory(e, item.id)}
-                          className="text-[10px] text-red-400 hover:text-red-600 px-1 py-1 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          {t('history_delete')}
-                        </button>
-                      </div>
-                    </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={useBrandKit} onChange={toggleBrandKit} className="sr-only peer" />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="input-group">
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('style_opt')}</label>
+              <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${styleImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                <span className="text-xl mb-1">🎨</span>
+                <span className="text-[10px] text-slate-500 text-center px-1 truncate w-full">
+                  {styleImage ? (useBrandKit && userProfile?.brandKit?.styleImage === styleImage ? "Brand Style Applied" : t('loaded')) : t('ref_image')}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => { setStyleImage(null); handleImageUpload(e, setStyleImage); setUseBrandKit(false); }}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            <div className="input-group">
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('logo_opt')}</label>
+              <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all w-full ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                <span className="text-xl mb-1">©️</span>
+                <span className="text-[10px] text-slate-500 text-center px-1 truncate w-full">
+                  {logoImage ? (useBrandKit && userProfile?.brandKit?.logo === logoImage ? "Brand Logo Applied" : t('loaded')) : "Logo PNG"}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => { setLogoImage(null); handleImageUpload(e, setLogoImage); setUseBrandKit(false); }}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">{t('add_element_opt')}</label>
+
+            {/* Element List */}
+            {elementImages.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {elementImages.map((img, idx) => (
+                  <div key={idx} className="relative w-16 h-16 rounded-lg border border-slate-200 overflow-hidden group">
+                    <img src={img} alt="Element" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setElementImages(prev => prev.filter((_, i) => i !== idx))}
+                      className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
             )}
+
+            <div className="flex gap-2">
+              <label className={`cursor-pointer flex-shrink-0 w-20 flex flex-col items-center justify-center h-[50px] border-2 border-dashed rounded-lg transition-all border-slate-300 hover:border-indigo-400 hover:bg-slate-50`}>
+                <span className="text-lg">➕</span>
+                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, (base64) => setElementImages(prev => [...prev, base64]))} className="hidden" />
+              </label>
+              <input
+                type="text"
+                value={additionalElementsText}
+                onChange={(e) => setAdditionalElementsText(e.target.value)}
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-slate-900 placeholder:text-slate-400 text-sm"
+                placeholder={t('element_ph')}
+              />
+            </div>
+          </div>
+
+          <Button type="submit" isLoading={isPlanning || isGeneratingImages} className="w-full py-4 text-lg shadow-indigo-200 mt-4">
+            {isPlanning ? t('planning_content') : isGeneratingImages ? t('designing') : (
+              <span className="flex items-center gap-1">
+                {t('generate')} ({totalCost} <CoinIcon className="w-5 h-5 inline-block" />)
+              </span>
+            )}
+          </Button>
+
+          {error && (
+            <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              {error}
+            </div>
+          )}
+        </form>
+      </div>
+
+      {/* History Section */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex justify-between items-center">
+          {t('history_title')}
+          <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{history.length}</span>
+        </h3>
+        {history.length === 0 ? (
+          <div className="text-center text-slate-400 py-6 text-sm">
+            {t('history_empty')}
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+            {history.map(item => (
+              <div key={item.id} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
+                <div className="w-16 h-16 bg-slate-100 rounded-md overflow-hidden flex-shrink-0">
+                  {Array.isArray(item.results) && item.results[0] && (
+                    <img src={item.results[0]} className="w-full h-full object-cover" alt="History" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-800 truncate leading-tight mb-1">
+                    {item.inputs.description || item.inputs.manualContent || "Untitled Project"}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mb-2">
+                    {new Date(item.timestamp).toLocaleDateString()} • {item.inputs.slideCount} slides
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleLoadHistory(item)}
+                      className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 font-medium transition-colors"
+                    >
+                      {t('history_load')}
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteHistory(e, item.id)}
+                      className="text-[10px] text-red-400 hover:text-red-600 px-1 py-1 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      {t('history_delete')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Results */ }
+  <div className="lg:col-span-7 space-y-6" ref={resultsRef}>
+    {/* Plan Visualization (Only if Auto-Planned) */}
+    {generatedPlan && !manualContent && (
+      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 animate-fade-in">
+        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">{t('ai_content_strategy')}</h3>
+        <div className="space-y-4">
+          {generatedPlan.map((slide) => (
+            <div key={slide.slideNumber} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex gap-4 items-start">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                {slide.slideNumber}
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{slide.role}</span>
+                  <h4 className="font-semibold text-slate-900">{slide.title}</h4>
+                </div>
+                <p className="text-sm text-slate-500 mb-2">{slide.subtitle}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Generated Images & Editing */}
+    {generatedImages.length > 0 ? (
+      <div className="animate-fade-in space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold text-slate-800">{t('final_designs')}</h3>
+          <div className="flex gap-2">
+            <span className="text-xs text-slate-500 self-center hidden sm:block">{t('click_to_edit')}</span>
+            {generatedImages.length > 1 && (
+              <button
+                onClick={handleDownloadAll}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+              >
+                {t('download_all')}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Results */}
-        <div className="lg:col-span-7 space-y-6" ref={resultsRef}>
-          {/* Plan Visualization (Only if Auto-Planned) */}
-          {generatedPlan && !manualContent && (
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 animate-fade-in">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">{t('ai_content_strategy')}</h3>
-              <div className="space-y-4">
-                {generatedPlan.map((slide) => (
-                  <div key={slide.slideNumber} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex gap-4 items-start">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                      {slide.slideNumber}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{slide.role}</span>
-                        <h4 className="font-semibold text-slate-900">{slide.title}</h4>
-                      </div>
-                      <p className="text-sm text-slate-500 mb-2">{slide.subtitle}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Generated Images & Editing */}
-          {generatedImages.length > 0 ? (
-            <div className="animate-fade-in space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-slate-800">{t('final_designs')}</h3>
-                <div className="flex gap-2">
-                  <span className="text-xs text-slate-500 self-center hidden sm:block">{t('click_to_edit')}</span>
-                  {generatedImages.length > 1 && (
-                    <button
-                      onClick={handleDownloadAll}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-                    >
-                      {t('download_all')}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Carousel View Container */}
-              <div className={`
+        {/* Carousel View Container */}
+        <div className={`
                 ${generatedImages.length > 1 ? 'flex overflow-x-auto pb-6 snap-x snap-mandatory gap-0.5' : 'grid grid-cols-1 gap-6'}
               `}>
-                {generatedImages.map((img, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedSlideIndex(idx)}
-                    className={`
+          {generatedImages.map((img, idx) => (
+            <div
+              key={idx}
+              onClick={() => setSelectedSlideIndex(idx)}
+              className={`
                       relative group bg-white cursor-pointer transition-all duration-200
                       ${selectedSlideIndex === idx ? 'ring-4 ring-indigo-500 scale-[0.98]' : 'hover:scale-[0.99]'}
                       ${generatedImages.length > 1 ? 'min-w-[280px] sm:min-w-[320px] snap-center first:rounded-l-xl last:rounded-r-xl' : 'rounded-2xl shadow-md overflow-hidden'}
                     `}
-                  >
-                    <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-auto object-cover" />
+            >
+              <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-auto object-cover" />
 
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-3 backdrop-blur-sm pointer-events-none">
-                      <span className="text-white font-medium">{t('click_to_edit')} {idx + 1}</span>
-                    </div>
-                  </div>
-                ))}
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-3 backdrop-blur-sm pointer-events-none">
+                <span className="text-white font-medium">{t('click_to_edit')} {idx + 1}</span>
               </div>
-
-              {/* Live Editing Interface for Carousel */}
-              {selectedSlideIndex !== null && (
-                <div className="bg-white p-5 rounded-2xl border border-indigo-200 shadow-lg animate-fade-in relative ring-4 ring-indigo-50/50">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-bold text-indigo-900">Editing Slide {selectedSlideIndex + 1}</h4>
-                    <button onClick={() => setSelectedSlideIndex(null)} className="text-slate-400 hover:text-slate-600 text-sm">{t('cancel')}</button>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={editInstruction}
-                      onChange={(e) => setEditInstruction(e.target.value)}
-                      placeholder={t('edit_placeholder')}
-                      className="flex-1 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
-                      onKeyDown={(e) => e.key === 'Enter' && handleEditSlide()}
-                    />
-                    <Button onClick={handleEditSlide} isLoading={isEditing} variant="primary" className="px-6">
-                      <span className="flex items-center gap-1">
-                        {t('update')} ({editCost} <CoinIcon className="w-4 h-4 inline-block" />)
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
-          ) : (
-            !isPlanning && !isGeneratingImages && (
-              <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
-                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-4xl">✨</span>
-                </div>
-                <p className="text-lg font-medium text-slate-500">{t('enter_topic_start')}</p>
-                <p className="text-sm">We'll {manualContent ? "design based on your script" : "plan the content"} automatically.</p>
-              </div>
-            )
-          )}
-
-          {/* Loading States Visuals */}
-          {(isPlanning || isGeneratingImages) && (
-            <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-indigo-100 rounded-3xl bg-indigo-50/20">
-              <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <p className="text-lg font-medium text-indigo-800">
-                {isPlanning ? `🧠 ${t('ai_planning_msg')}` : `🎨 ${t('generating_designs_msg')}`}
-              </p>
-            </div>
-          )}
+          ))}
         </div>
+
+        {/* Live Editing Interface for Carousel */}
+        {selectedSlideIndex !== null && (
+          <div className="bg-white p-5 rounded-2xl border border-indigo-200 shadow-lg animate-fade-in relative ring-4 ring-indigo-50/50">
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="font-bold text-indigo-900">Editing Slide {selectedSlideIndex + 1}</h4>
+              <button onClick={() => setSelectedSlideIndex(null)} className="text-slate-400 hover:text-slate-600 text-sm">{t('cancel')}</button>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={editInstruction}
+                onChange={(e) => setEditInstruction(e.target.value)}
+                placeholder={t('edit_placeholder')}
+                className="flex-1 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                onKeyDown={(e) => e.key === 'Enter' && handleEditSlide()}
+              />
+              <Button onClick={handleEditSlide} isLoading={isEditing} variant="primary" className="px-6">
+                <span className="flex items-center gap-1">
+                  {t('update')} ({editCost} <CoinIcon className="w-4 h-4 inline-block" />)
+                </span>
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    ) : (
+      !isPlanning && !isGeneratingImages && (
+        <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
+          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+            <span className="text-4xl">✨</span>
+          </div>
+          <p className="text-lg font-medium text-slate-500">{t('enter_topic_start')}</p>
+          <p className="text-sm">We'll {manualContent ? "design based on your script" : "plan the content"} automatically.</p>
+        </div>
+      )
+    )}
+
+    {/* Loading States Visuals */}
+    {(isPlanning || isGeneratingImages) && (
+      <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-indigo-100 rounded-3xl bg-indigo-50/20">
+        <svg className="animate-spin h-10 w-10 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p className="text-lg font-medium text-indigo-800">
+          {isPlanning ? `🧠 ${t('ai_planning_msg')}` : `🎨 ${t('generating_designs_msg')}`}
+        </p>
+      </div>
+    )}
+  </div>
+    </div >
+  </div >
   );
 };

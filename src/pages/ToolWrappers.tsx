@@ -7,31 +7,31 @@ import { LandingPageTool } from '../../components/Tools/LandingPageTool';
 import { AdminDashboard } from '../../components/Admin/AdminDashboard';
 
 export const SocialMediaWrapper: React.FC = () => {
-    const { points, deductPoints, isPaidUser } = useOutletContext<DashboardContextType>();
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
     return (
         <>
             {!isPaidUser && <TrialBanner />}
-            <SocialMediaTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} />
+            <SocialMediaTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
         </>
     );
 };
 
 export const AdCreativeWrapper: React.FC = () => {
-    const { points, deductPoints, isPaidUser } = useOutletContext<DashboardContextType>();
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
     return (
         <>
             {!isPaidUser && <TrialBanner />}
-            <AdCreativeTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} />
+            <AdCreativeTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
         </>
     );
 };
 
 export const LandingPageToolWrapper: React.FC = () => {
-    const { points, deductPoints, isPaidUser } = useOutletContext<DashboardContextType>();
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
     return (
         <>
             {!isPaidUser && <TrialBanner />}
-            <LandingPageTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} />
+            <LandingPageTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
         </>
     );
 };

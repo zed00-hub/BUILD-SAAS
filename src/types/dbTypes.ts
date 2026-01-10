@@ -29,6 +29,12 @@ export interface UserData {
 
     createdAt: Timestamp;
     lastLogin?: Timestamp;
+
+    // Brand Kit / Defaults
+    brandKit?: {
+        logo?: string;
+        styleImage?: string;
+    };
 }
 
 export interface WalletTransaction {

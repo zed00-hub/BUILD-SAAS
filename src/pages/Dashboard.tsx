@@ -14,6 +14,8 @@ import { auth } from '../firebase'; // src/pages/.. -> src/firebase
 import { VerifyEmailScreen } from '../../components/VerifyEmailScreen';
 import { WalletService } from '../services/walletService'; // src/pages/.. -> src/services
 import { OrderService } from '../services/orderService';
+import { ProfileSettingsModal } from '../../components/ProfileSettingsModal';
+import { UserData } from '../types/dbTypes';
 
 export interface DashboardContextType {
     user: User | null;
@@ -21,6 +23,7 @@ export interface DashboardContextType {
     deductPoints: (amount: number, description: string, count?: number) => Promise<boolean>;
     isPaidUser: boolean;
     isAdmin: boolean;
+    userProfile: UserData | null;
 }
 
 // Trial Account Warning Banner
@@ -74,6 +77,8 @@ export const Dashboard: React.FC = () => {
     const [loadingAuth, setLoadingAuth] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isPaidUser, setIsPaidUser] = useState(false);
+    const [userProfile, setUserProfile] = useState<UserData | null>(null);
+    const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
 
     const { t, language } = useLanguage();
     const isRtl = language === 'ar';
@@ -142,30 +147,36 @@ export const Dashboard: React.FC = () => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
-                try {
-                    await WalletService.initializeUserWallet(
-                        currentUser.uid,
-                        currentUser.email || '',
-                        currentUser.displayName || undefined,
-                        currentUser.photoURL || undefined
-                    );
-                    const userProfile = await WalletService.getUserProfile(currentUser.uid);
-                    if (userProfile) {
-                        setPoints(userProfile.balance);
-                        setIsAdmin(!!userProfile.isAdmin);
-                        setIsPaidUser(userProfile.accountType === 'paid');
-                    }
-                } catch (error) {
-                    console.error("Error fetching wallet:", error);
-                }
+                await fetchUserProfile(currentUser.uid, currentUser);
             } else {
                 setIsAdmin(false);
                 setIsPaidUser(false);
+                setUserProfile(null);
             }
             setLoadingAuth(false);
         });
         return () => unsubscribe();
     }, []);
+
+    const fetchUserProfile = async (uid: string, authUser: User) => {
+        try {
+            await WalletService.initializeUserWallet(
+                uid,
+                authUser.email || '',
+                authUser.displayName || undefined,
+                authUser.photoURL || undefined
+            );
+            const profile = await WalletService.getUserProfile(uid);
+            if (profile) {
+                setPoints(profile.balance);
+                setIsAdmin(!!profile.isAdmin);
+                setIsPaidUser(profile.accountType === 'paid');
+                setUserProfile(profile);
+            }
+        } catch (error) {
+            console.error("Error fetching wallet:", error);
+        }
+    };
 
     // Subscribe to wallet changes
     useEffect(() => {
@@ -192,7 +203,7 @@ export const Dashboard: React.FC = () => {
         }
 
         // Context provider for nested routes (Tools)
-        return <Outlet context={{ user, points, deductPoints: handleDeduction, isPaidUser, isAdmin } as DashboardContextType} />;
+        return <Outlet context={{ user, points, deductPoints: handleDeduction, isPaidUser, isAdmin, userProfile } as DashboardContextType} />;
     };
 
     return (
@@ -208,6 +219,14 @@ export const Dashboard: React.FC = () => {
             )}
 
             <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+            {userProfile && (
+                <ProfileSettingsModal
+                    isOpen={isProfileSettingsOpen}
+                    onClose={() => setIsProfileSettingsOpen(false)}
+                    user={userProfile}
+                    onUpdate={() => user && fetchUserProfile(user.uid, user)}
+                />
+            )}
 
             {/* Sidebar Overlay */}
             {isSidebarOpen && user && (
@@ -302,6 +321,12 @@ export const Dashboard: React.FC = () => {
                                     <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || t('welcome_back')}</p>
                                     <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
                                 </div>
+                                <button
+                                    onClick={() => setIsProfileSettingsOpen(true)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-left rtl:text-right"
+                                >
+                                    <span>⚙️</span> Settings
+                                </button>
                                 <button
                                     onClick={() => signOut(auth)}
                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left rtl:text-right"
