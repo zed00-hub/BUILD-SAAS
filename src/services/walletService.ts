@@ -20,7 +20,7 @@ const USERS_COLLECTION = 'users';
 const TRANSACTIONS_COLLECTION = 'transactions';
 
 // Limits Configuration
-const LIMITS = {
+export const LIMITS = {
     trial: { maxDaily: 2, cooldownMin: 0 },
     basic: { maxDaily: 20, cooldownMin: 30 },
     pro: { maxDaily: 30, cooldownMin: 15 }, // Distributed usage

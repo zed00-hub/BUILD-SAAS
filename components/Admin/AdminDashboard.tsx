@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AdminService, PLAN_CONFIGS } from '../../src/services/adminService';
+import { LIMITS } from '../../src/services/walletService';
 import { UserData, Order, AccountType, PlanType } from '../../src/types/dbTypes';
 import { Button } from '../Button';
 import { CoinIcon } from '../CoinIcon';
@@ -9,7 +10,7 @@ type AdjustmentType = 'trial' | 'paid';
 export const AdminDashboard: React.FC = () => {
     const [users, setUsers] = useState<UserData[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [activeTab, setActiveTab] = useState<'users' | 'orders'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits'>('users');
     const [isLoading, setIsLoading] = useState(true);
 
     // Action States
@@ -170,6 +171,12 @@ export const AdminDashboard: React.FC = () => {
                 >
                     Order History
                 </button>
+                <button
+                    onClick={() => setActiveTab('limits')}
+                    className={`pb-4 px-2 font-semibold ${activeTab === 'limits' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                    System Limits & Rules
+                </button>
             </div>
 
             {/* Content */}
@@ -242,7 +249,7 @@ export const AdminDashboard: React.FC = () => {
                         </table>
                     </div>
                 </div>
-            ) : (
+            ) : activeTab === 'orders' ? (
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
@@ -287,6 +294,126 @@ export const AdminDashboard: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-8 animate-fade-in">
+
+                    {/* Storage & Retention Rules */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            🗄️ Storage & Retention Policy
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                                <span className="inline-block px-2 py-1 bg-amber-200 text-amber-800 text-xs font-bold rounded mb-2">TRIAL USERS</span>
+                                <h3 className="font-bold text-lg text-slate-800 mb-1">No Storage (Temporary)</h3>
+                                <p className="text-sm text-slate-600">
+                                    Trial users <strong>cannot save their work</strong>. All generated content is lost upon refreshing or leaving the page. They must download their work immediately.
+                                </p>
+                            </div>
+                            <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+                                <span className="inline-block px-2 py-1 bg-emerald-200 text-emerald-800 text-xs font-bold rounded mb-2">PAID SUBSCRIBERS</span>
+                                <h3 className="font-bold text-lg text-slate-800 mb-1">30-Day Retention</h3>
+                                <p className="text-sm text-slate-600">
+                                    All paid users (Basic, Pro, Elite) have their generation history saved for <strong>30 days</strong>. They can reload, edit, and download past projects anytime within this window.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Gen Limits */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            ⚡ Daily Generation Limits
+                        </h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-100 text-slate-500 text-xs uppercase">
+                                        <th className="py-3 px-4">Plan Level</th>
+                                        <th className="py-3 px-4">Daily Limit</th>
+                                        <th className="py-3 px-4">Cooldown</th>
+                                        <th className="py-3 px-4">Reset Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    <tr className="hover:bg-slate-50">
+                                        <td className="py-3 px-4 font-bold text-amber-600">Trial</td>
+                                        <td className="py-3 px-4">{LIMITS.trial.maxDaily} generations</td>
+                                        <td className="py-3 px-4">{LIMITS.trial.cooldownMin > 0 ? `${LIMITS.trial.cooldownMin} mins` : 'None'}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                    </tr>
+                                    <tr className="hover:bg-slate-50">
+                                        <td className="py-3 px-4 font-bold text-slate-700">Basic</td>
+                                        <td className="py-3 px-4">{LIMITS.basic.maxDaily} generations</td>
+                                        <td className="py-3 px-4">{LIMITS.basic.cooldownMin > 0 ? `${LIMITS.basic.cooldownMin} mins` : 'None'}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                    </tr>
+                                    <tr className="hover:bg-slate-50">
+                                        <td className="py-3 px-4 font-bold text-indigo-600">Pro</td>
+                                        <td className="py-3 px-4">{LIMITS.pro.maxDaily} generations</td>
+                                        <td className="py-3 px-4">{LIMITS.pro.cooldownMin > 0 ? `${LIMITS.pro.cooldownMin} mins` : 'None'}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                    </tr>
+                                    <tr className="hover:bg-slate-50">
+                                        <td className="py-3 px-4 font-bold text-emerald-600">Elite / Admin</td>
+                                        <td className="py-3 px-4">{LIMITS.elite.maxDaily} generations</td>
+                                        <td className="py-3 px-4">Unlimited</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Points System Explanation */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            💰 Points System Logic
+                        </h2>
+                        <div className="space-y-4 text-slate-700">
+                            <p>
+                                The points system is designed to govern <strong>"Heavy"</strong> AI operations.
+                                Points are deducted per successful generation request. If a request fails, points are usually not deducted or are refunded.
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                    <h4 className="font-bold text-indigo-700 mb-2">Social Media Post</h4>
+                                    <p className="text-2xl font-black text-slate-900">30 <span className="text-sm font-normal text-slate-500">pts / slide</span></p>
+                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
+                                        <li>High-res Image Generation</li>
+                                        <li>Content Planning & Strategy</li>
+                                        <li>Smart Editing Available</li>
+                                    </ul>
+                                </div>
+
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                    <h4 className="font-bold text-indigo-700 mb-2">Ad Creative</h4>
+                                    <p className="text-2xl font-black text-slate-900">20 <span className="text-sm font-normal text-slate-500">pts / variant</span></p>
+                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
+                                        <li>Commercial License</li>
+                                        <li>Product Integration</li>
+                                        <li>Text Overlay & Layout</li>
+                                    </ul>
+                                </div>
+
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                    <h4 className="font-bold text-indigo-700 mb-2">Landing Page</h4>
+                                    <p className="text-2xl font-black text-slate-900">50 <span className="text-sm font-normal text-slate-500">pts / section</span></p>
+                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
+                                        <li>Full Copywriting</li>
+                                        <li>Layout Code (HTML/Tailwind)</li>
+                                        <li>Image Assets Selection</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100">
+                                <span className="font-bold">Note:</span> Trial users start with 0 points and rely on the free daily counts. Paid users perform actions using points relative to their monthly allowance.
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
