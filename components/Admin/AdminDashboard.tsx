@@ -191,7 +191,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setActiveTab('pricing')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
-                    💰 Pricing Design
+                    🎨 Pricing Design
                 </button>
             </div>
 
