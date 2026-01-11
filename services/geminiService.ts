@@ -163,7 +163,12 @@ export const editGeneratedImage = async (originalImageBase64: string, instructio
   // Clean base64 if it has header
   const cleanBase64 = originalImageBase64.includes(',') ? originalImageBase64.split(',')[1] : originalImageBase64;
 
-  const prompt = `Edit this image. Instruction: ${instruction}. Maintain high quality and consistency.`;
+  const prompt = `Edit this image. Instruction: ${instruction}. 
+  CRITICAL REQUIREMENTS:
+  - Maintain ULTRA-HIGH resolution and professional photorealistic quality.
+  - Ensure editing logic is precise and blends seamlessly with the original image.
+  - Preserve the original lighting, shadows, and texture where appropriate.
+  - Output should be crisp, sharp, and artifact-free.`;
 
   try {
     const response = await callGeminiFunction({
@@ -179,7 +184,7 @@ export const editGeneratedImage = async (originalImageBase64: string, instructio
       ],
       config: {
         imageConfig: {
-          imageSize: "1K" // Maintain resolution for speed in edits
+          imageSize: "2K" // Upgrade to higher resolution
         }
       }
     });
