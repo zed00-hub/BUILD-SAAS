@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CoinIcon } from './CoinIcon';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
-import { PricingService, DEFAULT_PRICING_CONFIG, PricingConfig } from '../services/pricingService';
+import { PricingService, DEFAULT_PRICING_CONFIG, PricingConfig } from '../src/services/pricingService';
 
 interface PricingModalProps {
   isOpen: boolean;
