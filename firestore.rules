@@ -43,5 +43,17 @@ service cloud.firestore {
       // Allow users to update their own orders (e.g. marking as completed)
       allow update: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
     }
+
+    // Saved Designs Collection (Cloud Storage metadata)
+    match /saved_designs/{designId} {
+      // Users can read their own designs, admins can read all
+      allow read: if resource.data.userId == request.auth.uid || isAdmin();
+      // Users can create designs only for themselves
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Users can delete their own designs
+      allow delete: if resource.data.userId == request.auth.uid || isAdmin();
+      // No updates allowed (designs are immutable)
+      allow update: if false;
+    }
   }
 }

@@ -1,0 +1,45 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the path
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Check file size (max 5MB per file)
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // Check if file is an image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    // Designs folder - Users can only access their own designs
+    match /designs/{userId}/{allPaths=**} {
+      // Allow read if owner
+      allow read: if isOwner(userId);
+      
+      // Allow write if owner, valid size, and is image
+      allow write: if isOwner(userId) 
+                   && isValidSize() 
+                   && isImage();
+      
+      // Allow delete if owner
+      allow delete: if isOwner(userId);
+    }
+    
+    // Public assets (if needed in future)
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // Admin only via console
+    }
+  }
+}
