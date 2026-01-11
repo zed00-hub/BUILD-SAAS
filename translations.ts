@@ -39,6 +39,7 @@ export const translations = {
     tool_social: "Social Media",
     tool_ad: "Ad Creative",
     tool_landing: "Landing Page",
+    tool_quick_edit: "Quick Edit",
     credits: "Credits",
     powered_by: "Powered by Creakits AI Engine",
 
@@ -151,6 +152,25 @@ export const translations = {
     generate_creatives: "Generate Creatives",
     ad_results_empty: "Ad results will appear here",
     ad_results_sub: "Generate up to 4 variations at once",
+    style_image_opt: "Style Reference",
+    upload_style: "Upload Style Image",
+    style_ready: "Style Ready",
+    custom_prompt_label: "Custom Instructions",
+    custom_prompt_ph: "Add specific design instructions (e.g., use blue color scheme, minimalist style...)",
+    optional: "Optional",
+    remove: "Remove",
+
+    // Quick Edit Tool
+    quick_edit_title: "Quick Edit",
+    quick_edit_desc: "Edit your images professionally - add, remove, or modify elements.",
+    upload_image_edit: "Upload Image to Edit",
+    edit_instruction_label: "What do you want to change?",
+    edit_instruction_ph: "E.g., Remove background, Add a shadow, Change the color to blue...",
+    apply_edit: "Apply Edit",
+    original_image: "Original",
+    edited_image: "Edited",
+    quick_edit_empty: "Upload an image and describe your edits",
+    quick_edit_sub: "Professional image editing powered by AI",
 
     // Landing Page Tool
     landing_title: "Landing Page Designer",
@@ -216,6 +236,7 @@ export const translations = {
     tool_social: "Réseaux Sociaux",
     tool_ad: "Publicité Créative",
     tool_landing: "Page de Vente",
+    tool_quick_edit: "Édition Rapide",
     credits: "Crédits",
     powered_by: "Propulsé par le moteur Creakits AI",
 
@@ -328,6 +349,25 @@ export const translations = {
     generate_creatives: "Générer Créations",
     ad_results_empty: "Les résultats apparaîtront ici",
     ad_results_sub: "Générez jusqu'à 4 variations à la fois",
+    style_image_opt: "Référence de Style",
+    upload_style: "Uploader Image de Style",
+    style_ready: "Style Prêt",
+    custom_prompt_label: "Instructions Personnalisées",
+    custom_prompt_ph: "Ajoutez des instructions (ex: utiliser un thème bleu, style minimaliste...)",
+    optional: "Optionnel",
+    remove: "Supprimer",
+
+    // Quick Edit Tool
+    quick_edit_title: "Édition Rapide",
+    quick_edit_desc: "Modifiez vos images professionnellement - ajouter, supprimer ou modifier des éléments.",
+    upload_image_edit: "Uploader Image à Éditer",
+    edit_instruction_label: "Que voulez-vous changer ?",
+    edit_instruction_ph: "Ex: Supprimer l'arrière-plan, Ajouter une ombre, Changer la couleur en bleu...",
+    apply_edit: "Appliquer",
+    original_image: "Original",
+    edited_image: "Édité",
+    quick_edit_empty: "Uploadez une image et décrivez vos modifications",
+    quick_edit_sub: "Édition d'image professionnelle par IA",
 
     // Landing Page Tool
     landing_title: "Designer Page de Vente",
@@ -393,6 +433,7 @@ export const translations = {
     tool_social: "وسائل التواصل",
     tool_ad: "إعلانات إبداعية",
     tool_landing: "صفحات الهبوط",
+    tool_quick_edit: "تعديل سريع",
     credits: "رصيد",
     powered_by: "مدعوم بمحرك Creakits AI",
 
@@ -505,6 +546,25 @@ export const translations = {
     generate_creatives: "توليد الإعلانات",
     ad_results_empty: "ستظهر النتائج هنا",
     ad_results_sub: "قم بتوليد حتى 4 تنويعات في المرة الواحدة",
+    style_image_opt: "مرجع الستايل",
+    upload_style: "رفع صورة الستايل",
+    style_ready: "الستايل جاهز",
+    custom_prompt_label: "تعليمات مخصصة",
+    custom_prompt_ph: "أضف تعليمات محددة (مثال: استخدم الألوان الزرقاء، ستايل مينيماليست...)",
+    optional: "اختياري",
+    remove: "إزالة",
+
+    // Quick Edit Tool
+    quick_edit_title: "تعديل سريع",
+    quick_edit_desc: "عدّل صورك باحترافية - أضف، احذف، أو غيّر العناصر.",
+    upload_image_edit: "ارفع صورة للتعديل",
+    edit_instruction_label: "ماذا تريد تغييره؟",
+    edit_instruction_ph: "مثال: احذف الخلفية، أضف ظل، غيّر اللون إلى أزرق...",
+    apply_edit: "تطبيق التعديل",
+    original_image: "الأصلية",
+    edited_image: "المعدّلة",
+    quick_edit_empty: "ارفع صورة وصف التعديلات المطلوبة",
+    quick_edit_sub: "تعديل صور احترافي بالذكاء الاصطناعي",
 
     // Landing Page Tool
     landing_title: "مصمم صفحات الهبوط",

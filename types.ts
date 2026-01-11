@@ -21,7 +21,7 @@ export enum Country {
   Germany = 'Germany'
 }
 
-export type ToolType = 'home' | 'social-media' | 'ad-creative' | 'landing-page' | 'admin';
+export type ToolType = 'home' | 'social-media' | 'ad-creative' | 'landing-page' | 'quick-edit' | 'admin';
 
 export interface SocialMediaParams {
   description: string;
@@ -63,7 +63,7 @@ export interface SlidePlan {
 
 // --- History Types ---
 
-export type HistoryToolType = 'social' | 'ad' | 'landing';
+export type HistoryToolType = 'social' | 'ad' | 'landing' | 'quick-edit';
 
 export interface HistoryItem {
   id: string;

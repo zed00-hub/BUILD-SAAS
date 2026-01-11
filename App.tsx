@@ -9,6 +9,7 @@ import {
   SocialMediaWrapper,
   AdCreativeWrapper,
   LandingPageToolWrapper,
+  QuickEditWrapper,
   AdminWrapper
 } from './src/pages/ToolWrappers';
 
@@ -26,6 +27,7 @@ const App: React.FC = () => {
             <Route path="social-media" element={<SocialMediaWrapper />} />
             <Route path="ad-creative" element={<AdCreativeWrapper />} />
             <Route path="landing-page" element={<LandingPageToolWrapper />} />
+            <Route path="quick-edit" element={<QuickEditWrapper />} />
             <Route path="admin" element={<AdminWrapper />} />
           </Route>
 

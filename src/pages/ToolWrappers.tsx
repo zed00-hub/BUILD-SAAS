@@ -4,6 +4,7 @@ import { DashboardContextType, TrialBanner } from './Dashboard';
 import { SocialMediaTool } from '../../components/Tools/SocialMediaTool';
 import { AdCreativeTool } from '../../components/Tools/AdCreativeTool';
 import { LandingPageTool } from '../../components/Tools/LandingPageTool';
+import { QuickEditTool } from '../../components/Tools/QuickEditTool';
 import { AdminDashboard } from '../../components/Admin/AdminDashboard';
 
 export const SocialMediaWrapper: React.FC = () => {
@@ -32,6 +33,16 @@ export const LandingPageToolWrapper: React.FC = () => {
         <>
             {!isPaidUser && <TrialBanner />}
             <LandingPageTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
+        </>
+    );
+};
+
+export const QuickEditWrapper: React.FC = () => {
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+    return (
+        <>
+            {!isPaidUser && <TrialBanner />}
+            <QuickEditTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
         </>
     );
 };

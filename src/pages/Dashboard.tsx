@@ -277,6 +277,12 @@ export const Dashboard: React.FC = () => {
                                 icon="🌐"
                                 label={t('tool_landing')}
                             />
+                            <SidebarItem
+                                active={isActive('quick-edit')}
+                                onClick={() => { navigate('quick-edit'); setIsSidebarOpen(false); }}
+                                icon="✨"
+                                label={t('tool_quick_edit')}
+                            />
 
                             {isAdmin && (
                                 <>

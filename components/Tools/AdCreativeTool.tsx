@@ -28,8 +28,10 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
 
   const [productImage, setProductImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [styleImage, setStyleImage] = useState<string | null>(null); // New: Style reference image
   const [useBrandKit, setUseBrandKit] = useState(false); // Default OFF for Ads
   const [imageCount, setImageCount] = useState<number>(1);
+  const [customPrompt, setCustomPrompt] = useState(''); // New: Custom instructions
 
   const [resultImages, setResultImages] = useState<string[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -125,8 +127,15 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
       
           CONTEXT:
           - Product: See attached image.
-          - Target Market: ${formData.country}
-          - Language: ${formData.language}
+          - Target Market Language: ${formData.language}
+          - Target Market Region: ${formData.country}
+          
+          CRITICAL DESIGN RULES:
+          - DO NOT include any local cultural patterns, tiles, traditional motifs, or geographically-specific decorative elements.
+          - The design should be UNIVERSAL and MODERN, suitable for global audiences but with text in the target language.
+          - Use clean, professional, contemporary design styles (minimalist, gradient backgrounds, abstract shapes, soft shadows).
+          - Focus on the PRODUCT as the hero of the design.
+          - Background should be clean: solid colors, subtle gradients, abstract geometric shapes, or soft bokeh effects.
           
           TEXT ELEMENTS TO INCLUDE (Make them legible, aesthetic and readable):
           ${formData.headline ? `- Headline: "${formData.headline}"` : ''}
@@ -137,14 +146,19 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
           ADDITIONAL VISUALS:
           ${formData.additionalElements ? `- Elements: ${formData.additionalElements}` : ''}
           
+          ${styleImage ? 'STYLE REFERENCE: Use the attached style reference image as inspiration for colors, layout, and overall aesthetic.' : ''}
+          
+          ${customPrompt ? `CUSTOM INSTRUCTIONS: ${customPrompt}` : ''}
+          
           DESIGN STYLE:
-          Commercial, trustworthy, high contrast, branded. Place the product centrally or naturally in a scene appropriate for the country/culture. 
-          Make this design unique from other variations.`;
+          Modern, commercial, trustworthy, high contrast, branded. Place the product centrally or naturally in a clean, professional scene.
+          Avoid cultural stereotypes or traditional patterns. Make this design unique from other variations.`;
 
         return generateImage({
           prompt,
           referenceImage: productImage,
           logoImage: logoImage || undefined,
+          elementImages: styleImage ? [styleImage] : undefined,
           aspectRatio: "1:1"
         });
       });
@@ -307,6 +321,50 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
                 <div className="input-group">
                   <input name="additionalElements" value={formData.additionalElements} onChange={handleChange} placeholder={t('extra_elements_ph')} className="w-full px-4 py-2 border rounded-lg bg-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
+              </div>
+
+              {/* Style Reference Image - Optional */}
+              <div className="input-group pt-3 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 flex items-center gap-2">
+                  {t('style_image_opt')}
+                  <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-medium">{t('optional')}</span>
+                </label>
+                <label className={`cursor-pointer flex flex-col items-center justify-center h-20 border-2 border-dashed rounded-xl transition-all ${styleImage ? 'border-purple-500 bg-purple-50' : 'border-slate-300 hover:border-purple-400 hover:bg-slate-50'}`}>
+                  <span className="text-xl mb-1">{styleImage ? '🎨' : '🖼️'}</span>
+                  <span className="text-xs text-slate-500 text-center font-medium px-1">
+                    {styleImage ? t('style_ready') : t('upload_style')}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, setStyleImage)}
+                    className="hidden"
+                  />
+                </label>
+                {styleImage && (
+                  <button
+                    type="button"
+                    onClick={() => setStyleImage(null)}
+                    className="text-xs text-red-500 hover:text-red-700 mt-1"
+                  >
+                    {t('remove')}
+                  </button>
+                )}
+              </div>
+
+              {/* Custom Prompt - Optional */}
+              <div className="input-group">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 flex items-center gap-2">
+                  {t('custom_prompt_label')}
+                  <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-medium">{t('optional')}</span>
+                </label>
+                <textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder={t('custom_prompt_ph')}
+                  rows={2}
+                  className="w-full px-4 py-2 border rounded-lg bg-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-sm"
+                />
               </div>
 
               <Button type="submit" isLoading={isLoading} className="w-full py-3 text-lg font-semibold shadow-xl shadow-indigo-100">
