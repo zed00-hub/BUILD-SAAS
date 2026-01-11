@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { AdminService, PLAN_CONFIGS } from '../../src/services/adminService';
 import { LIMITS } from '../../src/services/walletService';
+import { PricingService, PricingConfig, PricingPlan, DEFAULT_PRICING_CONFIG } from '../../src/services/pricingService';
 import { UserData, Order, AccountType, PlanType } from '../../src/types/dbTypes';
 import { Button } from '../Button';
 import { CoinIcon } from '../CoinIcon';
+import { PricingManager } from './PricingManager';
 
 type AdjustmentType = 'trial' | 'paid';
 
 export const AdminDashboard: React.FC = () => {
     const [users, setUsers] = useState<UserData[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits' | 'pricing'>('users');
     const [isLoading, setIsLoading] = useState(true);
 
     // Action States
@@ -20,6 +22,12 @@ export const AdminDashboard: React.FC = () => {
     const [adjustReason, setAdjustReason] = useState<string>('');
     const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro' | 'elite'>('basic');
 
+    // Pricing Management States
+    const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
+    const [editingPlan, setEditingPlan] = useState<PricingPlan | null>(null);
+    const [isAddingPlan, setIsAddingPlan] = useState(false);
+    const [pricingSaving, setPricingSaving] = useState(false);
+
     useEffect(() => {
         loadData();
     }, []);
@@ -27,12 +35,14 @@ export const AdminDashboard: React.FC = () => {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const [usersData, ordersData] = await Promise.all([
+            const [usersData, ordersData, pricingData] = await Promise.all([
                 AdminService.getAllUsers(),
-                AdminService.getAllOrders()
+                AdminService.getAllOrders(),
+                PricingService.getPricingConfig()
             ]);
             setUsers(usersData);
             setOrders(ordersData);
+            setPricingConfig(pricingData);
         } catch (e) {
             console.error("Failed to load admin data", e);
         } finally {
@@ -158,24 +168,30 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 border-b border-slate-200 mb-6">
+            <div className="flex gap-4 border-b border-slate-200 mb-6 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('users')}
-                    className={`pb-4 px-2 font-semibold ${activeTab === 'users' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'users' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                     User Management
                 </button>
                 <button
                     onClick={() => setActiveTab('orders')}
-                    className={`pb-4 px-2 font-semibold ${activeTab === 'orders' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'orders' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                     Order History
                 </button>
                 <button
                     onClick={() => setActiveTab('limits')}
-                    className={`pb-4 px-2 font-semibold ${activeTab === 'limits' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'limits' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                     System Limits & Rules
+                </button>
+                <button
+                    onClick={() => setActiveTab('pricing')}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                    💰 Pricing Design
                 </button>
             </div>
 
@@ -296,6 +312,8 @@ export const AdminDashboard: React.FC = () => {
                         </table>
                     </div>
                 </div>
+            ) : activeTab === 'pricing' ? (
+                <PricingManager config={pricingConfig} onUpdate={loadData} />
             ) : (
                 <div className="space-y-8 animate-fade-in">
 
@@ -416,136 +434,138 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Modal for Balance/Plan Adjustment */}
-            {selectedUser && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl animate-fade-in">
-                        <h3 className="text-xl font-bold mb-2">
-                            Manage: <span className="text-indigo-600">{selectedUser.displayName || selectedUser.email}</span>
-                        </h3>
-                        <div className="flex gap-2 mb-6">
-                            <span className="text-sm text-slate-500">Current Balance: <strong>{selectedUser.balance}</strong></span>
-                            <span className="mx-2 text-slate-300">|</span>
-                            {getAccountBadge(selectedUser)}
-                        </div>
+            {
+                selectedUser && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl animate-fade-in">
+                            <h3 className="text-xl font-bold mb-2">
+                                Manage: <span className="text-indigo-600">{selectedUser.displayName || selectedUser.email}</span>
+                            </h3>
+                            <div className="flex gap-2 mb-6">
+                                <span className="text-sm text-slate-500">Current Balance: <strong>{selectedUser.balance}</strong></span>
+                                <span className="mx-2 text-slate-300">|</span>
+                                {getAccountBadge(selectedUser)}
+                            </div>
 
-                        {/* Type Selection */}
-                        <div className="flex gap-2 mb-6">
-                            <button
-                                type="button"
-                                onClick={() => setAdjustmentType('trial')}
-                                className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${adjustmentType === 'trial'
-                                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                                    }`}
-                            >
-                                🆓 Trial Points
-                                <p className="text-xs font-normal mt-1">Add/remove points for testing</p>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setAdjustmentType('paid')}
-                                className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${adjustmentType === 'paid'
-                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                                    }`}
-                            >
-                                💎 Paid Plan
-                                <p className="text-xs font-normal mt-1">Upgrade to paid subscription</p>
-                            </button>
-                        </div>
+                            {/* Type Selection */}
+                            <div className="flex gap-2 mb-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setAdjustmentType('trial')}
+                                    className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${adjustmentType === 'trial'
+                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                        }`}
+                                >
+                                    🆓 Trial Points
+                                    <p className="text-xs font-normal mt-1">Add/remove points for testing</p>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setAdjustmentType('paid')}
+                                    className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${adjustmentType === 'paid'
+                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                        }`}
+                                >
+                                    💎 Paid Plan
+                                    <p className="text-xs font-normal mt-1">Upgrade to paid subscription</p>
+                                </button>
+                            </div>
 
-                        <form onSubmit={handleBalanceAdjustment}>
-                            {adjustmentType === 'trial' ? (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-1">Amount to Add/Remove</label>
-                                        <input
-                                            type="number"
-                                            value={amountToAdjust}
-                                            onChange={e => setAmountToAdjust(e.target.value)}
-                                            placeholder="e.g. 100 or -50"
-                                            className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
-                                            autoFocus
-                                            required
-                                        />
-                                        <p className="text-xs text-slate-400 mt-1">Use negative values to deduct points. This does NOT change account type.</p>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-1">Reason</label>
-                                        <input
-                                            type="text"
-                                            value={adjustReason}
-                                            onChange={e => setAdjustReason(e.target.value)}
-                                            placeholder="e.g. Testing bonus"
-                                            className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
-                                            required
-                                        />
-                                    </div>
+                            <form onSubmit={handleBalanceAdjustment}>
+                                {adjustmentType === 'trial' ? (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">Amount to Add/Remove</label>
+                                            <input
+                                                type="number"
+                                                value={amountToAdjust}
+                                                onChange={e => setAmountToAdjust(e.target.value)}
+                                                placeholder="e.g. 100 or -50"
+                                                className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                                                autoFocus
+                                                required
+                                            />
+                                            <p className="text-xs text-slate-400 mt-1">Use negative values to deduct points. This does NOT change account type.</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">Reason</label>
+                                            <input
+                                                type="text"
+                                                value={adjustReason}
+                                                onChange={e => setAdjustReason(e.target.value)}
+                                                placeholder="e.g. Testing bonus"
+                                                className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                                                required
+                                            />
+                                        </div>
 
-                                    {/* Warning for Trial accounts */}
-                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                                        ⚠️ <strong>Trial Account Note:</strong> Trial users cannot save work history. They must download their work immediately.
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Select Plan</label>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            {(['basic', 'pro', 'elite'] as const).map(plan => (
-                                                <button
-                                                    key={plan}
-                                                    type="button"
-                                                    onClick={() => setSelectedPlan(plan)}
-                                                    className={`p-4 rounded-xl border-2 text-center transition-all ${selectedPlan === plan
-                                                        ? 'border-emerald-500 bg-emerald-50'
-                                                        : 'border-slate-200 hover:border-slate-300'
-                                                        }`}
-                                                >
-                                                    <div className="text-lg font-bold text-slate-900">{PLAN_CONFIGS[plan].name}</div>
-                                                    <div className="text-2xl font-black text-emerald-600 my-1">{PLAN_CONFIGS[plan].points}</div>
-                                                    <div className="text-xs text-slate-500">
-                                                        {PLAN_CONFIGS[plan].price > 0 ? `$${PLAN_CONFIGS[plan].price}` : 'Custom'}
-                                                    </div>
-                                                </button>
-                                            ))}
+                                        {/* Warning for Trial accounts */}
+                                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+                                            ⚠️ <strong>Trial Account Note:</strong> Trial users cannot save work history. They must download their work immediately.
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-1">Note (Optional)</label>
-                                        <input
-                                            type="text"
-                                            value={adjustReason}
-                                            onChange={e => setAdjustReason(e.target.value)}
-                                            placeholder="e.g. Annual subscription"
-                                            className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
-                                        />
-                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-2">Select Plan</label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {(['basic', 'pro', 'elite'] as const).map(plan => (
+                                                    <button
+                                                        key={plan}
+                                                        type="button"
+                                                        onClick={() => setSelectedPlan(plan)}
+                                                        className={`p-4 rounded-xl border-2 text-center transition-all ${selectedPlan === plan
+                                                            ? 'border-emerald-500 bg-emerald-50'
+                                                            : 'border-slate-200 hover:border-slate-300'
+                                                            }`}
+                                                    >
+                                                        <div className="text-lg font-bold text-slate-900">{PLAN_CONFIGS[plan].name}</div>
+                                                        <div className="text-2xl font-black text-emerald-600 my-1">{PLAN_CONFIGS[plan].points}</div>
+                                                        <div className="text-xs text-slate-500">
+                                                            {PLAN_CONFIGS[plan].price > 0 ? `$${PLAN_CONFIGS[plan].price}` : 'Custom'}
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">Note (Optional)</label>
+                                            <input
+                                                type="text"
+                                                value={adjustReason}
+                                                onChange={e => setAdjustReason(e.target.value)}
+                                                placeholder="e.g. Annual subscription"
+                                                className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                                            />
+                                        </div>
 
-                                    {/* Info for Paid accounts */}
-                                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
-                                        ✅ <strong>Paid Account Benefits:</strong> Work history is saved for 30 days. Can download anytime.
+                                        {/* Info for Paid accounts */}
+                                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
+                                            ✅ <strong>Paid Account Benefits:</strong> Work history is saved for 30 days. Can download anytime.
+                                        </div>
                                     </div>
+                                )}
+
+                                <div className="flex gap-3 mt-8">
+                                    <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        className={`flex-1 ${adjustmentType === 'paid' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
+                                    >
+                                        {adjustmentType === 'trial' ? 'Confirm Adjustment' : `Upgrade to ${PLAN_CONFIGS[selectedPlan].name}`}
+                                    </Button>
                                 </div>
-                            )}
-
-                            <div className="flex gap-3 mt-8">
-                                <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-                                <Button
-                                    type="submit"
-                                    variant="primary"
-                                    className={`flex-1 ${adjustmentType === 'paid' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
-                                >
-                                    {adjustmentType === 'trial' ? 'Confirm Adjustment' : `Upgrade to ${PLAN_CONFIGS[selectedPlan].name}`}
-                                </Button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
         </div>
     );
 };

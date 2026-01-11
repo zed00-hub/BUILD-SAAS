@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CoinIcon } from './CoinIcon';
 import { Button } from './Button';
 import { useLanguage } from '../contexts/LanguageContext';
+import { PricingService, DEFAULT_PRICING_CONFIG, PricingConfig } from '../services/pricingService';
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -14,57 +15,19 @@ type BillingCycle = 'monthly' | 'yearly';
 export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
   const [currency, setCurrency] = useState<Currency>('DZD');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [config, setConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
   const { t, language } = useLanguage();
   const isRtl = language === 'ar';
+
+  useEffect(() => {
+    const unsubscribe = PricingService.subscribeToPricingConfig(setConfig);
+    return () => unsubscribe();
+  }, []);
 
   if (!isOpen) return null;
 
   const isYearly = billingCycle === 'yearly';
-
-  const plans = [
-    {
-      name: "BASIC",
-      basePoints: 300,
-      basePrice: { DZD: 1500, USD: 7.99 },
-      description: t('plan_basic_desc'),
-      features: [
-        { count: "10", label: t('feat_social') },
-        { count: "10", label: t('feat_landing') },
-        { count: "15", label: t('feat_ads') },
-      ],
-      isPopular: false,
-      gradient: "from-slate-200 to-slate-300",
-      buttonVariant: "outline" as const
-    },
-    {
-      name: "PRO",
-      basePoints: 1290,
-      basePrice: { DZD: 5990, USD: 30.99 },
-      description: t('plan_pro_desc'),
-      features: [
-        { count: "43", label: t('feat_social') },
-        { count: "43", label: t('feat_landing') },
-        { count: "64", label: t('feat_ads') },
-      ],
-      isPopular: true,
-      gradient: "from-indigo-500 to-purple-600",
-      buttonVariant: "primary" as const
-    },
-    {
-      name: "ELITE",
-      basePoints: "Custom",
-      basePrice: { DZD: null, USD: null }, // Custom pricing
-      description: t('plan_elite_desc'),
-      features: [
-        { count: "∞", label: t('feat_custom') },
-        { count: "✓", label: t('feat_support') },
-        { count: "✓", label: t('feat_api') },
-      ],
-      isPopular: false,
-      gradient: "from-slate-800 to-black",
-      buttonVariant: "secondary" as const
-    }
-  ];
+  const plans = config.plans;
 
   const formatPrice = (amount: number | null, curr: Currency) => {
     if (amount === null) return t('contact_sales');
@@ -140,10 +103,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan, idx) => (
               <div
-                key={idx}
+                key={plan.id || idx}
                 className={`relative rounded-3xl p-6 border transition-all duration-300 flex flex-col
                   ${plan.isPopular ? 'border-indigo-500 shadow-xl scale-105 z-10 bg-white ring-4 ring-indigo-50' : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'}
-                  ${plan.name === 'ELITE' ? 'bg-slate-900 text-white border-slate-800' : ''}
+                  ${plan.isCustomPricing ? 'bg-slate-900 text-white border-slate-800' : ''}
+                  ${!plan.isActive ? 'hidden' : ''}
                 `}
               >
                 {plan.isPopular && (
@@ -153,15 +117,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                 )}
 
                 <div className="mb-6 text-center">
-                  <h3 className={`text-lg font-bold mb-2 ${plan.name === 'ELITE' ? 'text-slate-300' : 'text-slate-500'}`}>{plan.name}</h3>
+                  <h3 className={`text-lg font-bold mb-2 ${plan.isCustomPricing ? 'text-slate-300' : 'text-slate-500'}`}>{plan.name}</h3>
                   <div className="flex items-center justify-center gap-2 mb-2">
                     {typeof plan.basePoints === 'number' && <CoinIcon className="w-8 h-8" />}
-                    <span className={`text-4xl font-extrabold ${plan.name === 'ELITE' ? 'text-white' : 'text-slate-900'}`}>
+                    <span className={`text-4xl font-extrabold ${plan.isCustomPricing ? 'text-white' : 'text-slate-900'}`}>
                       {typeof plan.basePoints === 'number' ? calculatePoints(plan.basePoints).toLocaleString() : plan.basePoints}
                     </span>
                     {typeof plan.basePoints === 'number' && <span className="text-sm font-medium opacity-60 self-end mb-1">pts</span>}
                   </div>
-                  <p className={`text-sm ${plan.name === 'ELITE' ? 'text-slate-400' : 'text-slate-500'}`}>
+                  <p className={`text-sm ${plan.isCustomPricing ? 'text-slate-400' : 'text-slate-500'}`}>
                     {plan.description}
                     {/* Show yearly bonus text */}
                     {isYearly && typeof plan.basePoints === 'number' && (
@@ -172,16 +136,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-2xl mb-6 ${plan.name === 'ELITE' ? 'bg-white/10' : 'bg-white border border-slate-100'}`}>
+                <div className={`p-4 rounded-2xl mb-6 ${plan.isCustomPricing ? 'bg-white/10' : 'bg-white border border-slate-100'}`}>
                   <div className="text-center mb-4">
                     <span className="text-xs font-bold uppercase tracking-wider opacity-50">{t('you_get')}</span>
                   </div>
                   <div className="space-y-3">
                     {plan.features.map((feature, i) => (
                       <div key={i} className="flex justify-between items-center text-sm">
-                        <span className={plan.name === 'ELITE' ? 'text-slate-300' : 'text-slate-600'}>{feature.label}</span>
-                        <span className={`font-bold ${plan.name === 'ELITE' ? 'text-white' : 'text-slate-900'}`}>
-                          {/* If feature count is a number and we are yearly, maybe multiply? User didn't specify, but usually features are 'per month' limits or 'total' credits. Assumed credits are total, limits are mostly credits based. Keeping feature text static unless it's obviously a number we want to scale. But standard SaaS lists 'limits per month'. Let's keep it simple as user asked for "2 months free" logic primarily on price/payment. */}
+                        <span className={plan.isCustomPricing ? 'text-slate-300' : 'text-slate-600'}>{feature.label}</span>
+                        <span className={`font-bold ${plan.isCustomPricing ? 'text-white' : 'text-slate-900'}`}>
                           {feature.count}
                         </span>
                       </div>
@@ -191,28 +154,28 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
 
                 <div className="mt-auto">
                   <div className="text-center mb-4">
-                    <span className={`text-2xl font-bold ${plan.name === 'ELITE' ? 'text-white' : 'text-slate-900'}`}>
-                      {formatPrice(plan.basePrice[currency], currency)}
+                    <span className={`text-2xl font-bold ${plan.isCustomPricing ? 'text-white' : 'text-slate-900'}`}>
+                      {formatPrice(plan.prices[currency], currency)}
                     </span>
-                    {plan.basePrice[currency] !== null && (
-                      <span className={`text-xs block mt-1 ${plan.name === 'ELITE' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {plan.prices[currency] !== null && (
+                      <span className={`text-xs block mt-1 ${plan.isCustomPricing ? 'text-slate-400' : 'text-slate-500'}`}>
                         {isYearly ? (isRtl ? '/ سنة' : '/ year') : (isRtl ? '/ شهر' : '/ month')}
                       </span>
                     )}
                   </div>
                   <Button
                     variant={plan.buttonVariant}
-                    className={`w-full py-3 rounded-xl ${plan.name === 'ELITE' ? 'bg-white text-slate-900 hover:bg-slate-200' : ''}`}
+                    className={`w-full py-3 rounded-xl ${plan.isCustomPricing ? 'bg-white text-slate-900 hover:bg-slate-200' : ''}`}
                     onClick={() => {
-                      if (plan.name === 'ELITE') {
-                        window.open('mailto:sales@creakits.com', '_blank');
+                      if (plan.isCustomPricing) {
+                        window.open(`mailto:${plan.contactEmail || 'sales@creakits.com'}`, '_blank');
                       } else {
                         // Integration with payment gateway
-                        alert(`Selected ${plan.name} Plan (${billingCycle}) - ${formatPrice(plan.basePrice[currency], currency)}`);
+                        alert(`Selected ${plan.name} Plan (${billingCycle}) - ${formatPrice(plan.prices[currency], currency)}`);
                       }
                     }}
                   >
-                    {plan.name === 'ELITE' ? t('contact_sales') : t('buy_credits')}
+                    {plan.isCustomPricing ? t('contact_sales') : t('buy_credits')}
                   </Button>
                 </div>
               </div>
