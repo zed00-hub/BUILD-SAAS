@@ -170,6 +170,13 @@ export const AdminDashboard: React.FC = () => {
             {/* Tabs */}
             <div className="flex gap-4 border-b border-slate-200 mb-6 overflow-x-auto">
                 <button
+                    id="pricing-tab-button"
+                    onClick={() => setActiveTab('pricing')}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                    💎 Manage Pricing
+                </button>
+                <button
                     onClick={() => setActiveTab('users')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'users' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
@@ -186,13 +193,6 @@ export const AdminDashboard: React.FC = () => {
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'limits' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                     System Limits & Rules
-                </button>
-                <button
-                    id="pricing-tab-button"
-                    onClick={() => setActiveTab('pricing')}
-                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
-                >
-                    💎 Manage Pricing
                 </button>
             </div>
 
