@@ -188,10 +188,11 @@ export const AdminDashboard: React.FC = () => {
                     System Limits & Rules
                 </button>
                 <button
+                    id="pricing-tab-button"
                     onClick={() => setActiveTab('pricing')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
-                    🎨 Pricing Design
+                    💎 Manage Pricing
                 </button>
             </div>
 
