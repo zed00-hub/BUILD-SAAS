@@ -9,6 +9,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
 import { SaveToCloudButton } from '../SaveToCloudButton';
 import { UsageLimitsCard } from '../UsageLimitsCard';
+import { WalletService } from '../../src/services/walletService';
+import { auth } from '../../src/firebase';
 
 interface SocialMediaToolProps {
   points: number;
@@ -254,7 +256,11 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
       }, 100);
 
     } catch (err: any) {
-      setError(err.message || "Failed to generate designs.");
+      console.error("Generation failed, refunding points...", err);
+      if (auth.currentUser) {
+        await WalletService.refundPoints(auth.currentUser.uid, totalCost, "Refund: Social Media Generation Failed", undefined, slideCount);
+      }
+      setError(err.message || "Failed to generate designs. Points have been refunded.");
     } finally {
       setIsPlanning(false);
       setIsGeneratingImages(false);
@@ -279,7 +285,11 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
       setGeneratedImages(updatedImages);
       setEditInstruction('');
     } catch (err: any) {
-      setError("Failed to edit slide: " + err.message);
+      console.error("Edit failed, refunding points...", err);
+      if (auth.currentUser) {
+        await WalletService.refundPoints(auth.currentUser.uid, editCost, "Refund: Slide Edit Failed", undefined, 1);
+      }
+      setError("Failed to edit slide: " + err.message + ". Points refunded.");
     } finally {
       setIsEditing(false);
     }

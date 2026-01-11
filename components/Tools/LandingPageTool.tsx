@@ -9,6 +9,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
 import { SaveToCloudButton } from '../SaveToCloudButton';
 import { UsageLimitsCard } from '../UsageLimitsCard';
+import { WalletService } from '../../src/services/walletService';
+import { auth } from '../../src/firebase';
 
 interface LandingPageToolProps {
   points: number;
@@ -210,7 +212,11 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       }
 
     } catch (err: any) {
-      setError(err.message || "Failed to generate design.");
+      console.error("Landing page generation failed, refunding points...", err);
+      if (auth.currentUser) {
+        await WalletService.refundPoints(auth.currentUser.uid, generationCost, "Refund: Landing Page Failed", undefined, 1);
+      }
+      setError(err.message || "Failed to generate design. Points have been refunded.");
     } finally {
       setIsLoading(false);
     }
@@ -231,7 +237,11 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       setResultImage(newImage);
       setEditInstruction('');
     } catch (err: any) {
-      setError("Failed to update: " + err.message);
+      console.error("Landing page edit failed, refunding points...", err);
+      if (auth.currentUser) {
+        await WalletService.refundPoints(auth.currentUser.uid, editCost, "Refund: Landing Page Edit Failed", undefined, 1);
+      }
+      setError("Failed to update: " + err.message + ". Points refunded.");
     } finally {
       setIsEditing(false);
     }

@@ -220,7 +220,7 @@ export const WalletService = {
     /**
      * استرجاع النقاط (Refund)
      */
-    async refundPoints(uid: string, amount: number, description: string, orderId?: string) {
+    async refundPoints(uid: string, amount: number, description: string, orderId?: string, usageRestoreCount: number = 1) {
         try {
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, USERS_COLLECTION, uid);
@@ -232,11 +232,13 @@ export const WalletService = {
 
                 const newBalance = (userDoc.data().balance || 0) + amount;
 
-                // Note: Refunds do not revert the 'dailyUsageCount' to avoid exploiting limits, 
-                // but if fairness is strictly required, we could decrement it. 
-                // For now, we keep the usage count as is (attempt consumed).
+                const currentDailyCount = userDoc.data().dailyUsageCount || 0;
 
-                transaction.update(userRef, { balance: newBalance });
+                // Refund logic with fairness: Decrement daily usage if it was incremented
+                transaction.update(userRef, {
+                    balance: newBalance,
+                    dailyUsageCount: Math.max(0, currentDailyCount - usageRestoreCount)
+                });
 
                 const newTransactionRef = doc(collection(db, TRANSACTIONS_COLLECTION));
                 transaction.set(newTransactionRef, {

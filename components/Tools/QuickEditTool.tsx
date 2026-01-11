@@ -8,6 +8,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
 import { SaveToCloudButton } from '../SaveToCloudButton';
 import { UsageLimitsCard } from '../UsageLimitsCard';
+import { WalletService } from '../../src/services/walletService';
+import { auth } from '../../src/firebase';
 
 interface QuickEditToolProps {
     points: number;
@@ -95,9 +97,12 @@ export const QuickEditTool: React.FC<QuickEditToolProps> = ({ points, deductPoin
                 });
                 refreshHistory();
             }
-
         } catch (err: any) {
-            setError(err.message || "Failed to edit image.");
+            console.error("Quick edit failed, refunding points...", err);
+            if (auth.currentUser) {
+                await WalletService.refundPoints(auth.currentUser.uid, editCost, "Refund: Quick Edit Failed", undefined, 1);
+            }
+            setError(err.message || "Failed to edit image. Points refunded.");
         } finally {
             setIsLoading(false);
         }

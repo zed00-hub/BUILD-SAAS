@@ -8,6 +8,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
 import { SaveToCloudButton } from '../SaveToCloudButton';
 import { UsageLimitsCard } from '../UsageLimitsCard';
+import { WalletService } from '../../src/services/walletService';
+import { auth } from '../../src/firebase';
 
 interface AdCreativeToolProps {
   points: number;
@@ -182,7 +184,11 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
       }
 
     } catch (err: any) {
-      setError(err.message || "Failed to generate ad creative.");
+      console.error("Ad generation failed, refunding points...", err);
+      if (auth.currentUser) {
+        await WalletService.refundPoints(auth.currentUser.uid, totalCost, "Refund: Ad Generation Failed", undefined, imageCount);
+      }
+      setError(err.message || "Failed to generate ad creative. Points have been refunded.");
     } finally {
       setIsLoading(false);
     }
@@ -207,7 +213,11 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
 
       setEditInstruction('');
     } catch (err: any) {
-      setError("Failed to update design: " + err.message);
+      console.error("Ad edit failed, refunding points...", err);
+      if (auth.currentUser) {
+        await WalletService.refundPoints(auth.currentUser.uid, editCost, "Refund: Ad Edit Failed", undefined, 1);
+      }
+      setError("Failed to update design: " + err.message + ". Points refunded.");
     } finally {
       setIsEditing(false);
     }
