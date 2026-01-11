@@ -7,6 +7,8 @@ import { fileToBase64, generateImage, editGeneratedImage } from '../../services/
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
+import { SaveToCloudButton } from '../SaveToCloudButton';
+import { UsageLimitsCard } from '../UsageLimitsCard';
 
 interface LandingPageToolProps {
   points: number;
@@ -459,6 +461,9 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
               </div>
             )}
           </div>
+
+          {/* Usage Limits Card */}
+          <UsageLimitsCard userProfile={userProfile} compact />
         </div>
 
         {/* Results Panel */}
@@ -498,6 +503,20 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                   </a>
                 </div>
+
+                {isPaidUser && (
+                  <div className="flex justify-center mt-4 pt-4 border-t border-slate-100">
+                    <SaveToCloudButton
+                      images={[resultImage]}
+                      designType="landing"
+                      metadata={{ description: formData.description, country: formData.country }}
+                      onSaved={() => alert(t('design_saved') || 'Design saved!')}
+                      onError={(err) => alert(err)}
+                      className="w-full"
+                      variant="secondary"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (

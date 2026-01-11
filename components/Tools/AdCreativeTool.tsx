@@ -6,6 +6,8 @@ import { fileToBase64, generateImage, editGeneratedImage } from '../../services/
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
+import { SaveToCloudButton } from '../SaveToCloudButton';
+import { UsageLimitsCard } from '../UsageLimitsCard';
 
 interface AdCreativeToolProps {
   points: number;
@@ -422,6 +424,9 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
               </div>
             )}
           </div>
+
+          {/* Usage Limits Card */}
+          <UsageLimitsCard userProfile={userProfile} compact />
         </div>
 
         <div className="lg:col-span-8 flex flex-col gap-6">
@@ -485,6 +490,21 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
                   </div>
                 )}
               </div>
+
+
+              {/* Save to Cloud Section */}
+              {isPaidUser && resultImages.length > 0 && (
+                <div className="flex justify-center pt-4 border-t border-slate-100">
+                  <SaveToCloudButton
+                    images={resultImages}
+                    designType="ad"
+                    metadata={{ headline: formData.headline, imageCount }}
+                    onSaved={() => alert(t('design_saved') || 'Design saved!')}
+                    onError={(err) => alert(err)}
+                    className="w-full sm:w-auto min-w-[200px]"
+                  />
+                </div>
+              )}
             </div>
           ) : (
             <div className="h-full min-h-[500px] flex flex-col items-center justify-center bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-300 text-slate-400">
@@ -495,6 +515,6 @@ export const AdCreativeTool: React.FC<AdCreativeToolProps> = ({ points, deductPo
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };

@@ -6,6 +6,8 @@ import { fileToBase64, editGeneratedImage } from '../../services/geminiService';
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
+import { SaveToCloudButton } from '../SaveToCloudButton';
+import { UsageLimitsCard } from '../UsageLimitsCard';
 
 interface QuickEditToolProps {
     points: number;
@@ -232,6 +234,9 @@ export const QuickEditTool: React.FC<QuickEditToolProps> = ({ points, deductPoin
                                 ))}
                             </div>
                         )}
+
+                        {/* Usage Limits */}
+                        <UsageLimitsCard userProfile={userProfile} compact />
                     </div>
                 </div>
 
@@ -272,6 +277,16 @@ export const QuickEditTool: React.FC<QuickEditToolProps> = ({ points, deductPoin
                                     >
                                         {t('download')}
                                     </a>
+                                    {isPaidUser && (
+                                        <SaveToCloudButton
+                                            images={[editedImage]}
+                                            designType="quick-edit"
+                                            metadata={{ instruction: editInstruction }}
+                                            onSaved={() => alert(t('design_saved') || 'Design saved!')}
+                                            onError={(err) => alert(err)}
+                                            className="flex-1"
+                                        />
+                                    )}
                                     <button
                                         onClick={() => {
                                             setSourceImage(editedImage);

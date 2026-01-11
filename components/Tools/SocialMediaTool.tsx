@@ -7,6 +7,8 @@ import { UserData } from '../../src/types/dbTypes';
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
+import { SaveToCloudButton } from '../SaveToCloudButton';
+import { UsageLimitsCard } from '../UsageLimitsCard';
 
 interface SocialMediaToolProps {
   points: number;
@@ -498,6 +500,9 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
               </div>
             )}
           </div>
+
+          {/* Usage Limits Card */}
+          <UsageLimitsCard userProfile={userProfile} compact />
         </div>
 
         {/* Results */}
@@ -533,12 +538,24 @@ export const SocialMediaTool: React.FC<SocialMediaToolProps> = ({ points, deduct
                 <div className="flex gap-2">
                   <span className="text-xs text-slate-500 self-center hidden sm:block">{t('click_to_edit')}</span>
                   {generatedImages.length > 0 && (
-                    <button
-                      onClick={handleDownloadAll}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-                    >
-                      {generatedImages.length > 1 ? t('download_all') : t('download')}
-                    </button>
+                    <>
+                      {isPaidUser && (
+                        <SaveToCloudButton
+                          images={generatedImages}
+                          designType="social"
+                          metadata={{ description, slideCount }}
+                          onSaved={() => alert(t('design_saved') || 'Design saved!')}
+                          onError={(err) => alert(err)}
+                          variant="secondary"
+                        />
+                      )}
+                      <button
+                        onClick={handleDownloadAll}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+                      >
+                        {generatedImages.length > 1 ? t('download_all') : t('download')}
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
