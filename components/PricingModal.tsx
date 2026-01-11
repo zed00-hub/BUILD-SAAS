@@ -170,8 +170,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                       if (plan.isCustomPricing) {
                         window.open(`mailto:${plan.contactEmail || 'sales@creakits.com'}`, '_blank');
                       } else {
-                        // Integration with payment gateway
-                        alert(`Selected ${plan.name} Plan (${billingCycle}) - ${formatPrice(plan.prices[currency], currency)}`);
+                        if (currency === 'DZD') {
+                          const message = `مرحباً، أريد الاشتراك في باقة ${plan.name} (${isYearly ? 'سنوي' : 'شهري'}). السعر: ${formatPrice(plan.prices[currency], currency)}.`;
+                          window.open(`https://wa.me/2136578491823?text=${encodeURIComponent(message)}`, '_blank');
+                        } else {
+                          // Integration with payment gateway
+                          alert(`Selected ${plan.name} Plan (${billingCycle}) - ${formatPrice(plan.prices[currency], currency)}`);
+                        }
                       }
                     }}
                   >

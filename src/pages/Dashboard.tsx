@@ -358,6 +358,47 @@ export const Dashboard: React.FC = () => {
                     </div>
                 )}
 
+                {/* Activation Gateway - Free Trial */}
+                {user && !isPaidUser && points <= 0 && userProfile?.accountType === 'trial' && (
+                    <div className="mx-4 mt-20 sm:mt-24 mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-xl shadow-emerald-200 animate-fade-in group hover:shadow-2xl transition-all duration-500">
+                        {/* Background Effects */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-white/20 transition-all duration-500"></div>
+                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/10 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
+
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between p-6 md:p-8 gap-6 text-center md:text-left rtl:md:text-right">
+                            <div className="flex-1 space-y-2">
+                                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-white mb-2 shadow-sm border border-white/20">
+                                    <span className="animate-pulse">✨</span> {isRtl ? 'عرض خاص للمستخدمين الجدد' : 'New User Special'}
+                                </div>
+                                <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                                    {isRtl ? 'تفعيل 20 نقطة تجريبية مجاناً' : 'Activate 20 Free Trial Points'}
+                                </h2>
+                                <p className="text-emerald-50 text-sm md:text-base max-w-xl font-medium leading-relaxed opacity-90">
+                                    {isRtl
+                                        ? 'ابدأ تصميماتك الأولى الآن مجاناً! اضغط على الزر لتفعيل رصيدك التجريبي وتجربة جميع أدوات المنصة المتقدمة.'
+                                        : 'Start your first designs for free! Click below to activate your trial balance and experience all advanced platform tools.'}
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    const message = `مرحباً، أنشأت حساباً في المنصة وأريد تفعيل النقاط التجريبية. اسم المستخدم: ${userProfile?.displayName || user.email || ''}`;
+                                    window.open(`https://wa.me/2136578491823?text=${encodeURIComponent(message)}`, '_blank');
+                                }}
+                                className="flex-shrink-0 bg-white text-emerald-700 hover:text-emerald-800 px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-3 group/btn"
+                            >
+                                <span className="text-2xl group-hover/btn:rotate-12 transition-transform duration-300">🎁</span>
+                                <span className="flex flex-col items-start leading-none gap-1">
+                                    <span className="text-sm uppercase tracking-wider opacity-60 font-bold">{isRtl ? 'اضغط هنا' : 'CLICK HERE'}</span>
+                                    <span className="text-lg">{isRtl ? 'تفعيل الآن مجاناً' : 'Activate For Free'}</span>
+                                </span>
+                                <svg className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {renderContent()}
             </main>
         </div>
