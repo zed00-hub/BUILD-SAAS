@@ -194,6 +194,11 @@ export const translations = {
     refine_result: "Refine Result",
     ai_editor: "AI Editor",
     download_4k: "Download 4K",
+    page_type: "Page Length",
+    standard_page: "Standard (30 pts)",
+    long_page: "Long Professional (45 pts)",
+    download_png: "Download PNG",
+    download_webp: "Download WEBP",
 
     // Dropdown Values (Landing)
     pay_cod: "Cash on Delivery",
@@ -447,6 +452,11 @@ export const translations = {
     refine_result: "Affiner Résultat",
     ai_editor: "Éditeur IA",
     download_4k: "Télécharger 4K",
+    page_type: "Longueur de Page",
+    standard_page: "Standard (30 pts)",
+    long_page: "Longue Pro (45 pts)",
+    download_png: "Télécharger PNG",
+    download_webp: "Télécharger WEBP",
 
     // Dropdown Values (Landing)
     pay_cod: "Paiement à la livraison",
@@ -700,6 +710,11 @@ export const translations = {
     refine_result: "تحسين النتيجة",
     ai_editor: "المحرر الذكي",
     download_4k: "تحميل بدقة 4K",
+    page_type: "طول الصفحة",
+    standard_page: "عادية (30 نقطة)",
+    long_page: "طويلة احترافية (45 نقطة)",
+    download_png: "تحميل PNG",
+    download_webp: "تحميل WEBP",
 
     // Dropdown Values (Landing)
     pay_cod: "الدفع عند الاستلام",

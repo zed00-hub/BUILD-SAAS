@@ -23,37 +23,29 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     description: '',
-
-    // Pricing & Offer
     price: '',
     currency: 'DZD',
     discount: '',
     showPrice: true,
-
-    // Logistics
     paymentMethod: 'cod' as 'cod' | 'online' | 'both',
-
-    // Targeting
-    language: Language.Arabic, // Default to Arabic as per screenshot preference
+    language: Language.Arabic,
     country: Country.Algeria,
-
-    // Customization
-    customization: '', // "Custom Features"
+    customization: '',
   });
 
+  const [pageType, setPageType] = useState<'standard' | 'long'>('standard');
   const [productImage, setProductImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [useBrandKit, setUseBrandKit] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
-
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editInstruction, setEditInstruction] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const generationCost = 30;
+  const generationCost = pageType === 'long' ? 45 : 30;
   const editCost = 15;
 
   const currencies = [
@@ -123,6 +115,51 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     setFormData(prev => ({ ...prev, showPrice: !prev.showPrice }));
   };
 
+  const handleDownload = (format: 'png' | 'webp') => {
+    if (!resultImage) return;
+
+    if (format === 'png') {
+      const link = document.createElement('a');
+      link.href = resultImage;
+      link.download = `creakits-landing-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (format === 'webp') {
+      const img = new Image();
+      img.crossOrigin = "anonymous"; // Important for CORS if image is remote
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          try {
+            const webpData = canvas.toDataURL('image/webp', 0.9);
+            const link = document.createElement('a');
+            link.href = webpData;
+            link.download = `creakits-landing-${Date.now()}.webp`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (e) {
+            console.error("Download failed (CORS likely):", e);
+            alert("Could not convert to WEBP due to browser security restrictions. Downloading as PNG instead.");
+            // Fallback
+            const link = document.createElement('a');
+            link.href = resultImage;
+            link.download = `creakits-landing-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
+      };
+      img.src = resultImage;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productImage) {
@@ -130,93 +167,98 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       return;
     }
 
-    // Check Points Async
-    const hasPoints = await deductPoints(generationCost, "Generate Landing Page Design");
-    if (!hasPoints) {
-      return;
-    }
+    const hasPoints = await deductPoints(generationCost, `Generate Landing Page (${pageType})`);
+    if (!hasPoints) return;
 
     setIsLoading(true);
     setError(null);
     setResultImage(null);
 
     try {
-      // Logic for Payment Icons based on selection
       let paymentInstruction = "";
       if (formData.paymentMethod === 'cod') {
-        paymentInstruction = "Include prominent icons/badges for 'Cash on Delivery' (الدفع عند الاستلام) and 'Fast Shipping'.";
+        paymentInstruction = "Include prominent icons/badges for 'Cash on Delivery' (الدفع عند الاستلام).";
       } else if (formData.paymentMethod === 'online') {
         paymentInstruction = "Include secure payment icons (Visa/Mastercard).";
       } else {
         paymentInstruction = "Include trust badges for both Secure Payment and Cash on Delivery.";
       }
 
-      // Logic for Price Display
       let priceInstruction = "";
       if (formData.showPrice && formData.price) {
         if (formData.discount && parseInt(formData.discount) > 0) {
-          priceInstruction = `DISPLAY PRICE: Show the main price "${formData.price} ${formData.currency}" clearly. Also show a "SALE" badge with "-${formData.discount}% OFF".`;
+          priceInstruction = `DISPLAY PRICE: Show "${formData.price} ${formData.currency}" crossed out if applicable or just prominently. Highlight "SALE -${formData.discount}%".`;
         } else {
-          priceInstruction = `DISPLAY PRICE: Show the price "${formData.price} ${formData.currency}" prominently.`;
+          priceInstruction = `DISPLAY PRICE: Show "${formData.price} ${formData.currency}" prominently.`;
         }
       } else {
-        priceInstruction = "DO NOT display specific price numbers. Focus on the 'Order Now' Call to Action.";
+        priceInstruction = "DO NOT display specific price numbers. Focus on value.";
       }
 
-      // Enhanced Prompt
-      const prompt = `Design a HIGH-FIDELITY 4K VERTICAL Mobile Landing Page (E-commerce Style).
+      const structureInstruction = pageType === 'long'
+        ? `
+        DETAILED LONG-FORM STRUCTURE (Scrollable View):
+        1. **Hero Header**: Immersive product shot, bold value proposition headline, "Order Now" button.
+        2. **Social Proof Bar**: "Trusted by 10,000+ customers" or media logos.
+        3. **Problem/Agitation**: Visuals showing the problem the product solves.
+        4. **Solution Showcase**: Large product details, zoomed-in features, bullet points with icons.
+        5. **Benefits Grid**: 2x2 or 3x3 grid of key benefits with modern glassmorphism cards.
+        6. **Testimonials Carousel**: 3 realistic user reviews with stars and avatars.
+        7. **Offer Section**: "Limited Time Offer", count-down timer visual, Price Box (${priceInstruction}).
+        8. **FAQ Accordion**: 3 common questions visualized.
+        9. **Sticky Bottom Bar / Final CTA**: "Order Now" button with Payment Icons (${paymentInstruction}).
+        `
+        : `
+        STANDARD CONCISE STRUCTURE:
+        1. **Hero**: Headline, Product Image, Primary CTA.
+        2. **Key Benefits**: 3 main selling points with icons.
+        3. **Social Proof**: Simple star rating or "Best Seller" badge.
+        4. **Offer/Price**: Clear price display (${priceInstruction}) and Payment Badges (${paymentInstruction}).
+        5. **Footer**: Final CTA button.
+        `;
+
+      const prompt = `Design a ${pageType === 'long' ? 'PREMIUM LONG-FORM' : 'STANDARD'} 4K VERTICAL Mobile Landing Page UI for E-commerce.
       
-      CONTEXT:
-      - Product: See attached image.
+      PRODUCT CONTEXT:
+      - Product: See image.
       - Target Market: ${formData.country}
-      - Language: ${formData.language} (CRITICAL: Ensure all text is grammatically correct. If Arabic, use proper connecting letters).
-      - Payment Method: ${formData.paymentMethod}
+      - Language: ${formData.language} (Ensure correct grammar and RTL layout if Arabic).
+      - Description: ${formData.description}
+      ${formData.customization ? `- Custom Requirements: ${formData.customization}` : ''}
+
+      VISUAL STYLE:
+      - Professional, High-End, Trustworthy. 
+      - Use "Inter" or modern Sans-Serif typography.
+      - Clean whitespace, subtle drop-shadows, rounded corners (Apple/Modern UI style).
+      - Color palette derived from product image but optimized for conversion (contrasting CTAs).
       
-      CONTENT & OFFERS:
-      - Product Description: ${formData.description}
-      - ${priceInstruction}
-      - ${paymentInstruction}
-      ${formData.customization ? `- Special Features to Highlight: ${formData.customization}` : ''}
-
-      VISUAL STRUCTURE (Modern Sales Funnel Layout):
-      1. **Hero Section**: High-impact headline, large product visual, and immediate "Order Now" button.
-      2. **Offer/Price Box**: A distinct visual container showing the Price/Offer details (if enabled) with a shadow effect.
-      3. **Transformation**: A "Before vs After" comparison section to show value.
-      4. **Trust & Logistics**: A bar or grid showing the Payment Method icons and Shipping guarantees.
-      5. **Footer**: Floating action button style "Order Now".
-
-      DESIGN STYLE:
-      - Clean, trustworthy, high-conversion aesthetic.
-      - Use colors that match the product but keep the background clean (white/soft gray/pastel) to ensure readability.
-      - No gibberish text. Use icons where text is too complex.`;
+      ${structureInstruction}
+      `;
 
       const result = await generateImage({
         prompt,
         referenceImage: productImage,
         logoImage: logoImage || undefined,
-        aspectRatio: "9:16",
-        imageSize: "4K" // Upgraded to 4K
+        aspectRatio: pageType === 'long' ? "9:21" : "9:16", // Taller aspect ratio for long pages? Model might not support 9:21, sticking to vertical but instructing content density.
+        imageSize: "4K"
       });
       setResultImage(result);
 
-      // Save History ONLY for Paid Users
       if (isPaidUser) {
         saveHistoryItem({
           tool: 'landing',
           results: result,
-          inputs: {
-            formData
-          }
+          inputs: { formData: { ...formData, pageType } } // Save pageType too
         });
         refreshHistory();
       }
 
     } catch (err: any) {
-      console.error("Landing page generation failed, refunding points...", err);
+      console.error("Generation failed", err);
       if (auth.currentUser) {
         await WalletService.refundPoints(auth.currentUser.uid, generationCost, "Refund: Landing Page Failed", undefined, 1);
       }
-      setError(err.message || "Failed to generate design. Points have been refunded.");
+      setError(err.message || "Failed to generate design.");
     } finally {
       setIsLoading(false);
     }
@@ -224,12 +266,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
   const handleEdit = async () => {
     if (!resultImage || !editInstruction) return;
-
-    // Check points for edit
-    const hasPoints = await deductPoints(editCost, "Edit Landing Page Design");
-    if (!hasPoints) {
-      return;
-    }
+    const hasPoints = await deductPoints(editCost, "Edit Landing Page");
+    if (!hasPoints) return;
 
     setIsEditing(true);
     try {
@@ -237,11 +275,10 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       setResultImage(newImage);
       setEditInstruction('');
     } catch (err: any) {
-      console.error("Landing page edit failed, refunding points...", err);
       if (auth.currentUser) {
-        await WalletService.refundPoints(auth.currentUser.uid, editCost, "Refund: Landing Page Edit Failed", undefined, 1);
+        await WalletService.refundPoints(auth.currentUser.uid, editCost, "Refund: Edit Failed", undefined, 1);
       }
-      setError("Failed to update: " + err.message + ". Points refunded.");
+      setError("Edit failed: " + err.message);
     } finally {
       setIsEditing(false);
     }
@@ -249,9 +286,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
   return (
     <div className="max-w-7xl mx-auto p-4 lg:p-8 animate-fade-in">
-      <div className="mb-8 border-b border-slate-200 pb-6">
-        <h2 className="text-3xl font-bold text-slate-900 mb-2">{t('landing_title')}</h2>
-        <p className="text-slate-600">{t('landing_desc')}</p>
+      <div className="mb-8 border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">{t('landing_title')}</h2>
+          <p className="text-slate-600">{t('landing_desc')}</p>
+        </div>
+        <UsageLimitsCard userProfile={userProfile} compact />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -263,7 +303,28 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">{t('step_indicator')}</span>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+
+              {/* Page Type Selection */}
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-slate-800">{t('page_type')}</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div
+                    onClick={() => setPageType('standard')}
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${pageType === 'standard' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}
+                  >
+                    <div className="font-bold text-slate-900 mb-1">{t('standard_page')}</div>
+                    <div className="text-xs text-slate-500">Concise, Single Screen Focus</div>
+                  </div>
+                  <div
+                    onClick={() => setPageType('long')}
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${pageType === 'long' ? 'border-purple-500 bg-purple-50' : 'border-slate-200 hover:border-slate-300'}`}
+                  >
+                    <div className="font-bold text-slate-900 mb-1">{t('long_page')}</div>
+                    <div className="text-xs text-slate-500">Detailed, High Conversion Funnel</div>
+                  </div>
+                </div>
+              </div>
 
               {/* 1. Visual Asset */}
               <div className="space-y-3">
@@ -298,182 +359,125 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                       {logoImage ? (
                         <>
                           <span className="text-2xl mb-1">©️</span>
-                          <span className="text-xs font-medium text-indigo-600">{useBrandKit ? "Brand Logo" : t('loaded')}</span>
+                          <span className="text-xs text-center text-slate-500 truncate w-full px-2">{t('loaded')}</span>
                         </>
                       ) : (
-                        <>
-                          <span className="text-2xl mb-1">©️</span>
-                          <span className="text-xs font-medium text-slate-500">{t('upload_logo')}</span>
-                        </>
+                        <span className="text-xs text-slate-400">Upload Logo</span>
                       )}
-                      <input type="file" accept="image/*" onChange={(e) => { setLogoImage(null); setUseBrandKit(false); handleImageUpload(e, setLogoImage); }} className="hidden" />
+                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setLogoImage)} className="hidden" />
                     </label>
                   </div>
                 </div>
               </div>
 
-              {/* 2. Market Settings */}
+              {/* 2. Content */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">{t('market')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('language')}</label>
-                    <select name="language" value={formData.language} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium">
-                      {Object.values(Language).map(l => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('region')}</label>
-                    <select name="country" value={formData.country} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium">
-                      {Object.values(Country).map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Pricing Engine */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">Pricing & Offer</h3>
-
-                <div className="grid grid-cols-12 gap-3">
-                  <div className="col-span-4">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('currency')}</label>
-                    <select name="currency" value={formData.currency} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white outline-none text-sm">
-                      {currencies.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
-                    </select>
-                  </div>
-                  <div className="col-span-8">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('payment_method')}</label>
-                    <select name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:bg-white outline-none text-sm">
-                      {paymentMethods.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('price_amount')}</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleChange}
-                      placeholder="e.g. 3500"
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('discount_percent')}</label>
-                    <input
-                      type="number"
-                      name="discount"
-                      min="0"
-                      max="100"
-                      value={formData.discount}
-                      onChange={handleChange}
-                      placeholder="0-100"
-                      className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Show Price Toggle */}
-                <div
-                  onClick={toggleShowPrice}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:border-indigo-200 bg-slate-50 cursor-pointer transition-colors"
-                >
-                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.showPrice ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
-                    {formData.showPrice && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                  </div>
-                  <span className="text-sm font-medium text-slate-700">{t('show_price_toggle')}</span>
-                </div>
-              </div>
-
-              {/* 4. Content Details */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">{t('content_details')}</h3>
-
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('prod_desc_label')}</label>
+                  <label className="block text-sm font-bold text-slate-800 mb-1">{t('prod_desc_label')}</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg h-20 outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 text-sm resize-none"
                     placeholder={t('prod_desc_ph')}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 min-h-[80px]"
+                    required
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('payment_method')}</label>
+                    <select
+                      name="paymentMethod"
+                      value={formData.paymentMethod}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    >
+                      {paymentMethods.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('currency')}</label>
+                    <select
+                      name="currency"
+                      value={formData.currency}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                    >
+                      {currencies.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.showPrice}
+                    onChange={toggleShowPrice}
+                    className="w-4 h-4 text-indigo-600 rounded"
+                  />
+                  <span className="text-sm text-slate-700">{t('show_price_toggle')}</span>
+                </div>
+
+                {formData.showPrice && (
+                  <div className="grid grid-cols-2 gap-4 animate-fade-in">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{t('price_amount')}</label>
+                      <input
+                        type="text"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        placeholder="e.g. 5000"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{t('discount_percent')}</label>
+                      <input
+                        type="text"
+                        name="discount"
+                        value={formData.discount}
+                        onChange={handleChange}
+                        placeholder="e.g. 20"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('custom_features_label')}</label>
+                  <label className="block text-sm font-bold text-slate-800 mb-1">{t('custom_features_label')}</label>
                   <textarea
                     name="customization"
                     value={formData.customization}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg h-16 outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 text-sm resize-none"
                     placeholder={t('custom_features_ph')}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 min-h-[60px] text-sm"
                   />
                 </div>
               </div>
 
-              <Button type="submit" isLoading={isLoading} className="w-full py-4 text-lg font-bold shadow-xl shadow-indigo-100 hover:shadow-indigo-200">
-                <span className="flex items-center gap-1">
-                  {t('generate_design')} ({generationCost} <CoinIcon className="w-5 h-5 inline-block" />)
-                </span>
+              {error && <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</div>}
+
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={isLoading}
+                className="w-full py-4 text-lg font-bold shadow-xl shadow-indigo-200 hover:shadow-indigo-300 transition-all transform hover:-translate-y-1"
+                disabled={!productImage}
+              >
+                <div className="flex flex-col items-center leading-none">
+                  <span className="flex items-center gap-2">
+                    {t('generate_design')}
+                    <span className="bg-white/20 px-2 py-0.5 rounded text-sm flex items-center gap-1">
+                      {generationCost} <CoinIcon className="w-3 h-3 text-white" />
+                    </span>
+                  </span>
+                </div>
               </Button>
-              {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg">{error}</p>}
             </form>
           </div>
-
-          {/* History Section */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex justify-between items-center">
-              {t('history_title')}
-              <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">{history.length}</span>
-            </h3>
-            {history.length === 0 ? (
-              <div className="text-center text-slate-400 py-6 text-sm">
-                {t('history_empty')}
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                {history.map(item => (
-                  <div key={item.id} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
-                    <div className="w-12 h-20 bg-slate-100 rounded-md overflow-hidden flex-shrink-0">
-                      {typeof item.results === 'string' && (
-                        <img src={item.results} className="w-full h-full object-cover" alt="History" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-800 truncate leading-tight mb-1">
-                        {item.inputs.formData.description || "Untitled Landing Page"}
-                      </p>
-                      <p className="text-[10px] text-slate-400 mb-2">
-                        {new Date(item.timestamp).toLocaleDateString()} • {item.inputs.formData.country}
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleLoadHistory(item)}
-                          className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 font-medium transition-colors"
-                        >
-                          {t('history_load')}
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteHistory(e, item.id)}
-                          className="text-[10px] text-red-400 hover:text-red-600 px-1 py-1 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          {t('history_delete')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Usage Limits Card */}
-          <UsageLimitsCard userProfile={userProfile} compact />
         </div>
 
         {/* Results Panel */}
@@ -491,8 +495,10 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                   <span className="text-xs font-normal text-slate-400 px-2 py-0.5 bg-slate-100 rounded-full">{t('ai_editor')}</span>
                 </h3>
 
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex flex-[2] gap-2">
+                <div className="flex flex-col gap-4">
+
+                  {/* Edit Controls */}
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="text"
                       value={editInstruction}
@@ -504,14 +510,24 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                       {t('update')}
                     </Button>
                   </div>
-                  <a
-                    href={resultImage}
-                    download="creakits-landing-page-4k.png"
-                    className="flex-1 text-center py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
-                  >
-                    <span>{t('download_4k')}</span>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                  </a>
+
+                  {/* Download Controls */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => handleDownload('png')}
+                      className="py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      {t('download_png')}
+                    </button>
+                    <button
+                      onClick={() => handleDownload('webp')}
+                      className="py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      {t('download_webp')}
+                    </button>
+                  </div>
                 </div>
 
                 {isPaidUser && (
@@ -531,7 +547,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
             </div>
           ) : (
             <div className="h-full min-h-[600px] flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-              {/* Placeholder Graphics */}
               <div className="absolute inset-0 opacity-40 pointer-events-none">
                 <div className="absolute top-10 right-10 w-32 h-32 bg-indigo-100 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-10 left-10 w-40 h-40 bg-pink-100 rounded-full blur-3xl"></div>
@@ -545,21 +560,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                 <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
                   {t('ready_to_design_desc')}
                 </p>
-
-                <div className="mt-8 grid grid-cols-3 gap-4 text-xs text-slate-400">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="bg-slate-100 p-2 rounded-lg">4K</span>
-                    <span>Resolution</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="bg-slate-100 p-2 rounded-lg">Aa</span>
-                    <span>Typography</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="bg-slate-100 p-2 rounded-lg">🛒</span>
-                    <span>Conversion</span>
-                  </div>
-                </div>
               </div>
             </div>
           )}
