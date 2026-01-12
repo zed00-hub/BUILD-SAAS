@@ -21,6 +21,10 @@ const PrivacyContent = {
                 <h2 className="text-xl font-bold mb-4">3. Data Security</h2>
                 <p>We implement appropriate security measures to protect your personal information.</p>
             </section>
+            <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+                <h2 className="text-xl font-bold mb-2">🔴 Important Disclaimer</h2>
+                <p className="font-bold">We are not responsible before God Almighty for any use of the platform to produce images of living beings, immodest images, or any content that violates Islamic Sharia or public morals. The user bears full responsibility for the content they generate.</p>
+            </section>
         </>
     ),
     ar: (
@@ -61,6 +65,10 @@ const PrivacyContent = {
                 <h2 className="text-xl font-bold mb-4">3. Sécurité des données</h2>
                 <p>Nous mettons en œuvre des mesures de sécurité appropriées pour protéger vos informations personnelles.</p>
             </section>
+            <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+                <h2 className="text-xl font-bold mb-2">🔴 Avis de non-responsabilité important</h2>
+                <p className="font-bold">Nous ne sommes pas responsables devant Dieu Tout-Puissant de toute utilisation de la plateforme pour produire des images d'êtres vivants, des images impudiques ou tout contenu violant la Charia islamique ou les mœurs publiques. L'utilisateur assume l'entière responsabilité du contenu qu'il génère.</p>
+            </section>
         </>
     )
 };
@@ -80,6 +88,10 @@ const TermsContent = {
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">3. AI Generated Content</h2>
                 <p>You represent and warrant that you have all necessary rights to the content you submit for generation. We do not claim ownership of the content you generate.</p>
+            </section>
+            <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+                <h2 className="text-xl font-bold mb-2">🔴 Important Disclaimer</h2>
+                <p className="font-bold">We fully disclaim responsibility before God Almighty and before everyone for any use of these tools to generate images of living beings, immodest images, or any content prohibited by Sharia. The platform's goal is to assist business owners and designers in their lawful (Halal) work, and any misuse lies solely with the user.</p>
             </section>
         </>
     ),
@@ -118,6 +130,10 @@ const TermsContent = {
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">3. Contenu généré par IA</h2>
                 <p>Vous déclarez et garantissez que vous disposez de tous les droits nécessaires sur le contenu que vous soumettez pour génération. Nous ne revendiquons pas la propriété du contenu que vous générez.</p>
+            </section>
+            <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+                <h2 className="text-xl font-bold mb-2">🔴 Décharge de responsabilité</h2>
+                <p className="font-bold">Nous déclinons toute responsabilité devant Dieu Tout-Puissant et devant tous de toute utilisation de ces outils pour générer des images d'êtres vivants, des images impudiques ou tout contenu interdit par la Charia. L'objectif de la plateforme est d'aider les propriétaires d'entreprises et les concepteurs dans leur travail licite (Halal), et toute mauvaise utilisation incombe uniquement à l'utilisateur.</p>
             </section>
         </>
     )
