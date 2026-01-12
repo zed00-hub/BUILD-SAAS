@@ -323,19 +323,33 @@ export const AdminDashboard: React.FC = () => {
                         <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                             🗄️ Storage & Retention Policy
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                                <span className="inline-block px-2 py-1 bg-amber-200 text-amber-800 text-xs font-bold rounded mb-2">TRIAL USERS</span>
-                                <h3 className="font-bold text-lg text-slate-800 mb-1">No Storage (Temporary)</h3>
+                                <span className="inline-block px-2 py-1 bg-amber-200 text-amber-800 text-xs font-bold rounded mb-2">TRIAL</span>
+                                <h3 className="font-bold text-lg text-slate-800 mb-1">50MB Limit</h3>
                                 <p className="text-sm text-slate-600">
-                                    Trial users <strong>cannot save their work</strong>. All generated content is lost upon refreshing or leaving the page. They must download their work immediately.
+                                    Local temporary storage only. <strong>No Cloud Save</strong>. Data is lost on refresh.
+                                </p>
+                            </div>
+                            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <span className="inline-block px-2 py-1 bg-slate-200 text-slate-800 text-xs font-bold rounded mb-2">BASIC</span>
+                                <h3 className="font-bold text-lg text-slate-800 mb-1">1GB Storage</h3>
+                                <p className="text-sm text-slate-600">
+                                    Cloud save enabled. Assets retained for subscription duration.
+                                </p>
+                            </div>
+                            <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+                                <span className="inline-block px-2 py-1 bg-indigo-200 text-indigo-800 text-xs font-bold rounded mb-2">PRO</span>
+                                <h3 className="font-bold text-lg text-slate-800 mb-1">10GB Storage</h3>
+                                <p className="text-sm text-slate-600">
+                                    High-res assets & history preserved. Priority bandwidth.
                                 </p>
                             </div>
                             <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
-                                <span className="inline-block px-2 py-1 bg-emerald-200 text-emerald-800 text-xs font-bold rounded mb-2">PAID SUBSCRIBERS</span>
-                                <h3 className="font-bold text-lg text-slate-800 mb-1">30-Day Retention</h3>
+                                <span className="inline-block px-2 py-1 bg-emerald-200 text-emerald-800 text-xs font-bold rounded mb-2">ELITE</span>
+                                <h3 className="font-bold text-lg text-slate-800 mb-1">50GB Storage</h3>
                                 <p className="text-sm text-slate-600">
-                                    All paid users (Basic, Pro, Elite) have their generation history saved for <strong>30 days</strong>. They can reload, edit, and download past projects anytime within this window.
+                                    Maximum capacity for large agencies. Long-term retention.
                                 </p>
                             </div>
                         </div>
@@ -377,8 +391,8 @@ export const AdminDashboard: React.FC = () => {
                                     </tr>
                                     <tr className="hover:bg-slate-50">
                                         <td className="py-3 px-4 font-bold text-emerald-600">Elite / Admin</td>
-                                        <td className="py-3 px-4">{LIMITS.elite.maxDaily} generations</td>
                                         <td className="py-3 px-4">Unlimited</td>
+                                        <td className="py-3 px-4">None</td>
                                         <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
                                     </tr>
                                 </tbody>
@@ -394,43 +408,53 @@ export const AdminDashboard: React.FC = () => {
                         <div className="space-y-4 text-slate-700">
                             <p>
                                 The points system is designed to govern <strong>"Heavy"</strong> AI operations.
-                                Points are deducted per successful generation request. If a request fails, points are usually not deducted or are refunded.
+                                Points are deducted <strong>before</strong> generation to prevent abuse, but are <strong>automatically refunded</strong> if the generation fails.
                             </p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                                    <h4 className="font-bold text-indigo-700 mb-2">Social Media Post</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
+                                    <h4 className="font-bold text-indigo-700 mb-2">Social Media</h4>
                                     <p className="text-2xl font-black text-slate-900">30 <span className="text-sm font-normal text-slate-500">pts / slide</span></p>
                                     <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>High-res Image Generation</li>
-                                        <li>Content Planning & Strategy</li>
-                                        <li>Smart Editing Available</li>
+                                        <li>High-res Generation</li>
+                                        <li>Smart Editing</li>
                                     </ul>
                                 </div>
 
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
                                     <h4 className="font-bold text-indigo-700 mb-2">Ad Creative</h4>
                                     <p className="text-2xl font-black text-slate-900">20 <span className="text-sm font-normal text-slate-500">pts / variant</span></p>
                                     <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>Commercial License</li>
+                                        <li>Commercial Use</li>
                                         <li>Product Integration</li>
-                                        <li>Text Overlay & Layout</li>
                                     </ul>
                                 </div>
 
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
                                     <h4 className="font-bold text-indigo-700 mb-2">Landing Page</h4>
                                     <p className="text-2xl font-black text-slate-900">50 <span className="text-sm font-normal text-slate-500">pts / section</span></p>
                                     <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>Full Copywriting</li>
-                                        <li>Layout Code (HTML/Tailwind)</li>
-                                        <li>Image Assets Selection</li>
+                                        <li>Copywriting + Code</li>
+                                        <li>Asset Selection</li>
+                                    </ul>
+                                </div>
+
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
+                                    <h4 className="font-bold text-indigo-700 mb-2">Quick Edit</h4>
+                                    <p className="text-2xl font-black text-slate-900">10 <span className="text-sm font-normal text-slate-500">pts / edit</span></p>
+                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
+                                        <li>Magic Fill/Replace</li>
+                                        <li>Background Removal</li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100">
-                                <span className="font-bold">Note:</span> Trial users start with 0 points and rely on the free daily counts. Paid users perform actions using points relative to their monthly allowance.
+                            <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100 flex items-start gap-2">
+                                <span className="text-lg">ℹ️</span>
+                                <div>
+                                    <span className="font-bold">Fair Usage Policy:</span> Points are currency for value. <br />
+                                    <strong>Reserve & Refund:</strong> Points are reserved at request start. Any failure (API error, timeout) triggers an instant full refund + functionality restoration.
+                                </div>
                             </div>
                         </div>
                     </div>
