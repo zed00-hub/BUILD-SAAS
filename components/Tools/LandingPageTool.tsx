@@ -31,6 +31,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     language: Language.Arabic,
     country: Country.Algeria,
     customization: '',
+    reviews: '', // New field for expert reviews
   });
 
   const [pageType, setPageType] = useState<'standard' | 'long'>('standard');
@@ -186,50 +187,43 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       let priceInstruction = "";
       if (formData.showPrice && formData.price) {
         if (formData.discount && parseInt(formData.discount) > 0) {
-          priceInstruction = `DISPLAY PRICE: Show "${formData.price} ${formData.currency}" crossed out if applicable or just prominently. Highlight "SALE -${formData.discount}%".`;
+          priceInstruction = `Price: ${formData.price} ${formData.currency} ${formData.discount ? `(Sale: -${formData.discount}%)` : ''}`;
         } else {
-          priceInstruction = `DISPLAY PRICE: Show "${formData.price} ${formData.currency}" prominently.`;
+          priceInstruction = `Price: ${formData.price} ${formData.currency}`;
         }
       } else {
-        priceInstruction = "DO NOT display specific price numbers. Focus on value.";
+        priceInstruction = "No price shown.";
       }
 
+      // Simplified Structure Logic to avoid Overwhelming the Model
       const structureInstruction = pageType === 'long'
         ? `
-        DETAILED LONG-FORM STRUCTURE (Scrollable View):
-        1. **Hero Header**: Immersive product shot, bold value proposition headline, "Order Now" button.
-        2. **Social Proof Bar**: "Trusted by 10,000+ customers" or media logos.
-        3. **Problem/Agitation**: Visuals showing the problem the product solves.
-        4. **Solution Showcase**: Large product details, zoomed-in features, bullet points with icons.
-        5. **Benefits Grid**: 2x2 or 3x3 grid of key benefits with modern glassmorphism cards.
-        6. **Testimonials Carousel**: 3 realistic user reviews with stars and avatars.
-        7. **Offer Section**: "Limited Time Offer", count-down timer visual, Price Box (${priceInstruction}).
-        8. **FAQ Accordion**: 3 common questions visualized.
-        9. **Sticky Bottom Bar / Final CTA**: "Order Now" button with Payment Icons (${paymentInstruction}).
+        Structure (Vertical Scroll):
+        1. Hero: Product Shot + Title
+        2. Problem/Solution Visuals
+        3. Key Benefits (Grid)
+        4. Testimonials: "${formData.reviews || 'Great product!'}"
+        5. FAQ Section
+        6. Footer: "Order Now" + Payment Icons (${formData.paymentMethod})
         `
         : `
-        STANDARD CONCISE STRUCTURE:
-        1. **Hero**: Headline, Product Image, Primary CTA.
-        2. **Key Benefits**: 3 main selling points with icons.
-        3. **Social Proof**: Simple star rating or "Best Seller" badge.
-        4. **Offer/Price**: Clear price display (${priceInstruction}) and Payment Badges (${paymentInstruction}).
-        5. **Footer**: Final CTA button.
+        Structure:
+        1. Hero: Product + Title
+        2. Benefits Lists
+        3. Call to Action: "Order Now"
+        4. Payment/Trust Badges
         `;
 
-      const prompt = `Design a ${pageType === 'long' ? 'PREMIUM LONG-FORM' : 'STANDARD'} 4K VERTICAL Mobile Landing Page UI for E-commerce.
+      const prompt = `Create a ${pageType === 'long' ? 'Long-form' : 'Short'} E-commerce Landing Page UI (Vertical Mobile View).
       
-      PRODUCT CONTEXT:
-      - Product: See image.
-      - Target Market: ${formData.country}
-      - Language: ${formData.language} (Ensure correct grammar and RTL layout if Arabic).
-      - Description: ${formData.description}
-      ${formData.customization ? `- Custom Requirements: ${formData.customization}` : ''}
-
-      VISUAL STYLE:
-      - Professional, High-End, Trustworthy. 
-      - Use "Inter" or modern Sans-Serif typography.
-      - Clean whitespace, subtle drop-shadows, rounded corners (Apple/Modern UI style).
-      - Color palette derived from product image but optimized for conversion (contrasting CTAs).
+      Details:
+      - Product: See image
+      - Market: ${formData.country} (${formData.language})
+      - ${priceInstruction}
+      - ${paymentInstruction}
+      ${formData.customization ? `- Custom: ${formData.customization}` : ''}
+      
+      Style: Professional, Clean, Conversion-Focused, Modern UI.
       
       ${structureInstruction}
       `;
@@ -238,7 +232,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         prompt,
         referenceImage: productImage,
         logoImage: logoImage || undefined,
-        aspectRatio: "9:16", // 9:21 is not supported by the API yet
+        aspectRatio: "9:16", // Fixed to 9:16
         imageSize: "4K"
       });
       setResultImage(result);
@@ -325,7 +319,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                 </div>
               </div>
 
-              {/* Targeting (Restored) */}
+              {/* Targeting */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">{t('target_country')}</label>
@@ -485,6 +479,19 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 min-h-[60px] text-sm"
                   />
                 </div>
+
+                {/* Reviews */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-1">{t('expert_reviews_label')}</label>
+                  <textarea
+                    name="reviews"
+                    value={formData.reviews}
+                    onChange={handleChange}
+                    placeholder={t('expert_reviews_ph')}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 min-h-[60px] text-sm"
+                  />
+                </div>
+
               </div>
 
               {error && <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</div>}

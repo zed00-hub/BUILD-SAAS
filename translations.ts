@@ -199,6 +199,8 @@ export const translations = {
     long_page: "Long Professional (45 pts)",
     download_png: "Download PNG",
     download_webp: "Download WEBP",
+    expert_reviews_label: "Expert/Customer Reviews (Optional)",
+    expert_reviews_ph: "Add a quote or review to display...",
 
     // Dropdown Values (Landing)
     pay_cod: "Cash on Delivery",
@@ -457,6 +459,8 @@ export const translations = {
     long_page: "Longue Pro (45 pts)",
     download_png: "Télécharger PNG",
     download_webp: "Télécharger WEBP",
+    expert_reviews_label: "Avis Experts/Clients (Optionnel)",
+    expert_reviews_ph: "Ajouter un avis à afficher...",
 
     // Dropdown Values (Landing)
     pay_cod: "Paiement à la livraison",
@@ -715,6 +719,8 @@ export const translations = {
     long_page: "طويلة احترافية (45 نقطة)",
     download_png: "تحميل PNG",
     download_webp: "تحميل WEBP",
+    expert_reviews_label: "آراء الخبراء/العملاء (اختياري)",
+    expert_reviews_ph: "أضف رأياً أو تقييماً للعرض...",
 
     // Dropdown Values (Landing)
     pay_cod: "الدفع عند الاستلام",
