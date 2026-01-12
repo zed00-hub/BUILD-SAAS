@@ -127,7 +127,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       document.body.removeChild(link);
     } else if (format === 'webp') {
       const img = new Image();
-      img.crossOrigin = "anonymous"; // Important for CORS if image is remote
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
@@ -146,7 +146,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
           } catch (e) {
             console.error("Download failed (CORS likely):", e);
             alert("Could not convert to WEBP due to browser security restrictions. Downloading as PNG instead.");
-            // Fallback
             const link = document.createElement('a');
             link.href = resultImage;
             link.download = `creakits-landing-${Date.now()}.png`;
@@ -323,6 +322,36 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                     <div className="font-bold text-slate-900 mb-1">{t('long_page')}</div>
                     <div className="text-xs text-slate-500">Detailed, High Conversion Funnel</div>
                   </div>
+                </div>
+              </div>
+
+              {/* Targeting (Restored) */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">{t('target_country')}</label>
+                  <select
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  >
+                    {Object.values(Country).map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">{t('language')}</label>
+                  <select
+                    name="language"
+                    value={formData.language}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  >
+                    {Object.values(Language).map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
