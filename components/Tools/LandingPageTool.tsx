@@ -239,7 +239,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         prompt,
         referenceImage: productImage,
         logoImage: logoImage || undefined,
-        aspectRatio: pageType === 'long' ? "9:21" : "9:16", // Taller aspect ratio for long pages? Model might not support 9:21, sticking to vertical but instructing content density.
+        aspectRatio: "9:16", // 9:21 is not supported by the API yet
         imageSize: "4K"
       });
       setResultImage(result);
