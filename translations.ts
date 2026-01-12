@@ -41,6 +41,7 @@ export const translations = {
     tool_landing: "Landing Page",
     tool_quick_edit: "Quick Edit",
     credits: "Credits",
+    my_projects: "My Projects",
     powered_by: "Powered by Creakits AI Engine",
 
     // Hero
@@ -293,6 +294,7 @@ export const translations = {
     tool_landing: "Page de Vente",
     tool_quick_edit: "Édition Rapide",
     credits: "Crédits",
+    my_projects: "Mes Projets",
     powered_by: "Propulsé par le moteur Creakits AI",
 
     // Hero
@@ -545,6 +547,7 @@ export const translations = {
     tool_landing: "صفحات الهبوط",
     tool_quick_edit: "تعديل سريع",
     credits: "رصيد",
+    my_projects: "مشاريعي",
     powered_by: "مدعوم بمحرك Creakits AI",
 
     // Hero

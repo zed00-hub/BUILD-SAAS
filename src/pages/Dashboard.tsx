@@ -15,6 +15,7 @@ import { VerifyEmailScreen } from '../../components/VerifyEmailScreen';
 import { WalletService } from '../services/walletService'; // src/pages/.. -> src/services
 import { OrderService } from '../services/orderService';
 import { ProfileSettingsModal } from '../../components/ProfileSettingsModal';
+import { DesignGallery } from '../../components/DesignGallery';
 import { UserData } from '../types/dbTypes';
 
 export interface DashboardContextType {
@@ -79,6 +80,7 @@ export const Dashboard: React.FC = () => {
     const [isPaidUser, setIsPaidUser] = useState(false);
     const [userProfile, setUserProfile] = useState<UserData | null>(null);
     const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
     const { t, language } = useLanguage();
     const isRtl = language === 'ar';
@@ -219,6 +221,7 @@ export const Dashboard: React.FC = () => {
             )}
 
             <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+            <DesignGallery isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
             {userProfile && (
                 <ProfileSettingsModal
                     isOpen={isProfileSettingsOpen}
@@ -282,6 +285,13 @@ export const Dashboard: React.FC = () => {
                                 onClick={() => { navigate('quick-edit'); setIsSidebarOpen(false); }}
                                 icon="✨"
                                 label={t('tool_quick_edit')}
+                            />
+                            <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('my_projects')}</div>
+                            <SidebarItem
+                                active={isGalleryOpen}
+                                onClick={() => { setIsGalleryOpen(true); setIsSidebarOpen(false); }}
+                                icon="📂"
+                                label={t('my_projects')}
                             />
 
                             {isAdmin && (
