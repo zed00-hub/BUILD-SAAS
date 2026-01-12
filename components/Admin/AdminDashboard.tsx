@@ -6,6 +6,8 @@ import { UserData, Order } from '../../src/types/dbTypes';
 import { Button } from '../Button';
 import { CoinIcon } from '../CoinIcon';
 import { PricingManager } from './PricingManager';
+import { ToolManager } from './ToolManager';
+
 import { useLanguage } from '../../contexts/LanguageContext';
 
 type AdjustmentType = 'trial' | 'paid';
@@ -14,7 +16,7 @@ export const AdminDashboard: React.FC = () => {
     const { t } = useLanguage();
     const [users, setUsers] = useState<UserData[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits' | 'pricing'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits' | 'pricing' | 'tools'>('users');
     const [isLoading, setIsLoading] = useState(true);
 
     // Action States
@@ -171,6 +173,12 @@ export const AdminDashboard: React.FC = () => {
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                     💎 {t('manage_pricing')}
+                </button>
+                <button
+                    onClick={() => setActiveTab('tools')}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'tools' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                    🔨 {t('manage_tools', 'Manage Tools')}
                 </button>
                 <button
                     onClick={() => setActiveTab('users')}
@@ -437,6 +445,10 @@ export const AdminDashboard: React.FC = () => {
                 </div>
             )
             }
+
+            {activeTab === 'tools' && (
+                <ToolManager />
+            )}
 
             {/* Modal for Balance/Plan Adjustment */}
             {

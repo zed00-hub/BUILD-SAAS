@@ -8,10 +8,13 @@ import {
     runTransaction,
     serverTimestamp,
     Timestamp,
-    where
+    where,
+    setDoc,
+    deleteDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { UserData, Order, WalletTransaction, AccountType, PlanType } from '../types/dbTypes';
+import { ToolLock } from '../../types';
 
 const USERS_COLLECTION = 'users';
 const ORDERS_COLLECTION = 'orders';
@@ -146,5 +149,22 @@ export const AdminService = {
     async toggleUserStatus(userId: string, currentStatus: boolean): Promise<void> {
         const userRef = doc(db, USERS_COLLECTION, userId);
         await updateDoc(userRef, { isDisabled: !currentStatus });
+    },
+
+    // --- Tool Management (Locks) ---
+
+    async getToolLocks(): Promise<ToolLock[]> {
+        const snapshot = await getDocs(collection(db, 'tool_locks'));
+        // toolId is stored as document ID, but also inside data for easier usage
+        return snapshot.docs.map(doc => ({ ...doc.data() as ToolLock, toolId: doc.id }));
+    },
+
+    async setToolLock(lock: ToolLock): Promise<void> {
+        // Use setDoc to create/overwrite document with ID = toolId
+        await setDoc(doc(db, 'tool_locks', lock.toolId), lock);
+    },
+
+    async removeToolLock(toolId: string): Promise<void> {
+        await deleteDoc(doc(db, 'tool_locks', toolId));
     }
 };

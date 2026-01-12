@@ -73,3 +73,14 @@ export interface HistoryItem {
   results: string[] | string; // Array of images or single image
   meta?: any; // Extra metadata (like SlidePlan)
 }
+
+// --- Tool Lock Types ---
+
+export interface ToolLock {
+  toolId: string;
+  isGlobal: boolean;
+  affectedUserIds?: string[]; // If not global
+  reason: string;
+  createdAt: number;
+  createdBy: string;
+}
