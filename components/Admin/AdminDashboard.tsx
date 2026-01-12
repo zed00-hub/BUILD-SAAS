@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { AdminService, PLAN_CONFIGS } from '../../src/services/adminService';
 import { LIMITS } from '../../src/services/walletService';
 import { PricingService, PricingConfig, PricingPlan, DEFAULT_PRICING_CONFIG } from '../../src/services/pricingService';
-import { UserData, Order, AccountType, PlanType } from '../../src/types/dbTypes';
+import { UserData, Order } from '../../src/types/dbTypes';
 import { Button } from '../Button';
 import { CoinIcon } from '../CoinIcon';
 import { PricingManager } from './PricingManager';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 type AdjustmentType = 'trial' | 'paid';
 
 export const AdminDashboard: React.FC = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<UserData[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits' | 'pricing'>('users');
@@ -24,9 +26,6 @@ export const AdminDashboard: React.FC = () => {
 
     // Pricing Management States
     const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
-    const [editingPlan, setEditingPlan] = useState<PricingPlan | null>(null);
-    const [isAddingPlan, setIsAddingPlan] = useState(false);
-    const [pricingSaving, setPricingSaving] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -57,7 +56,6 @@ export const AdminDashboard: React.FC = () => {
         let success = false;
 
         if (adjustmentType === 'trial') {
-            // Trial adjustment - just add/remove points
             const amount = parseInt(amountToAdjust);
             if (isNaN(amount)) {
                 alert("Please enter a valid amount");
@@ -69,7 +67,6 @@ export const AdminDashboard: React.FC = () => {
                 adjustReason || 'Admin Manual Adjustment'
             );
         } else {
-            // Paid plan upgrade
             success = await AdminService.upgradeToPaidPlan(
                 selectedUser.uid,
                 selectedPlan,
@@ -127,42 +124,42 @@ export const AdminDashboard: React.FC = () => {
         }
         return (
             <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium">
-                🆓 Trial
+                🆓 {t('trial_plan')}
             </span>
         );
     };
 
     if (isLoading) {
-        return <div className="p-8 text-center">Loading Admin Dashboard...</div>;
+        return <div className="p-8 text-center">{t('processing')}...</div>;
     }
 
     return (
         <div className="max-w-7xl mx-auto p-6 md:p-10 animate-fade-in">
             <h1 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
                 <span className="bg-indigo-600 text-white p-2 rounded-lg text-xl">🛡️</span>
-                Admin Dashboard
+                {t('admin_dashboard')}
             </h1>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <p className="text-slate-500 text-sm font-bold uppercase">Total Users</p>
+                    <p className="text-slate-500 text-sm font-bold uppercase">{t('total_users')}</p>
                     <p className="text-4xl font-bold text-indigo-600 mt-2">{users.length}</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <p className="text-slate-500 text-sm font-bold uppercase">Paid Users</p>
+                    <p className="text-slate-500 text-sm font-bold uppercase">{t('paid_users')}</p>
                     <p className="text-4xl font-bold text-emerald-600 mt-2">
                         {users.filter(u => u.accountType === 'paid').length}
                     </p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <p className="text-slate-500 text-sm font-bold uppercase">Trial Users</p>
+                    <p className="text-slate-500 text-sm font-bold uppercase">{t('trial_users')}</p>
                     <p className="text-4xl font-bold text-amber-500 mt-2">
                         {users.filter(u => u.accountType !== 'paid').length}
                     </p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <p className="text-slate-500 text-sm font-bold uppercase">Total Orders</p>
+                    <p className="text-slate-500 text-sm font-bold uppercase">{t('total_orders')}</p>
                     <p className="text-4xl font-bold text-purple-600 mt-2">{orders.length}</p>
                 </div>
             </div>
@@ -170,29 +167,28 @@ export const AdminDashboard: React.FC = () => {
             {/* Tabs */}
             <div className="flex gap-4 border-b border-slate-200 mb-6 overflow-x-auto">
                 <button
-                    id="pricing-tab-button"
                     onClick={() => setActiveTab('pricing')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'pricing' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
-                    💎 Manage Pricing
+                    💎 {t('manage_pricing')}
                 </button>
                 <button
                     onClick={() => setActiveTab('users')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'users' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
-                    User Management
+                    {t('user_management')}
                 </button>
                 <button
                     onClick={() => setActiveTab('orders')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'orders' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
-                    Order History
+                    {t('order_history')}
                 </button>
                 <button
                     onClick={() => setActiveTab('limits')}
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'limits' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
-                    System Limits & Rules
+                    {t('system_limits')}
                 </button>
             </div>
 
@@ -203,12 +199,12 @@ export const AdminDashboard: React.FC = () => {
                         <table className="w-full text-left">
                             <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
                                 <tr>
-                                    <th className="p-4">User</th>
-                                    <th className="p-4">Balance</th>
-                                    <th className="p-4">Account Type</th>
-                                    <th className="p-4">Role</th>
-                                    <th className="p-4">Status</th>
-                                    <th className="p-4">Actions</th>
+                                    <th className="p-4">{t('user_col')}</th>
+                                    <th className="p-4">{t('balance_col')}</th>
+                                    <th className="p-4">{t('account_type_col')}</th>
+                                    <th className="p-4">{t('role_col')}</th>
+                                    <th className="p-4">{t('status_col')}</th>
+                                    <th className="p-4">{t('actions_col')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -242,21 +238,21 @@ export const AdminDashboard: React.FC = () => {
                                                     onClick={() => setSelectedUser(user)}
                                                     className="px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg hover:bg-indigo-100"
                                                 >
-                                                    💰 Manage Points
+                                                    💰 {t('manage_points_btn')}
                                                 </button>
                                                 {user.accountType === 'paid' && (
                                                     <button
                                                         onClick={() => handleDowngrade(user)}
                                                         className="px-3 py-1.5 bg-amber-50 text-amber-600 text-xs font-bold rounded-lg hover:bg-amber-100"
                                                     >
-                                                        ⬇️ Downgrade
+                                                        ⬇️ {t('downgrade_btn')}
                                                     </button>
                                                 )}
                                                 <button
                                                     onClick={() => toggleUserStatus(user)}
                                                     className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${user.isDisabled ? 'border-emerald-200 text-emerald-600 hover:bg-emerald-50' : 'border-red-200 text-red-600 hover:bg-red-50'}`}
                                                 >
-                                                    {user.isDisabled ? 'Unban' : 'Ban'}
+                                                    {user.isDisabled ? t('unban_btn') : t('ban_btn')}
                                                 </button>
                                             </div>
                                         </td>
@@ -272,12 +268,12 @@ export const AdminDashboard: React.FC = () => {
                         <table className="w-full text-left">
                             <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
                                 <tr>
-                                    <th className="p-4">Order ID</th>
-                                    <th className="p-4">User</th>
-                                    <th className="p-4">Tool</th>
-                                    <th className="p-4">Cost</th>
-                                    <th className="p-4">Status</th>
-                                    <th className="p-4">Time</th>
+                                    <th className="p-4">{t('order_id')}</th>
+                                    <th className="p-4">{t('user_col')}</th>
+                                    <th className="p-4">{t('tool_col')}</th>
+                                    <th className="p-4">{t('cost_col')}</th>
+                                    <th className="p-4">{t('status_col')}</th>
+                                    <th className="p-4">{t('time_col')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -321,35 +317,35 @@ export const AdminDashboard: React.FC = () => {
                     {/* Storage & Retention Rules */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            🗄️ Storage & Retention Policy
+                            🗄️ {t('storage_policy_title')}
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                                <span className="inline-block px-2 py-1 bg-amber-200 text-amber-800 text-xs font-bold rounded mb-2">TRIAL</span>
+                                <span className="inline-block px-2 py-1 bg-amber-200 text-amber-800 text-xs font-bold rounded mb-2 uppercase">{t('trial_plan')}</span>
                                 <h3 className="font-bold text-lg text-slate-800 mb-1">50MB Limit</h3>
                                 <p className="text-sm text-slate-600">
-                                    Local temporary storage only. <strong>No Cloud Save</strong>. Data is lost on refresh.
+                                    {t('storage_trial_desc')}
                                 </p>
                             </div>
                             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                                <span className="inline-block px-2 py-1 bg-slate-200 text-slate-800 text-xs font-bold rounded mb-2">BASIC</span>
+                                <span className="inline-block px-2 py-1 bg-slate-200 text-slate-800 text-xs font-bold rounded mb-2 uppercase">{t('basic_plan')}</span>
                                 <h3 className="font-bold text-lg text-slate-800 mb-1">1GB Storage</h3>
                                 <p className="text-sm text-slate-600">
-                                    Cloud save enabled. Assets retained for subscription duration.
+                                    {t('storage_basic_desc')}
                                 </p>
                             </div>
                             <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
-                                <span className="inline-block px-2 py-1 bg-indigo-200 text-indigo-800 text-xs font-bold rounded mb-2">PRO</span>
+                                <span className="inline-block px-2 py-1 bg-indigo-200 text-indigo-800 text-xs font-bold rounded mb-2 uppercase">{t('pro_plan')}</span>
                                 <h3 className="font-bold text-lg text-slate-800 mb-1">10GB Storage</h3>
                                 <p className="text-sm text-slate-600">
-                                    High-res assets & history preserved. Priority bandwidth.
+                                    {t('storage_pro_desc')}
                                 </p>
                             </div>
                             <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
-                                <span className="inline-block px-2 py-1 bg-emerald-200 text-emerald-800 text-xs font-bold rounded mb-2">ELITE</span>
+                                <span className="inline-block px-2 py-1 bg-emerald-200 text-emerald-800 text-xs font-bold rounded mb-2 uppercase">{t('elite_plan')}</span>
                                 <h3 className="font-bold text-lg text-slate-800 mb-1">50GB Storage</h3>
                                 <p className="text-sm text-slate-600">
-                                    Maximum capacity for large agencies. Long-term retention.
+                                    {t('storage_elite_desc')}
                                 </p>
                             </div>
                         </div>
@@ -358,42 +354,42 @@ export const AdminDashboard: React.FC = () => {
                     {/* Gen Limits */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            ⚡ Daily Generation Limits
+                            ⚡ {t('daily_gen_limits')}
                         </h2>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="border-b border-slate-100 text-slate-500 text-xs uppercase">
-                                        <th className="py-3 px-4">Plan Level</th>
-                                        <th className="py-3 px-4">Daily Limit</th>
-                                        <th className="py-3 px-4">Cooldown</th>
-                                        <th className="py-3 px-4">Reset Time</th>
+                                        <th className="py-3 px-4">{t('account_type_col')}</th>
+                                        <th className="py-3 px-4">{t('daily_limit_col')}</th>
+                                        <th className="py-3 px-4">{t('cooldown_col')}</th>
+                                        <th className="py-3 px-4">{t('reset_time_col')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-amber-600">Trial</td>
-                                        <td className="py-3 px-4">{LIMITS.trial.maxDaily} generations</td>
-                                        <td className="py-3 px-4">{LIMITS.trial.cooldownMin > 0 ? `${LIMITS.trial.cooldownMin} mins` : 'None'}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                        <td className="py-3 px-4 font-bold text-amber-600">{t('trial_plan')}</td>
+                                        <td className="py-3 px-4">{LIMITS.trial.maxDaily}</td>
+                                        <td className="py-3 px-4">{LIMITS.trial.cooldownMin > 0 ? `${LIMITS.trial.cooldownMin} mins` : t('none')}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
                                     </tr>
                                     <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-slate-700">Basic</td>
-                                        <td className="py-3 px-4">{LIMITS.basic.maxDaily} generations</td>
-                                        <td className="py-3 px-4">{LIMITS.basic.cooldownMin > 0 ? `${LIMITS.basic.cooldownMin} mins` : 'None'}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                        <td className="py-3 px-4 font-bold text-slate-700">{t('basic_plan')}</td>
+                                        <td className="py-3 px-4">{LIMITS.basic.maxDaily}</td>
+                                        <td className="py-3 px-4">{LIMITS.basic.cooldownMin > 0 ? `${LIMITS.basic.cooldownMin} mins` : t('none')}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
                                     </tr>
                                     <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-indigo-600">Pro</td>
-                                        <td className="py-3 px-4">{LIMITS.pro.maxDaily} generations</td>
-                                        <td className="py-3 px-4">{LIMITS.pro.cooldownMin > 0 ? `${LIMITS.pro.cooldownMin} mins` : 'None'}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                        <td className="py-3 px-4 font-bold text-indigo-600">{t('pro_plan')}</td>
+                                        <td className="py-3 px-4">{LIMITS.pro.maxDaily}</td>
+                                        <td className="py-3 px-4">{LIMITS.pro.cooldownMin > 0 ? `${LIMITS.pro.cooldownMin} mins` : t('none')}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
                                     </tr>
                                     <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-emerald-600">Elite / Admin</td>
-                                        <td className="py-3 px-4">Unlimited</td>
-                                        <td className="py-3 px-4">None</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">Midnight UTC</td>
+                                        <td className="py-3 px-4 font-bold text-emerald-600">{t('elite_plan')}</td>
+                                        <td className="py-3 px-4">{t('unlimited')}</td>
+                                        <td className="py-3 px-4">{t('none')}</td>
+                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -403,57 +399,37 @@ export const AdminDashboard: React.FC = () => {
                     {/* Points System Explanation */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            💰 Points System Logic
+                            💰 {t('points_system_logic')}
                         </h2>
                         <div className="space-y-4 text-slate-700">
-                            <p>
-                                The points system is designed to govern <strong>"Heavy"</strong> AI operations.
-                                Points are deducted <strong>before</strong> generation to prevent abuse, but are <strong>automatically refunded</strong> if the generation fails.
-                            </p>
+                            <p dangerouslySetInnerHTML={{ __html: t('points_desc') }}></p>
 
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
-                                    <h4 className="font-bold text-indigo-700 mb-2">Social Media</h4>
-                                    <p className="text-2xl font-black text-slate-900">30 <span className="text-sm font-normal text-slate-500">pts / slide</span></p>
-                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>High-res Generation</li>
-                                        <li>Smart Editing</li>
-                                    </ul>
+                                    <h4 className="font-bold text-indigo-700 mb-2">{t('tool_social')}</h4>
+                                    <p className="text-2xl font-black text-slate-900">30 <span className="text-sm font-normal text-slate-500">{t('pts_per_slide')}</span></p>
                                 </div>
 
                                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
-                                    <h4 className="font-bold text-indigo-700 mb-2">Ad Creative</h4>
-                                    <p className="text-2xl font-black text-slate-900">20 <span className="text-sm font-normal text-slate-500">pts / variant</span></p>
-                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>Commercial Use</li>
-                                        <li>Product Integration</li>
-                                    </ul>
+                                    <h4 className="font-bold text-indigo-700 mb-2">{t('tool_ad')}</h4>
+                                    <p className="text-2xl font-black text-slate-900">20 <span className="text-sm font-normal text-slate-500">{t('pts_per_variant')}</span></p>
                                 </div>
 
                                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
-                                    <h4 className="font-bold text-indigo-700 mb-2">Landing Page</h4>
-                                    <p className="text-2xl font-black text-slate-900">50 <span className="text-sm font-normal text-slate-500">pts / section</span></p>
-                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>Copywriting + Code</li>
-                                        <li>Asset Selection</li>
-                                    </ul>
+                                    <h4 className="font-bold text-indigo-700 mb-2">{t('tool_landing')}</h4>
+                                    <p className="text-2xl font-black text-slate-900">50 <span className="text-sm font-normal text-slate-500">{t('pts_per_section')}</span></p>
                                 </div>
 
                                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors">
-                                    <h4 className="font-bold text-indigo-700 mb-2">Quick Edit</h4>
-                                    <p className="text-2xl font-black text-slate-900">10 <span className="text-sm font-normal text-slate-500">pts / edit</span></p>
-                                    <ul className="text-xs text-slate-500 mt-2 list-disc list-inside">
-                                        <li>Magic Fill/Replace</li>
-                                        <li>Background Removal</li>
-                                    </ul>
+                                    <h4 className="font-bold text-indigo-700 mb-2">{t('tool_quick_edit')}</h4>
+                                    <p className="text-2xl font-black text-slate-900">10 <span className="text-sm font-normal text-slate-500">{t('pts_per_edit')}</span></p>
                                 </div>
                             </div>
 
                             <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100 flex items-start gap-2">
                                 <span className="text-lg">ℹ️</span>
                                 <div>
-                                    <span className="font-bold">Fair Usage Policy:</span> Points are currency for value. <br />
-                                    <strong>Reserve & Refund:</strong> Points are reserved at request start. Any failure (API error, timeout) triggers an instant full refund + functionality restoration.
+                                    <span className="font-bold">{t('fair_usage_title')}:</span> {t('fair_usage_desc')}
                                 </div>
                             </div>
                         </div>
@@ -468,10 +444,10 @@ export const AdminDashboard: React.FC = () => {
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                         <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl animate-fade-in">
                             <h3 className="text-xl font-bold mb-2">
-                                Manage: <span className="text-indigo-600">{selectedUser.displayName || selectedUser.email}</span>
+                                {t('manage_user_title')}: <span className="text-indigo-600">{selectedUser.displayName || selectedUser.email}</span>
                             </h3>
                             <div className="flex gap-2 mb-6">
-                                <span className="text-sm text-slate-500">Current Balance: <strong>{selectedUser.balance}</strong></span>
+                                <span className="text-sm text-slate-500">{t('current_balance')}: <strong>{selectedUser.balance}</strong></span>
                                 <span className="mx-2 text-slate-300">|</span>
                                 {getAccountBadge(selectedUser)}
                             </div>
@@ -486,8 +462,7 @@ export const AdminDashboard: React.FC = () => {
                                         : 'border-slate-200 text-slate-500 hover:border-slate-300'
                                         }`}
                                 >
-                                    🆓 Trial Points
-                                    <p className="text-xs font-normal mt-1">Add/remove points for testing</p>
+                                    🆓 {t('trial_plan')}
                                 </button>
                                 <button
                                     type="button"
@@ -497,8 +472,7 @@ export const AdminDashboard: React.FC = () => {
                                         : 'border-slate-200 text-slate-500 hover:border-slate-300'
                                         }`}
                                 >
-                                    💎 Paid Plan
-                                    <p className="text-xs font-normal mt-1">Upgrade to paid subscription</p>
+                                    💎 {t('upgrade_plan')}
                                 </button>
                             </div>
 
@@ -506,7 +480,7 @@ export const AdminDashboard: React.FC = () => {
                                 {adjustmentType === 'trial' ? (
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-1">Amount to Add/Remove</label>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">{t('amount_adjust')}</label>
                                             <input
                                                 type="number"
                                                 value={amountToAdjust}
@@ -516,10 +490,9 @@ export const AdminDashboard: React.FC = () => {
                                                 autoFocus
                                                 required
                                             />
-                                            <p className="text-xs text-slate-400 mt-1">Use negative values to deduct points. This does NOT change account type.</p>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-1">Reason</label>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">{t('reason')}</label>
                                             <input
                                                 type="text"
                                                 value={adjustReason}
@@ -529,16 +502,11 @@ export const AdminDashboard: React.FC = () => {
                                                 required
                                             />
                                         </div>
-
-                                        {/* Warning for Trial accounts */}
-                                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                                            ⚠️ <strong>Trial Account Note:</strong> Trial users cannot save work history. They must download their work immediately.
-                                        </div>
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">Select Plan</label>
+                                            <label className="block text-sm font-bold text-slate-700 mb-2">{t('upgrade_plan')}</label>
                                             <div className="grid grid-cols-3 gap-3">
                                                 {(['basic', 'pro', 'elite'] as const).map(plan => (
                                                     <button
@@ -552,39 +520,31 @@ export const AdminDashboard: React.FC = () => {
                                                     >
                                                         <div className="text-lg font-bold text-slate-900">{PLAN_CONFIGS[plan].name}</div>
                                                         <div className="text-2xl font-black text-emerald-600 my-1">{PLAN_CONFIGS[plan].points}</div>
-                                                        <div className="text-xs text-slate-500">
-                                                            {PLAN_CONFIGS[plan].price > 0 ? `$${PLAN_CONFIGS[plan].price}` : 'Custom'}
-                                                        </div>
                                                     </button>
                                                 ))}
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-1">Note (Optional)</label>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">{t('reason')}</label>
                                             <input
                                                 type="text"
                                                 value={adjustReason}
                                                 onChange={e => setAdjustReason(e.target.value)}
-                                                placeholder="e.g. Annual subscription"
+                                                placeholder="..."
                                                 className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
                                             />
-                                        </div>
-
-                                        {/* Info for Paid accounts */}
-                                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
-                                            ✅ <strong>Paid Account Benefits:</strong> Work history is saved for 30 days. Can download anytime.
                                         </div>
                                     </div>
                                 )}
 
                                 <div className="flex gap-3 mt-8">
-                                    <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
+                                    <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">{t('cancel')}</Button>
                                     <Button
                                         type="submit"
                                         variant="primary"
                                         className={`flex-1 ${adjustmentType === 'paid' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
                                     >
-                                        {adjustmentType === 'trial' ? 'Confirm Adjustment' : `Upgrade to ${PLAN_CONFIGS[selectedPlan].name}`}
+                                        {t('confirm_adjustment')}
                                     </Button>
                                 </div>
                             </form>
