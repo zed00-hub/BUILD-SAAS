@@ -34,7 +34,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     reviews: '', // New field for expert reviews
   });
 
-  const [pageType, setPageType] = useState<'standard' | 'long'>('standard');
   const [productImage, setProductImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [useBrandKit, setUseBrandKit] = useState(false);
@@ -46,7 +45,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const [editInstruction, setEditInstruction] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const generationCost = pageType === 'long' ? 45 : 30;
+  const generationCost = 30;
   const editCost = 15;
 
   const currencies = [
@@ -167,7 +166,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       return;
     }
 
-    const hasPoints = await deductPoints(generationCost, `Generate Landing Page (${pageType})`);
+    const hasPoints = await deductPoints(generationCost, `Generate Landing Page`);
     if (!hasPoints) return;
 
     setIsLoading(true);
@@ -196,8 +195,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       }
 
       // Enhanced Structure Logic for Comprehensive Landing Pages
-      const structureInstruction = pageType === 'long'
-        ? `
+      // Enhanced Structure Logic for Comprehensive Landing Pages - SINGLE VERTICAL COLUMN ONLY
+      const structureInstruction = `
         ⚠️ CRITICAL LAYOUT RULE - ABSOLUTELY MANDATORY:
         - THE ENTIRE PAGE MUST BE A SINGLE VERTICAL COLUMN - NO HORIZONTAL SPLITS
         - DO NOT use 2-column layouts, grids, or side-by-side elements
@@ -262,51 +261,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
            - Large "Order Now" button centered
            - Payment method icons in a row
            - Contact information
-        `
-        : `
-        ⚠️ CRITICAL LAYOUT RULE - ABSOLUTELY MANDATORY:
-        - THE ENTIRE PAGE MUST BE A SINGLE VERTICAL COLUMN - NO HORIZONTAL SPLITS
-        - DO NOT use 2-column layouts, grids, or side-by-side elements
-        - ALL elements stacked VERTICALLY in ONE continuous column
-        - This is a MOBILE-FIRST design - single column only like a real mobile landing page
-        
-        CRITICAL DESIGN REQUIREMENTS:
-        - FILL THE ENTIRE 9:16 VERTICAL SPACE - Use all available room
-        - Create a COMPREHENSIVE single-view landing page
-        - MODERN UI with gradients, shadows, and visual hierarchy
-        - ALL content in ONE VERTICAL COLUMN - no splits
-        
-        MANDATORY SECTIONS (ALL Required, STACKED VERTICALLY):
-        
-        1. 🔥 HERO SECTION:
-           - Stunning gradient/colored background
-           - Large centered product image with glow/shadow effect
-           - Bold, compelling headline in ${formData.language}
-           - Value proposition subtext below headline
-           - Trust indicators in horizontal row (⭐ ratings, badges)
-        
-        2. ✨ KEY BENEFITS:
-           - Section title
-           - 4-6 benefit items STACKED VERTICALLY (NOT in grid/columns)
-           - Each benefit: Icon + Bold title + Description - stacked one below another
-           - Use colorful icons
-        
-        3. 💰 PRICING & OFFER:
-           - Clear price display with currency - centered
-           - If discount: Show original price crossed out
-           - Limited time offer indicator
-           - Savings highlight
-        
-        4. 🛒 CALL TO ACTION:
-           - Large, prominent "Order Now" button - full width, centered
-           - Urgency text (limited stock, offer ends soon)
-           - Payment icons in horizontal row
-           - Guarantee mention
-        
-        5. 📞 FOOTER:
-           - Contact information centered
-           - Delivery/shipping info
-           - Social proof elements
         `;
 
       const languageInstruction = formData.language === Language.Arabic
@@ -353,7 +307,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       const prompt = `You are an EXPERT e-commerce landing page designer specializing in HIGH-CONVERTING sales pages.
 
-      🎯 MISSION: Create a ${pageType === 'long' ? 'COMPREHENSIVE LONG-FORM' : 'DETAILED SINGLE-VIEW'} Landing Page that CONVERTS visitors into BUYERS.
+      🎯 MISSION: Create a COMPREHENSIVE VERTICAL Landing Page that CONVERTS visitors into BUYERS.
       
       📦 PRODUCT ANALYSIS:
       - CAREFULLY ANALYZE the product image to understand: What is it? What problem does it solve? Who needs it?
@@ -378,7 +332,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       3. ✅ Is the layout CLEAN and ORGANIZED? (NO random elements)
       4. ✅ Does it fill the ENTIRE 9:16 space properly? (NO empty areas)
       5. ✅ Does it look like a REAL professional landing page? (HIGH quality)
-      6. ✅ Would a customer WANT to buy after seeing this? (CONVERSION focus)
+      6. ✅ Is it a SINGLE VERTICAL COLUMN? (No horizontal splits)
       
       GENERATE A STUNNING, PROFESSIONAL, HIGH-CONVERTING LANDING PAGE NOW.
       `;
@@ -396,7 +350,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         saveHistoryItem({
           tool: 'landing',
           results: result,
-          inputs: { formData: { ...formData, pageType } } // Save pageType too
+          inputs: { formData: { ...formData } }
         });
         refreshHistory();
       }
@@ -452,27 +406,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-
-              {/* Page Type Selection */}
-              <div className="space-y-3">
-                <label className="block text-sm font-bold text-slate-800">{t('page_type')}</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div
-                    onClick={() => setPageType('standard')}
-                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${pageType === 'standard' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}
-                  >
-                    <div className="font-bold text-slate-900 mb-1">{t('standard_page')}</div>
-                    <div className="text-xs text-slate-500">Concise, Single Screen Focus</div>
-                  </div>
-                  <div
-                    onClick={() => setPageType('long')}
-                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${pageType === 'long' ? 'border-purple-500 bg-purple-50' : 'border-slate-200 hover:border-slate-300'}`}
-                  >
-                    <div className="font-bold text-slate-900 mb-1">{t('long_page')}</div>
-                    <div className="text-xs text-slate-500">Detailed, High Conversion Funnel</div>
-                  </div>
-                </div>
-              </div>
 
               {/* Targeting */}
               <div className="grid grid-cols-2 gap-4">
