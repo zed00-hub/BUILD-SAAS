@@ -11,7 +11,7 @@ const db = admin.firestore();
 exports.generateContent = functions
     .runWith({
         secrets: ["GEMINI_API_KEY"],
-        timeoutSeconds: 300,
+        timeoutSeconds: 540,
         memory: "1GB"
     })
     .https.onCall(async (data, context) => {
