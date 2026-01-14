@@ -198,110 +198,115 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       // Enhanced Structure Logic for Comprehensive Landing Pages
       const structureInstruction = pageType === 'long'
         ? `
+        ⚠️ CRITICAL LAYOUT RULE - ABSOLUTELY MANDATORY:
+        - THE ENTIRE PAGE MUST BE A SINGLE VERTICAL COLUMN - NO HORIZONTAL SPLITS
+        - DO NOT use 2-column layouts, grids, or side-by-side elements
+        - ALL elements stacked VERTICALLY in ONE continuous column
+        - This is a MOBILE-FIRST design - single column only like a real mobile landing page
+        
         CRITICAL DESIGN REQUIREMENTS:
         - FILL THE ENTIRE 9:16 VERTICAL SPACE - No empty areas allowed
         - Create a LONG SCROLLABLE landing page design with MAXIMUM content density
         - Use RICH, MODERN UI with gradients, shadows, and micro-interactions
-        - Every section must be visually distinct and professionally designed
+        - Every section flows vertically into the next - ONE COLUMN ONLY
         
-        MANDATORY SECTIONS (In Order, ALL Required):
+        MANDATORY SECTIONS (In Order, ALL Required, STACKED VERTICALLY):
         
-        1. 🔥 HERO SECTION (Top 20%):
+        1. 🔥 HERO SECTION:
            - Eye-catching gradient background (vibrant colors matching product)
-           - Large, clear product image with shadow/glow effect
+           - Large, centered product image with shadow/glow effect
            - Bold headline in ${formData.language} (compelling, benefit-focused)
            - Subheadline explaining unique value proposition
-           - Trust badges row (⭐ ratings, 🏆 awards, ✅ verified)
-           - Animated "Order Now" button with price
+           - Trust badges in a horizontal row (⭐ ratings, 🏆 awards, ✅ verified)
+           - Prominent "Order Now" button with price
         
-        2. 😰 PROBLEM SECTION (Next 12%):
+        2. 😰 PROBLEM SECTION:
            - Section title: "Are you struggling with..."
-           - 3-4 pain points with ❌ icons
-           - Relatable customer frustration visuals
+           - 3-4 pain points STACKED VERTICALLY with ❌ icons
+           - Each problem in its own row, one below the other
            - Dark/muted colors to emphasize problems
         
-        3. ✨ SOLUTION SECTION (Next 12%):
+        3. ✨ SOLUTION SECTION:
            - Section title: "Introducing the solution..."
-           - Product as the hero with spotlight effect
-           - 3-4 solutions with ✅ checkmarks
+           - Centered product image with spotlight effect
+           - 3-4 solutions STACKED VERTICALLY with ✅ checkmarks
+           - Each solution in its own row, one below the other
            - Bright, optimistic colors
         
-        4. 🎯 FEATURES & BENEFITS GRID (Next 18%):
+        4. 🎯 FEATURES & BENEFITS:
            - Section title: "Why Choose This Product"
-           - 6-8 feature cards in 2-column grid
-           - Each card: Icon + Feature title + Short description
-           - Use modern icons and hover states
-           - Alternate card backgrounds for visual interest
+           - 6-8 feature items STACKED VERTICALLY (NOT in grid)
+           - Each feature: Icon + Title + Description - ALL IN ONE ROW, stacked below previous
+           - Use modern icons - but NO multi-column layout
         
-        5. 📊 SPECIFICATIONS/DETAILS (Next 8%):
+        5. 📊 SPECIFICATIONS/DETAILS:
            - Technical specs or product details
-           - Clean table or list format
+           - List format - each spec on its own line vertically
            - Material, size, weight, compatibility info
         
-        6. 💬 TESTIMONIALS SECTION (Next 10%):
+        6. 💬 TESTIMONIALS SECTION:
            - Section title: "What Our Customers Say"
-           - ${formData.reviews ? `Include these testimonials: "${formData.reviews}"` : '3 customer testimonial cards with photos, names, ratings'}
-           - Star ratings (⭐⭐⭐⭐⭐)
+           - ${formData.reviews ? `Include these testimonials: "${formData.reviews}"` : '2-3 customer testimonials STACKED VERTICALLY, one below the other'}
+           - Each testimonial: Photo + Name + Rating + Quote - in vertical flow
            - Verified purchase badges
-           - Quote styling with decorative marks
         
-        7. ❓ FAQ SECTION (Next 8%):
-           - Common questions accordion style
-           - 4-5 relevant Q&As about the product
-           - Clean expandable design
+        7. ❓ FAQ SECTION:
+           - 3-4 Q&As STACKED VERTICALLY
+           - Each Q&A on its own row
         
-        8. 🛡️ GUARANTEE & TRUST (Next 6%):
-           - Money-back guarantee badge
-           - Secure checkout icons
-           - Customer support availability
-           - Shipping/delivery information
+        8. 🛡️ GUARANTEE & TRUST:
+           - Trust badges in horizontal row (only exception)
+           - Money-back guarantee, secure checkout, shipping info
         
-        9. 🚀 FINAL CTA SECTION (Bottom 6%):
-           - Urgent call-to-action with countdown/scarcity
-           - Large "Order Now" button
-           - Payment method icons
+        9. 🚀 FINAL CTA SECTION:
+           - Large "Order Now" button centered
+           - Payment method icons in a row
            - Contact information
         `
         : `
+        ⚠️ CRITICAL LAYOUT RULE - ABSOLUTELY MANDATORY:
+        - THE ENTIRE PAGE MUST BE A SINGLE VERTICAL COLUMN - NO HORIZONTAL SPLITS
+        - DO NOT use 2-column layouts, grids, or side-by-side elements
+        - ALL elements stacked VERTICALLY in ONE continuous column
+        - This is a MOBILE-FIRST design - single column only like a real mobile landing page
+        
         CRITICAL DESIGN REQUIREMENTS:
         - FILL THE ENTIRE 9:16 VERTICAL SPACE - Use all available room
         - Create a COMPREHENSIVE single-view landing page
         - MODERN UI with gradients, shadows, and visual hierarchy
-        - Maximum content without scrolling feeling cramped
+        - ALL content in ONE VERTICAL COLUMN - no splits
         
-        MANDATORY SECTIONS (ALL Required):
+        MANDATORY SECTIONS (ALL Required, STACKED VERTICALLY):
         
-        1. 🔥 HERO SECTION (Top 30%):
+        1. 🔥 HERO SECTION:
            - Stunning gradient/colored background
-           - Large product image with glow/shadow effect
+           - Large centered product image with glow/shadow effect
            - Bold, compelling headline in ${formData.language}
-           - Value proposition subtext
-           - Trust row: ⭐ ratings + 🏆 badges + ✅ reviews count
+           - Value proposition subtext below headline
+           - Trust indicators in horizontal row (⭐ ratings, badges)
         
-        2. ✨ KEY BENEFITS (Next 35%):
-           - Section title: "المميزات الرئيسية" or equivalent
-           - 4-6 benefit cards in modern grid layout
-           - Each: Icon + Bold title + Description line
-           - Use colorful icons and card shadows
-           - Visual variety (different sizes/emphasis)
+        2. ✨ KEY BENEFITS:
+           - Section title
+           - 4-6 benefit items STACKED VERTICALLY (NOT in grid/columns)
+           - Each benefit: Icon + Bold title + Description - stacked one below another
+           - Use colorful icons
         
-        3. 💰 PRICING & OFFER (Next 15%):
-           - Clear price display with currency
+        3. 💰 PRICING & OFFER:
+           - Clear price display with currency - centered
            - If discount: Show original price crossed out
            - Limited time offer indicator
-           - Value comparison or savings highlight
+           - Savings highlight
         
-        4. 🛒 CALL TO ACTION (Next 12%):
-           - Large, prominent "Order Now" button
+        4. 🛒 CALL TO ACTION:
+           - Large, prominent "Order Now" button - full width, centered
            - Urgency text (limited stock, offer ends soon)
-           - Payment icons and trust badges
-           - Guarantee/return policy mention
+           - Payment icons in horizontal row
+           - Guarantee mention
         
-        5. 📞 FOOTER (Bottom 8%):
-           - Contact information
+        5. 📞 FOOTER:
+           - Contact information centered
            - Delivery/shipping info
            - Social proof elements
-           - Company/brand mini-logo
         `;
 
       const languageInstruction = formData.language === Language.Arabic
