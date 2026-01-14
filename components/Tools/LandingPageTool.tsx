@@ -195,37 +195,158 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         priceInstruction = "No price shown.";
       }
 
-      // Simplified Structure Logic to avoid Overwhelming the Model
+      // Enhanced Structure Logic for Comprehensive Landing Pages
       const structureInstruction = pageType === 'long'
         ? `
-        Structure (Vertical Scroll):
-        1. Hero: Product Shot + Title
-        2. Problem/Solution Visuals
-        3. Key Benefits (Grid)
-        4. Testimonials: "${formData.reviews || 'Great product!'}"
-        5. FAQ Section
-        6. Footer: "Order Now" + Payment Icons (${formData.paymentMethod})
+        CRITICAL DESIGN REQUIREMENTS:
+        - FILL THE ENTIRE 9:16 VERTICAL SPACE - No empty areas allowed
+        - Create a LONG SCROLLABLE landing page design with MAXIMUM content density
+        - Use RICH, MODERN UI with gradients, shadows, and micro-interactions
+        - Every section must be visually distinct and professionally designed
+        
+        MANDATORY SECTIONS (In Order, ALL Required):
+        
+        1. 🔥 HERO SECTION (Top 20%):
+           - Eye-catching gradient background (vibrant colors matching product)
+           - Large, clear product image with shadow/glow effect
+           - Bold headline in ${formData.language} (compelling, benefit-focused)
+           - Subheadline explaining unique value proposition
+           - Trust badges row (⭐ ratings, 🏆 awards, ✅ verified)
+           - Animated "Order Now" button with price
+        
+        2. 😰 PROBLEM SECTION (Next 12%):
+           - Section title: "Are you struggling with..."
+           - 3-4 pain points with ❌ icons
+           - Relatable customer frustration visuals
+           - Dark/muted colors to emphasize problems
+        
+        3. ✨ SOLUTION SECTION (Next 12%):
+           - Section title: "Introducing the solution..."
+           - Product as the hero with spotlight effect
+           - 3-4 solutions with ✅ checkmarks
+           - Bright, optimistic colors
+        
+        4. 🎯 FEATURES & BENEFITS GRID (Next 18%):
+           - Section title: "Why Choose This Product"
+           - 6-8 feature cards in 2-column grid
+           - Each card: Icon + Feature title + Short description
+           - Use modern icons and hover states
+           - Alternate card backgrounds for visual interest
+        
+        5. 📊 SPECIFICATIONS/DETAILS (Next 8%):
+           - Technical specs or product details
+           - Clean table or list format
+           - Material, size, weight, compatibility info
+        
+        6. 💬 TESTIMONIALS SECTION (Next 10%):
+           - Section title: "What Our Customers Say"
+           - ${formData.reviews ? `Include these testimonials: "${formData.reviews}"` : '3 customer testimonial cards with photos, names, ratings'}
+           - Star ratings (⭐⭐⭐⭐⭐)
+           - Verified purchase badges
+           - Quote styling with decorative marks
+        
+        7. ❓ FAQ SECTION (Next 8%):
+           - Common questions accordion style
+           - 4-5 relevant Q&As about the product
+           - Clean expandable design
+        
+        8. 🛡️ GUARANTEE & TRUST (Next 6%):
+           - Money-back guarantee badge
+           - Secure checkout icons
+           - Customer support availability
+           - Shipping/delivery information
+        
+        9. 🚀 FINAL CTA SECTION (Bottom 6%):
+           - Urgent call-to-action with countdown/scarcity
+           - Large "Order Now" button
+           - Payment method icons
+           - Contact information
         `
         : `
-        Structure:
-        1. Hero: Product + Title
-        2. Benefits Lists
-        3. Call to Action: "Order Now"
-        4. Payment/Trust Badges
+        CRITICAL DESIGN REQUIREMENTS:
+        - FILL THE ENTIRE 9:16 VERTICAL SPACE - Use all available room
+        - Create a COMPREHENSIVE single-view landing page
+        - MODERN UI with gradients, shadows, and visual hierarchy
+        - Maximum content without scrolling feeling cramped
+        
+        MANDATORY SECTIONS (ALL Required):
+        
+        1. 🔥 HERO SECTION (Top 30%):
+           - Stunning gradient/colored background
+           - Large product image with glow/shadow effect
+           - Bold, compelling headline in ${formData.language}
+           - Value proposition subtext
+           - Trust row: ⭐ ratings + 🏆 badges + ✅ reviews count
+        
+        2. ✨ KEY BENEFITS (Next 35%):
+           - Section title: "المميزات الرئيسية" or equivalent
+           - 4-6 benefit cards in modern grid layout
+           - Each: Icon + Bold title + Description line
+           - Use colorful icons and card shadows
+           - Visual variety (different sizes/emphasis)
+        
+        3. 💰 PRICING & OFFER (Next 15%):
+           - Clear price display with currency
+           - If discount: Show original price crossed out
+           - Limited time offer indicator
+           - Value comparison or savings highlight
+        
+        4. 🛒 CALL TO ACTION (Next 12%):
+           - Large, prominent "Order Now" button
+           - Urgency text (limited stock, offer ends soon)
+           - Payment icons and trust badges
+           - Guarantee/return policy mention
+        
+        5. 📞 FOOTER (Bottom 8%):
+           - Contact information
+           - Delivery/shipping info
+           - Social proof elements
+           - Company/brand mini-logo
         `;
 
-      const prompt = `Create a ${pageType === 'long' ? 'Long-form' : 'Short'} E-commerce Landing Page UI (Vertical Mobile View).
+      const languageInstruction = formData.language === Language.Arabic
+        ? "ALL TEXT MUST BE IN ARABIC (العربية). Use RTL layout direction. Headlines, descriptions, buttons - everything in Arabic."
+        : formData.language === Language.French
+          ? "ALL TEXT MUST BE IN FRENCH. Use proper French marketing copy."
+          : "ALL TEXT MUST BE IN ENGLISH. Use compelling marketing copy.";
+
+      const styleInstruction = `
+        VISUAL STYLE REQUIREMENTS:
+        - Use MODERN 2024/2025 UI trends: glassmorphism, gradients, soft shadows
+        - Color scheme: Professional and matching product aesthetics
+        - Typography: Clean, modern fonts with clear hierarchy
+        - Spacing: Generous but efficient use of whitespace
+        - Cards: Rounded corners (12-16px), subtle shadows
+        - Buttons: Large, colorful, with hover states indicated
+        - Icons: Modern line or filled style, consistent set
+        - Images: High quality with subtle effects (shadows, glows)
+        - Backgrounds: Gradient or textured, not plain white
+        - Overall feel: PREMIUM, TRUSTWORTHY, CONVERSION-OPTIMIZED
+      `;
+
+      const prompt = `You are an EXPERT landing page designer. Create a ${pageType === 'long' ? 'COMPREHENSIVE LONG-FORM' : 'DETAILED SINGLE-VIEW'} E-commerce Landing Page.
       
-      Details:
-      - Product: See image
-      - Market: ${formData.country} (${formData.language})
+      🎯 PRIMARY OBJECTIVE: Generate a COMPLETE, DETAILED, PROFESSIONAL landing page that FILLS THE ENTIRE 9:16 VERTICAL SPACE with rich content and stunning visuals.
+      
+      📦 PRODUCT DETAILS:
+      - Product: CAREFULLY ANALYZE the reference image to understand what the product is, its features, benefits, and selling points
+      ${formData.description ? `- Product Description (User Provided): ${formData.description}` : '- Product Description: EXTRACT and GENERATE compelling product features, benefits, and selling points by analyzing the product image. Be creative and professional.'}
+      - Target Market: ${formData.country}
+      - ${languageInstruction}
       - ${priceInstruction}
       - ${paymentInstruction}
-      ${formData.customization ? `- Custom: ${formData.customization}` : ''}
+      ${formData.customization ? `- Special Requirements: ${formData.customization}` : ''}
       
-      Style: Professional, Clean, Conversion-Focused, Modern UI.
+      ${styleInstruction}
       
       ${structureInstruction}
+      
+      ⚠️ CRITICAL REMINDERS:
+      1. DO NOT leave any empty/white space - fill everything
+      2. Include ACTUAL TEXT content, not placeholders
+      3. Make it look like a REAL, PROFESSIONAL landing page
+      4. Every element should serve conversion optimization
+      5. The design should make customers WANT to buy immediately
       `;
 
       const result = await generateImage({
@@ -396,14 +517,16 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
               {/* 2. Content */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-800 mb-1">{t('prod_desc_label')}</label>
+                  <label className="block text-sm font-bold text-slate-800 mb-1 flex items-center gap-2">
+                    {t('prod_desc_label')}
+                    <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{t('optional') || 'اختياري'}</span>
+                  </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    placeholder={t('prod_desc_ph')}
+                    placeholder={t('prod_desc_ph_optional') || 'اترك فارغاً ليقوم الذكاء الاصطناعي باستخراج الوصف تلقائياً من صورة المنتج...'}
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 min-h-[80px]"
-                    required
                   />
                 </div>
 
