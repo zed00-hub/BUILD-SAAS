@@ -310,48 +310,77 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         `;
 
       const languageInstruction = formData.language === Language.Arabic
-        ? "ALL TEXT MUST BE IN ARABIC (العربية). Use RTL layout direction. Headlines, descriptions, buttons - everything in Arabic."
+        ? "ALL TEXT MUST BE IN ARABIC (العربية). Use RTL layout direction. Headlines, descriptions, buttons - everything in Arabic. Use professional Arabic marketing language."
         : formData.language === Language.French
           ? "ALL TEXT MUST BE IN FRENCH. Use proper French marketing copy."
           : "ALL TEXT MUST BE IN ENGLISH. Use compelling marketing copy.";
 
       const styleInstruction = `
-        VISUAL STYLE REQUIREMENTS:
+        🎨 VISUAL STYLE REQUIREMENTS (MANDATORY):
         - Use MODERN 2024/2025 UI trends: glassmorphism, gradients, soft shadows
-        - Color scheme: Professional and matching product aesthetics
-        - Typography: Clean, modern fonts with clear hierarchy
-        - Spacing: Generous but efficient use of whitespace
-        - Cards: Rounded corners (12-16px), subtle shadows
-        - Buttons: Large, colorful, with hover states indicated
-        - Icons: Modern line or filled style, consistent set
+        - Color scheme: Professional, vibrant, and matching product aesthetics
+        - Typography: Clean, modern fonts with CLEAR hierarchy (big headlines, readable body)
+        - Spacing: Well-organized, no clutter, no random empty spaces
+        - Cards: Rounded corners (12-16px), subtle shadows, well-aligned
+        - Icons: Modern, consistent style throughout
         - Images: High quality with subtle effects (shadows, glows)
-        - Backgrounds: Gradient or textured, not plain white
-        - Overall feel: PREMIUM, TRUSTWORTHY, CONVERSION-OPTIMIZED
+        - Backgrounds: Gradient or textured, visually appealing
+        - Overall feel: PREMIUM, TRUSTWORTHY, CLEAN, ORGANIZED
       `;
 
-      const prompt = `You are an EXPERT landing page designer. Create a ${pageType === 'long' ? 'COMPREHENSIVE LONG-FORM' : 'DETAILED SINGLE-VIEW'} E-commerce Landing Page.
+      const ctaInstruction = `
+        🔴 MANDATORY CTA BUTTONS (EXTREMELY IMPORTANT):
+        - EVERY landing page MUST have AT LEAST 2-3 prominent "اطلب الآن" / "Order Now" buttons
+        - Buttons must be: LARGE (full-width or nearly full-width), COLORFUL (red, green, or orange), PROMINENT
+        - Button text must be clear action words: "اطلب الآن", "احصل عليه الآن", "اشتري الآن"
+        - First CTA button should appear in the HERO section
+        - Last CTA button should appear at the BOTTOM of the page
+        - Buttons should have: Bold text, contrasting colors, rounded corners, subtle shadow
+        - NEVER generate a landing page without visible, prominent CTA buttons
+      `;
+
+      const contentQualityInstruction = `
+        📝 CONTENT QUALITY REQUIREMENTS (NO FILLER/PLACEHOLDER):
+        - ALL text must be MEANINGFUL and RELEVANT to the product
+        - DO NOT use generic placeholder text or lorem ipsum
+        - Headlines must be COMPELLING and describe actual product benefits
+        - Feature descriptions must explain REAL value to the customer
+        - Testimonials must feel AUTHENTIC with specific praise
+        - Every piece of text should SELL the product
+        - Use POWER WORDS: حصري، محدود، مجاني، ضمان، أصلي، سريع
+        - Create URGENCY: عرض محدود، آخر القطع، اطلب قبل نفاذ الكمية
+      `;
+
+      const prompt = `You are an EXPERT e-commerce landing page designer specializing in HIGH-CONVERTING sales pages.
+
+      🎯 MISSION: Create a ${pageType === 'long' ? 'COMPREHENSIVE LONG-FORM' : 'DETAILED SINGLE-VIEW'} Landing Page that CONVERTS visitors into BUYERS.
       
-      🎯 PRIMARY OBJECTIVE: Generate a COMPLETE, DETAILED, PROFESSIONAL landing page that FILLS THE ENTIRE 9:16 VERTICAL SPACE with rich content and stunning visuals.
-      
-      📦 PRODUCT DETAILS:
-      - Product: CAREFULLY ANALYZE the reference image to understand what the product is, its features, benefits, and selling points
-      ${formData.description ? `- Product Description (User Provided): ${formData.description}` : '- Product Description: EXTRACT and GENERATE compelling product features, benefits, and selling points by analyzing the product image. Be creative and professional.'}
+      📦 PRODUCT ANALYSIS:
+      - CAREFULLY ANALYZE the product image to understand: What is it? What problem does it solve? Who needs it?
+      ${formData.description ? `- User Description: ${formData.description}` : '- AUTO-GENERATE compelling product description by analyzing the image. Be specific and creative.'}
       - Target Market: ${formData.country}
       - ${languageInstruction}
       - ${priceInstruction}
       - ${paymentInstruction}
       ${formData.customization ? `- Special Requirements: ${formData.customization}` : ''}
       
+      ${ctaInstruction}
+      
+      ${contentQualityInstruction}
+      
       ${styleInstruction}
       
       ${structureInstruction}
       
-      ⚠️ CRITICAL REMINDERS:
-      1. DO NOT leave any empty/white space - fill everything
-      2. Include ACTUAL TEXT content, not placeholders
-      3. Make it look like a REAL, PROFESSIONAL landing page
-      4. Every element should serve conversion optimization
-      5. The design should make customers WANT to buy immediately
+      ⚠️ CRITICAL QUALITY CHECKS:
+      1. ✅ Does the page have 2-3 PROMINENT "Order Now" buttons? (REQUIRED)
+      2. ✅ Is ALL text meaningful and product-specific? (NO filler)
+      3. ✅ Is the layout CLEAN and ORGANIZED? (NO random elements)
+      4. ✅ Does it fill the ENTIRE 9:16 space properly? (NO empty areas)
+      5. ✅ Does it look like a REAL professional landing page? (HIGH quality)
+      6. ✅ Would a customer WANT to buy after seeing this? (CONVERSION focus)
+      
+      GENERATE A STUNNING, PROFESSIONAL, HIGH-CONVERTING LANDING PAGE NOW.
       `;
 
       const result = await generateImage({
