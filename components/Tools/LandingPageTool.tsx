@@ -198,13 +198,14 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       // Enhanced Structure Logic for Comprehensive Landing Pages - SINGLE VERTICAL COLUMN ONLY
       // Simplified & Optimized Prompt for Speed + Quality
       const structureInstruction = `
-        📐 LAYOUT: SINGLE CONTINUOUS VERTICAL COL (Mobile-style). NO grids.
+        📐 LAYOUT: STRICTLY SINGLE VERTICAL COLUMN (Mobile-style feed). 
+        ⛔ NO SPLIT SCREENS. NO 2-COLUMN GRIDS. EVERYTHING MUST BE STACKED VERTICALLY.
         
-        SECTIONS (ORDERED):
-        1. HERO: Product w/ shadows, Gradient BG, Headline, Trust badges, "Order Now" Button.
-        2. BEFORE/AFTER (CRITICAL): Split image visual. Left=Problem❌, Right=Solution✅.
+        SECTIONS (STACKED ONE BELOW ANOTHER):
+        1. HERO (TOP): Product Image Centered, Headline, Trust badges, "Order Now" Button.
+        2. BEFORE/AFTER (BELOW HERO): Show problem vs solution clearly. If side-by-side, make it a single image element, not a page split.
         3. SOCIAL PROOF: Happy REAL people (Modest/Family-friendly), Testimonials, 5-Star badge.
-        4. FEATURES: 3-4 Circular close-ups (Zoomed details).
+        4. FEATURES: 3-4 Circular close-ups (Zoomed details) stacked or in a carousel view.
         5. OFFER BOX (BOTTOM): Distinct color box, Big Price, Countdown, Guarantee, Free Shipping.
         6. FINAL CTA: Big "Order Now" Button.
       `;
@@ -248,8 +249,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       ${contentQualityInstruction}
       
       CHECKS:
-      1. Single Vertical Column? Yes.
-      2. Before/After shown? Yes.
+      1. Single Vertical Column? Yes. (NO SIDE-BY-SIDE SECTIONS)
+      2. Before/After shown below Hero? Yes.
       3. Modest/Family friendly? Yes.
       4. 4K Quality? Yes.
       `;
