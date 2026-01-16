@@ -196,177 +196,70 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       // Enhanced Structure Logic for Comprehensive Landing Pages
       // Enhanced Structure Logic for Comprehensive Landing Pages - SINGLE VERTICAL COLUMN ONLY
+      // Simplified & Optimized Prompt for Speed + Quality
       const structureInstruction = `
-        ⚠️ CRITICAL LAYOUT RULE - ABSOLUTELY MANDATORY:
-        - THE ENTIRE PAGE MUST BE A SINGLE VERTICAL COLUMN - NO HORIZONTAL SPLITS
-        - DO NOT use 2-column layouts, grids, or side-by-side elements
-        - ALL elements stacked VERTICALLY in ONE continuous column
-        - This is a MOBILE-FIRST design - single column only like a real mobile landing page
+        📐 LAYOUT: SINGLE CONTINUOUS VERTICAL COL (Mobile-style). NO grids.
         
-        CRITICAL DESIGN REQUIREMENTS:
-        - FILL THE ENTIRE 9:16 VERTICAL SPACE - No empty areas allowed
-        - Create a LONG SCROLLABLE landing page design with MAXIMUM content density
-        - Use RICH, MODERN UI with gradients, shadows, and micro-interactions
-        - Every section flows vertically into the next - ONE COLUMN ONLY
-        
-        MANDATORY SECTIONS (In Order, ALL Required, STACKED VERTICALLY):
-        
-        1. 🔥 HERO SECTION:
-           - Eye-catching gradient background (vibrant colors matching product)
-           - Large, centered product image with shadow/glow effect
-           - Bold headline in ${formData.language} (compelling, benefit-focused)
-           - Subheadline explaining unique value proposition
-           - Trust badges in a horizontal row (⭐ ratings, 🏆 awards, ✅ verified)
-           - Prominent "Order Now" button with price
-        
-        2. 🆚 "BEFORE & AFTER" VISUAL COMPARISON (CRITICAL):
-           - Generate a realistic split-screen visual:
-             * LEFT side: "Before" (Dull, problematic state, dirty, or struggling) with ❌ icon
-             * RIGHT side: "After" (Bright, clean, perfected state using the product) with ✅ icon
-           - Label clearly in ${formData.language} (e.g., "Before/After" or "قبل/بعد")
-           - This MUST look realistic and demonstrate the product's impact instantly
-        
-        3. 😰 PROBLEM & SOLUTION STORY:
-           - Section title: "Why you need this..."
-           - 3-4 pain points STACKED VERTICALLY with ❌ icons
-           - 3-4 corresponding solutions with ✅ checkmarks
-           - Dark/muted colors for problems, Bright/optimistic for solutions
-        
-        4. 👥 LIFESTYLE & SOCIAL PROOF (REAL PEOPLE):
-           - Show HAPPY REAL PEOPLE using the product (Families, Professionals, etc.)
-           - NOT just product photos - show human emotion and satisfaction
-           - Include a quote bubble from a "Doctor" or "Expert" or "Happy Customer"
-           - "Approved by Experts" or "Loved by Families" badge
-        
-        5. 🎁 SPECIAL OFFER BOX (DISTINCTIVE VISUAL):
-           - A distinct, colored containment box (Red, Gold, or Green borders)
-           - Inside: "Limited Time Offer" text
-           - Big Price Display + Discount
-           - Countdown Timer visual
-           - "Money Back Guarantee" Seal (30 Days / 100% Satisfaction)
-           - FREE Shipping badge
-        
-        6. 🟣 FEATURE CIRCLES (BOTTOM SECTION):
-           - 3 or 4 Circular Insets at the bottom
-           - Each circle zooms in on a specific tech feature or ingredient
-           - Short caption below each circle
-           - e.g., "Smart Chip", "Natural Ingredients", "Waterproof"
-        
-        7. 🚀 FINAL CTA SECTION:
-           - Large "Order Now" button centered
-           - Payment method icons in a row
-           - Contact information
-        `;
+        SECTIONS (ORDERED):
+        1. HERO: Product w/ shadows, Gradient BG, Headline, Trust badges, "Order Now" Button.
+        2. BEFORE/AFTER (CRITICAL): Split image visual. Left=Problem❌, Right=Solution✅.
+        3. SOCIAL PROOF: Happy REAL people (Modest/Family-friendly), Testimonials, 5-Star badge.
+        4. FEATURES: 3-4 Circular close-ups (Zoomed details).
+        5. OFFER BOX (BOTTOM): Distinct color box, Big Price, Countdown, Guarantee, Free Shipping.
+        6. FINAL CTA: Big "Order Now" Button.
+      `;
 
       const languageInstruction = formData.language === Language.Arabic
-        ? "ALL TEXT MUST BE IN ARABIC (العربية). Use RTL layout direction. Headlines, descriptions, buttons - everything in Arabic. Use professional Arabic marketing language."
+        ? "Language: ARABIC (Professional Marketing). RTL."
         : formData.language === Language.French
-          ? "ALL TEXT MUST BE IN FRENCH. Use proper French marketing copy."
-          : "ALL TEXT MUST BE IN ENGLISH. Use compelling marketing copy.";
+          ? "Language: FRENCH."
+          : "Language: ENGLISH.";
 
       const styleInstruction = `
-        🎨 VISUAL STYLE REQUIREMENTS (MANDATORY):
-        - 💎 **ULTRA 4K RESOLUTION**: Image MUST be crystal clear, sharp, and high-definition
-        - 🛡️ **MODESTY & FAMILY-FRIENDLY**:
-          * People in images MUST wear MODEST, respectful clothing (No revealing outfits)
-          * Suitable for conservative markets (Middle East/GCC focus)
-          * Focus on family values, professionalism, and trust
-        - Use MODERN 2024/2025 UI trends: glassmorphism, gradients, soft shadows
-        - Color scheme: Professional, vibrant, and matching product aesthetics
-        - Typography: Clean, modern fonts with CLEAR hierarchy (big headlines, readable body)
-        - The entire design must look like a PREMIUM BRAND
+        🎨 STYLE: ULTRA 4K. Premium 2025 UI.
+        - MODESTY MANDATE: Respectful clothing, family values (Middle East suitable).
+        - VISUALS: Glassmorphism, specific lighting, clear typography.
       `;
 
       const ctaInstruction = `
-        🔴 MANDATORY CTA BUTTONS (EXTREMELY IMPORTANT):
-        - EVERY landing page MUST have AT LEAST 2-3 prominent "اطلب الآن" / "Order Now" buttons
-        - Buttons must be: LARGE (full-width or nearly full-width), COLORFUL (red, green, or orange), PROMINENT
-        - Button text must be clear action words: "اطلب الآن", "احصل عليه الآن", "اشتري الآن"
-        - First CTA button should appear in the HERO section
-        - Last CTA button should appear at the BOTTOM of the page
-        - Buttons should have: Bold text, contrasting colors, rounded corners, subtle shadow
-        - NEVER generate a landing page without visible, prominent CTA buttons
+        🔴 CTAs: Must have 2-3 HUGE "Order Now" / "اطلب الآن" buttons. Colorful & Prominent.
       `;
 
       const contentQualityInstruction = `
-        📝 CONTENT QUALITY REQUIREMENTS (NO FILLER/FLUFF):
-        - ALL text must be MEANINGFUL and RELEVANT to the product
-        - 🚫 NO FAKE PHONE NUMBERS, NO RANDOM ADDRESSES, NO DUMMY EMAILS
-        - If contact info is needed, use generic terms like "Contact Us" or "000-000-000"
-        - Headlines must be COMPELLING and benefit-driven
-        - Testimonials must feel AUTHENTIC with specific praise
-        - Use POWER WORDS: حصري، محدود، مجاني، ضمان، أصلي، سريع
-        - Create URGENCY: عرض محدود، آخر القطع، اطلب قبل نفاذ الكمية
+        📝 TEXT: Meaningful, Selling.
+        - NO FAKE INFO (Use "Contact Us" or "000000").
+        - Power words + Urgency.
       `;
 
-      const prompt = `You are an EXPERT e-commerce landing page designer specializing in HIGH-CONVERTING sales pages.
-
-      🎯 MISSION: Create a SEAMLESS, VERTICAL "TIKTOK-STYLE" SCROLLING LANDING PAGE.
+      const prompt = `Design a HIGH-CONVERTING VERTICAL LANDING PAGE.
       
-      📦 PRODUCT ANALYSIS:
-      - CAREFULLY ANALYZE the product image to understand: What is it? What problem does it solve? Who needs it?
-      ${formData.description ? `- User Description: ${formData.description}` : '- AUTO-GENERATE compelling product description by analyzing the image. Be specific and creative.'}
-      - Target Market: ${formData.country}
+      PRODUCT INFO:
+      - Context: ${formData.description || 'Analyze image for context.'}
+      - Market: ${formData.country}
       - ${languageInstruction}
       - ${priceInstruction}
       - ${paymentInstruction}
-      ${formData.customization ? `- Special Requirements: ${formData.customization}` : ''}
+      ${formData.customization ? `- Custom: ${formData.customization}` : ''}
       
+      INSTRUCTIONS:
+      ${structureInstruction}
+      ${styleInstruction}
       ${ctaInstruction}
-      
       ${contentQualityInstruction}
       
-      ${styleInstruction}
-      
-      📐 STRUCTURE & FLOW (MATCH EXACTLY):
-      The page must flow continuously like a long social media post, NO hard breaks between sections.
-      
-      1. 🔥 HEADER / HERO:
-         - Top banner: "Limited Time Offer" / "Free Shipping"
-         - Main Hero Image (Product in action, beautiful lighting)
-         - Big Headline + Subheadline
-         - "Order Now" Button
-      
-      2. 🆚 SPLIT VISUAL (BEFORE & AFTER) - **DIRECTLY BELOW HERO**:
-         - A massive, clear split image:
-         - Left: "BEFORE" (Problem state, e.g., Dirty floor, overweight) - labeled clearly
-         - Right: "AFTER" (Perfect result with product) - labeled clearly
-         - This is the PRIMARY visual hook.
-      
-      3. 💬 SOCIAL PROOF & EXPERTS - **BELOW BEFORE/AFTER**:
-         - A collage/masonry layout of Happy People / Experts
-         - Photos of families, doctors, or influencers pointing to the product
-         - Speech bubbles with short, punchy testimonials
-         - "5-Star Rated" badge
-      
-      4. 🟣 INGREDIENTS / TECH SPECS (CIRCLES) - **BELOW PROOF**:
-         - 3 or 4 Circular Insets lined up horizontally or in a slight arc
-         - Inside each circle: Zoomed-in detail (e.g., Fabric texture, ingredient leaf, chip)
-         - Short label under each circle
-      
-      5. 🎁 THE OFFER BOX (BOTTOM CLIMAX) - **FINAL SECTION**:
-         - A distinct, high-contrast container (Red/Gold border)
-         - "Special Offer" Header
-         - Price: BIG and BOLD
-         - Checkmarks: "Free Shipping", "Cash on Delivery", "Warranty"
-         - FINAL HUGE "ORDER NOW" BUTTON
-      
-      ⚠️ CRITICAL CHECKS:
-      1. ✅ IS IT SEAMLESS? (Do sections flow into each other naturally?)
-      2. ✅ IS THE "BEFORE/AFTER" PROMINENT? (Must be large and clear)
-      3. ✅ ARE THERE 3-4 CIRCLE FEATURES? (As requested)
-      4. ✅ ARE FAKE DETAILS REMOVED? (No random phone numbers)
-      5. ✅ IS THE LAYOUT VERTICAL? (No horizontal side-by-side splitting of text blocks)
-      
-      GENERATE A STUNNING, CONVERSION-FOCUSED VERTICAL DESIGN NOW.
+      CHECKS:
+      1. Single Vertical Column? Yes.
+      2. Before/After shown? Yes.
+      3. Modest/Family friendly? Yes.
+      4. 4K Quality? Yes.
       `;
 
       const result = await generateImage({
         prompt,
         referenceImage: productImage,
         logoImage: logoImage || undefined,
-        aspectRatio: "9:16", // Fixed to 9:16
-        imageSize: "2K"
+        aspectRatio: "9:16",
+        imageSize: "4K"
       });
       setResultImage(result);
 
