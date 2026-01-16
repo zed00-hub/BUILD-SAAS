@@ -37,7 +37,7 @@ interface CloudFunctionResponse {
 }
 
 const callGeminiFunction = async (data: any): Promise<CloudFunctionResponse> => {
-  const generateContent = httpsCallable(functions, 'generateContent');
+  const generateContent = httpsCallable(functions, 'generateContent', { timeout: 540000 });
   try {
     const result = await generateContent(data);
     return result.data as CloudFunctionResponse;
