@@ -21,7 +21,7 @@ type ToolMode = 'virtual-tryon' | 'product-placement';
 
 // Virtual Try-On Options
 type ClothingType = 'tshirt' | 'shirt' | 'dress' | 'jacket' | 'pants' | 'full-outfit' | 'accessories' | 'shoes';
-type ModelGender = 'male' | 'female' | 'unisex';
+type ModelGender = 'male' | 'female';
 type ModelBodyType = 'slim' | 'average' | 'athletic' | 'plus-size';
 type ModelSkinTone = 'light' | 'medium' | 'tan' | 'dark';
 
@@ -291,6 +291,23 @@ IMPORTANT: Do NOT alter the product itself - only place it in the new environmen
                 </p>
             </div>
 
+            {/* Important Sharia Disclaimer */}
+            <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl flex-shrink-0">⚠️</span>
+                    <div>
+                        <h4 className="font-bold text-amber-800 mb-1">
+                            {isRtl ? 'تنبيه شرعي مهم' : 'Important Disclaimer'}
+                        </h4>
+                        <p className="text-sm text-amber-700 leading-relaxed">
+                            {isRtl
+                                ? 'نُذكّركم بأننا غير مسؤولين أمام الله عز وجل عن أي صور يتم إنتاجها تحتوي على محظورات شرعية. المستخدم يتحمل كامل المسؤولية الشرعية والأخلاقية عن المحتوى الذي يقوم بتوليده. يرجى استخدام هذه الأداة في الحلال فقط والالتزام بالضوابط الشرعية.'
+                                : 'We are not responsible before Allah for any images generated that contain prohibited content. The user bears full responsibility for the content they create. Please use this tool only for permissible purposes and adhere to Islamic guidelines.'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Mode Toggle */}
             <div className="mb-8 bg-slate-100 p-1.5 rounded-2xl inline-flex gap-1">
                 <button
@@ -424,14 +441,14 @@ IMPORTANT: Do NOT alter the product itself - only place it in the new environmen
                                                     {isRtl ? 'جنس الموديل' : 'Model Gender'}
                                                 </label>
                                                 <div className="flex gap-2">
-                                                    {(['female', 'male', 'unisex'] as const).map((g) => (
+                                                    {(['female', 'male'] as const).map((g) => (
                                                         <button
                                                             key={g}
                                                             type="button"
                                                             onClick={() => setModelGender(g)}
                                                             className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all font-medium ${modelGender === g ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200 hover:border-indigo-300 text-slate-600'}`}
                                                         >
-                                                            {g === 'female' ? (isRtl ? '👩 أنثى' : '👩 Female') : g === 'male' ? (isRtl ? '👨 ذكر' : '👨 Male') : (isRtl ? '🧑 محايد' : '🧑 Unisex')}
+                                                            {g === 'female' ? (isRtl ? '👩 أنثى' : '👩 Female') : (isRtl ? '👨 ذكر' : '👨 Male')}
                                                         </button>
                                                     ))}
                                                 </div>
