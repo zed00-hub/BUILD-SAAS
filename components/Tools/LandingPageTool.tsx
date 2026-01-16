@@ -366,7 +366,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         referenceImage: productImage,
         logoImage: logoImage || undefined,
         aspectRatio: "9:16", // Fixed to 9:16
-        imageSize: "4K"
+        imageSize: "2K"
       });
       setResultImage(result);
 
