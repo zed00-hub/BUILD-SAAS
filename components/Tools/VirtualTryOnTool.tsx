@@ -9,6 +9,8 @@ import { WalletService } from '../../src/services/walletService';
 import { auth, functions } from '../../src/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { SaveToCloudButton } from '../SaveToCloudButton';
+import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
+import { HistoryItem } from '../../types';
 
 interface VirtualTryOnToolProps {
     points: number;
@@ -63,7 +65,15 @@ export const VirtualTryOnTool: React.FC<VirtualTryOnToolProps> = ({
     const [generatedImages, setGeneratedImages] = useState<string[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
     const [variationCount, setVariationCount] = useState(2);
+
+    // History State
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+
+    React.useEffect(() => {
+        setHistory(getHistory('virtual-tryon'));
+    }, []);
 
     // Virtual Try-On State
     const [clothingType, setClothingType] = useState<ClothingType>('tshirt');
@@ -245,6 +255,25 @@ IMPORTANT: Do NOT alter the product itself - only place it in the new environmen
             }
 
             setGeneratedImages(images);
+
+            // Save to History
+            const historyItem = saveHistoryItem({
+                tool: 'virtual-tryon',
+                inputs: {
+                    mode,
+                    clothingType,
+                    modelGender,
+                    placementScene,
+                    prompt
+                },
+                results: images,
+                meta: { variationCount }
+            });
+
+            if (historyItem) {
+                setHistory(prev => [historyItem, ...prev]);
+            }
+
             setTimeout(() => {
                 resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
@@ -780,6 +809,66 @@ IMPORTANT: Do NOT alter the product itself - only place it in the new environmen
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* History Section - Previous Works */}
+            <div className="mt-12 pt-8 border-t border-slate-200 lg:col-span-12">
+                <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <span className="text-3xl">🕰️</span>
+                    {isRtl ? 'الأعمال السابقة' : 'Previous Works'}
+                </h3>
+
+                {history.length === 0 ? (
+                    <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-100 text-slate-400">
+                        {isRtl ? 'لا توجد أعمال سابقة بعد' : 'No previous works yet'}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {history.map((item) => (
+                            <div key={item.id} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
+                                <div className="aspect-[3/4] relative group">
+                                    {Array.isArray(item.results) && item.results[0] ? (
+                                        <img
+                                            src={item.results[0]}
+                                            alt="History"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : null}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setGeneratedImages(item.results as string[]);
+                                                resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                            }}
+                                            className="p-2 bg-white rounded-full text-indigo-600 hover:bg-indigo-50"
+                                            title={isRtl ? 'عرض' : 'View'}
+                                        >
+                                            👁️
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                deleteHistoryItem(item.id);
+                                                setHistory(prev => prev.filter(h => h.id !== item.id));
+                                            }}
+                                            className="p-2 bg-white rounded-full text-red-600 hover:bg-red-50"
+                                            title={isRtl ? 'حذف' : 'Delete'}
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-3">
+                                    <div className="text-xs text-slate-400 mb-1">
+                                        {new Date(item.timestamp).toLocaleDateString()}
+                                    </div>
+                                    <div className="text-sm font-medium text-slate-700 truncate">
+                                        {item.inputs.mode === 'virtual-tryon' ? (isRtl ? 'تجربة ملابس' : 'Virtual Try-On') : (isRtl ? 'وضع منتج' : 'Product Placement')}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

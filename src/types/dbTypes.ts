@@ -5,7 +5,7 @@ export type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'c
 
 // Account Types
 export type AccountType = 'trial' | 'paid';
-export type PlanType = 'basic' | 'pro' | 'elite' | null;
+export type PlanType = 'basic' | 'pro' | 'elite' | 'e-commerce' | null;
 
 export interface UserData {
     uid: string;

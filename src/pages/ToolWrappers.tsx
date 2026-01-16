@@ -81,8 +81,23 @@ const ToolGuard: React.FC<{ toolId: string; children: React.ReactNode }> = ({ to
 };
 
 
+const PlanRestrictedBanner: React.FC<{ message: string }> = ({ message }) => (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 animate-fade-in">
+        <div className="bg-slate-50 p-8 rounded-3xl max-w-lg border border-slate-200 shadow-sm">
+            <div className="text-6xl mb-6">🔒</div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Upgrade Required</h2>
+            <p className="text-slate-600 mb-6 font-medium">{message}</p>
+        </div>
+    </div>
+);
+
 export const SocialMediaWrapper: React.FC = () => {
     const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+
+    if (userProfile?.planType === 'e-commerce') {
+        return <PlanRestrictedBanner message="Social Media Tool is not available in the E-COM STARTER plan. Please upgrade to PRO to access." />;
+    }
+
     return (
         <ToolGuard toolId="social-media">
             {!isPaidUser && <TrialBanner />}
@@ -113,6 +128,11 @@ export const LandingPageToolWrapper: React.FC = () => {
 
 export const QuickEditWrapper: React.FC = () => {
     const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+
+    if (userProfile?.planType === 'e-commerce') {
+        return <PlanRestrictedBanner message="Quick Edit Tool is not available in the E-COM STARTER plan. Please upgrade to PRO to access." />;
+    }
+
     return (
         <ToolGuard toolId="quick-edit">
             {!isPaidUser && <TrialBanner />}
