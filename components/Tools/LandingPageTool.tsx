@@ -289,20 +289,19 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       `;
 
       const contentQualityInstruction = `
-        📝 CONTENT QUALITY REQUIREMENTS (NO FILLER/PLACEHOLDER):
+        📝 CONTENT QUALITY REQUIREMENTS (NO FILLER/FLUFF):
         - ALL text must be MEANINGFUL and RELEVANT to the product
-        - DO NOT use generic placeholder text or lorem ipsum
-        - Headlines must be COMPELLING and describe actual product benefits
-        - Feature descriptions must explain REAL value to the customer
+        - 🚫 NO FAKE PHONE NUMBERS, NO RANDOM ADDRESSES, NO DUMMY EMAILS
+        - If contact info is needed, use generic terms like "Contact Us" or "000-000-000"
+        - Headlines must be COMPELLING and benefit-driven
         - Testimonials must feel AUTHENTIC with specific praise
-        - Every piece of text should SELL the product
         - Use POWER WORDS: حصري، محدود، مجاني، ضمان، أصلي، سريع
         - Create URGENCY: عرض محدود، آخر القطع، اطلب قبل نفاذ الكمية
       `;
 
       const prompt = `You are an EXPERT e-commerce landing page designer specializing in HIGH-CONVERTING sales pages.
 
-      🎯 MISSION: Create a COMPREHENSIVE VERTICAL Landing Page that CONVERTS visitors into BUYERS.
+      🎯 MISSION: Create a SEAMLESS, VERTICAL "TIKTOK-STYLE" SCROLLING LANDING PAGE.
       
       📦 PRODUCT ANALYSIS:
       - CAREFULLY ANALYZE the product image to understand: What is it? What problem does it solve? Who needs it?
@@ -319,17 +318,47 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       
       ${styleInstruction}
       
-      ${structureInstruction}
+      📐 STRUCTURE & FLOW (MATCH EXACTLY):
+      The page must flow continuously like a long social media post, NO hard breaks between sections.
       
-      ⚠️ CRITICAL QUALITY CHECKS:
-      1. ✅ Does the page have 2-3 PROMINENT "Order Now" buttons? (REQUIRED)
-      2. ✅ Is ALL text meaningful and product-specific? (NO filler)
-      3. ✅ Is the layout CLEAN and ORGANIZED? (NO random elements)
-      4. ✅ Does it fill the ENTIRE 9:16 space properly? (NO empty areas)
-      5. ✅ Does it look like a REAL professional landing page? (HIGH quality)
-      6. ✅ Is it a SINGLE VERTICAL COLUMN? (No horizontal splits)
+      1. 🔥 HEADER / HERO:
+         - Top banner: "Limited Time Offer" / "Free Shipping"
+         - Main Hero Image (Product in action, beautiful lighting)
+         - Big Headline + Subheadline
+         - "Order Now" Button
       
-      GENERATE A STUNNING, PROFESSIONAL, HIGH-CONVERTING LANDING PAGE NOW.
+      2. 🆚 SPLIT VISUAL (BEFORE & AFTER) - **DIRECTLY BELOW HERO**:
+         - A massive, clear split image:
+         - Left: "BEFORE" (Problem state, e.g., Dirty floor, overweight) - labeled clearly
+         - Right: "AFTER" (Perfect result with product) - labeled clearly
+         - This is the PRIMARY visual hook.
+      
+      3. 💬 SOCIAL PROOF & EXPERTS - **BELOW BEFORE/AFTER**:
+         - A collage/masonry layout of Happy People / Experts
+         - Photos of families, doctors, or influencers pointing to the product
+         - Speech bubbles with short, punchy testimonials
+         - "5-Star Rated" badge
+      
+      4. 🟣 INGREDIENTS / TECH SPECS (CIRCLES) - **BELOW PROOF**:
+         - 3 or 4 Circular Insets lined up horizontally or in a slight arc
+         - Inside each circle: Zoomed-in detail (e.g., Fabric texture, ingredient leaf, chip)
+         - Short label under each circle
+      
+      5. 🎁 THE OFFER BOX (BOTTOM CLIMAX) - **FINAL SECTION**:
+         - A distinct, high-contrast container (Red/Gold border)
+         - "Special Offer" Header
+         - Price: BIG and BOLD
+         - Checkmarks: "Free Shipping", "Cash on Delivery", "Warranty"
+         - FINAL HUGE "ORDER NOW" BUTTON
+      
+      ⚠️ CRITICAL CHECKS:
+      1. ✅ IS IT SEAMLESS? (Do sections flow into each other naturally?)
+      2. ✅ IS THE "BEFORE/AFTER" PROMINENT? (Must be large and clear)
+      3. ✅ ARE THERE 3-4 CIRCLE FEATURES? (As requested)
+      4. ✅ ARE FAKE DETAILS REMOVED? (No random phone numbers)
+      5. ✅ IS THE LAYOUT VERTICAL? (No horizontal side-by-side splitting of text blocks)
+      
+      GENERATE A STUNNING, CONVERSION-FOCUSED VERTICAL DESIGN NOW.
       `;
 
       const result = await generateImage({
