@@ -266,15 +266,15 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       const styleInstruction = `
         🎨 VISUAL STYLE REQUIREMENTS (MANDATORY):
+        - 💎 **ULTRA 4K RESOLUTION**: Image MUST be crystal clear, sharp, and high-definition
+        - 🛡️ **MODESTY & FAMILY-FRIENDLY**:
+          * People in images MUST wear MODEST, respectful clothing (No revealing outfits)
+          * Suitable for conservative markets (Middle East/GCC focus)
+          * Focus on family values, professionalism, and trust
         - Use MODERN 2024/2025 UI trends: glassmorphism, gradients, soft shadows
         - Color scheme: Professional, vibrant, and matching product aesthetics
         - Typography: Clean, modern fonts with CLEAR hierarchy (big headlines, readable body)
-        - Spacing: Well-organized, no clutter, no random empty spaces
-        - Cards: Rounded corners (12-16px), subtle shadows, well-aligned
-        - Icons: Modern, consistent style throughout
-        - Images: High quality with subtle effects (shadows, glows)
-        - Backgrounds: Gradient or textured, visually appealing
-        - Overall feel: PREMIUM, TRUSTWORTHY, CLEAN, ORGANIZED
+        - The entire design must look like a PREMIUM BRAND
       `;
 
       const ctaInstruction = `
