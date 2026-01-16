@@ -10,6 +10,8 @@ import {
   AdCreativeWrapper,
   LandingPageToolWrapper,
   QuickEditWrapper,
+  ProductDescriptionWrapper,
+  VirtualTryOnWrapper,
   AdminWrapper
 } from './src/pages/ToolWrappers';
 
@@ -28,6 +30,8 @@ const App: React.FC = () => {
             <Route path="ad-creative" element={<AdCreativeWrapper />} />
             <Route path="landing-page" element={<LandingPageToolWrapper />} />
             <Route path="quick-edit" element={<QuickEditWrapper />} />
+            <Route path="product-description" element={<ProductDescriptionWrapper />} />
+            <Route path="virtual-tryon" element={<VirtualTryOnWrapper />} />
             <Route path="admin" element={<AdminWrapper />} />
           </Route>
 

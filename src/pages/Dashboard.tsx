@@ -286,6 +286,18 @@ export const Dashboard: React.FC = () => {
                                 icon="✨"
                                 label={t('tool_quick_edit')}
                             />
+                            <SidebarItem
+                                active={isActive('product-description')}
+                                onClick={() => { navigate('product-description'); setIsSidebarOpen(false); }}
+                                icon="📝"
+                                label={t('tool_product_desc')}
+                            />
+                            <SidebarItem
+                                active={isActive('virtual-tryon')}
+                                onClick={() => { navigate('virtual-tryon'); setIsSidebarOpen(false); }}
+                                icon="👗"
+                                label={t('tool_virtual_tryon')}
+                            />
                             <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('my_projects')}</div>
                             <SidebarItem
                                 active={isGalleryOpen}

@@ -8,6 +8,8 @@ import { SocialMediaTool } from '../../components/Tools/SocialMediaTool';
 import { AdCreativeTool } from '../../components/Tools/AdCreativeTool';
 import { LandingPageTool } from '../../components/Tools/LandingPageTool';
 import { QuickEditTool } from '../../components/Tools/QuickEditTool';
+import { ProductDescriptionTool } from '../../components/Tools/ProductDescriptionTool';
+import { VirtualTryOnTool } from '../../components/Tools/VirtualTryOnTool';
 import { AdminDashboard } from '../../components/Admin/AdminDashboard';
 
 // --- Tool Guard Component ---
@@ -123,3 +125,24 @@ export const AdminWrapper: React.FC = () => {
     const { isAdmin } = useOutletContext<DashboardContextType>();
     return isAdmin ? <AdminDashboard /> : <div className="p-8 text-center text-red-500 font-bold text-xl">Access Denied: Admins Only</div>;
 };
+
+export const ProductDescriptionWrapper: React.FC = () => {
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+    return (
+        <ToolGuard toolId="product-description">
+            {!isPaidUser && <TrialBanner />}
+            <ProductDescriptionTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
+        </ToolGuard>
+    );
+};
+
+export const VirtualTryOnWrapper: React.FC = () => {
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+    return (
+        <ToolGuard toolId="virtual-tryon">
+            {!isPaidUser && <TrialBanner />}
+            <VirtualTryOnTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
+        </ToolGuard>
+    );
+};
+
