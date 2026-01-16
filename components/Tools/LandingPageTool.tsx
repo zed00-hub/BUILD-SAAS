@@ -219,45 +219,40 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
            - Trust badges in a horizontal row (⭐ ratings, 🏆 awards, ✅ verified)
            - Prominent "Order Now" button with price
         
-        2. 😰 PROBLEM SECTION:
-           - Section title: "Are you struggling with..."
+        2. 🆚 "BEFORE & AFTER" VISUAL COMPARISON (CRITICAL):
+           - Generate a realistic split-screen visual:
+             * LEFT side: "Before" (Dull, problematic state, dirty, or struggling) with ❌ icon
+             * RIGHT side: "After" (Bright, clean, perfected state using the product) with ✅ icon
+           - Label clearly in ${formData.language} (e.g., "Before/After" or "قبل/بعد")
+           - This MUST look realistic and demonstrate the product's impact instantly
+        
+        3. 😰 PROBLEM & SOLUTION STORY:
+           - Section title: "Why you need this..."
            - 3-4 pain points STACKED VERTICALLY with ❌ icons
-           - Each problem in its own row, one below the other
-           - Dark/muted colors to emphasize problems
+           - 3-4 corresponding solutions with ✅ checkmarks
+           - Dark/muted colors for problems, Bright/optimistic for solutions
         
-        3. ✨ SOLUTION SECTION:
-           - Section title: "Introducing the solution..."
-           - Centered product image with spotlight effect
-           - 3-4 solutions STACKED VERTICALLY with ✅ checkmarks
-           - Each solution in its own row, one below the other
-           - Bright, optimistic colors
+        4. 👥 LIFESTYLE & SOCIAL PROOF (REAL PEOPLE):
+           - Show HAPPY REAL PEOPLE using the product (Families, Professionals, etc.)
+           - NOT just product photos - show human emotion and satisfaction
+           - Include a quote bubble from a "Doctor" or "Expert" or "Happy Customer"
+           - "Approved by Experts" or "Loved by Families" badge
         
-        4. 🎯 FEATURES & BENEFITS:
-           - Section title: "Why Choose This Product"
-           - 6-8 feature items STACKED VERTICALLY (NOT in grid)
-           - Each feature: Icon + Title + Description - ALL IN ONE ROW, stacked below previous
-           - Use modern icons - but NO multi-column layout
+        5. 🎁 SPECIAL OFFER BOX (DISTINCTIVE VISUAL):
+           - A distinct, colored containment box (Red, Gold, or Green borders)
+           - Inside: "Limited Time Offer" text
+           - Big Price Display + Discount
+           - Countdown Timer visual
+           - "Money Back Guarantee" Seal (30 Days / 100% Satisfaction)
+           - FREE Shipping badge
         
-        5. 📊 SPECIFICATIONS/DETAILS:
-           - Technical specs or product details
-           - List format - each spec on its own line vertically
-           - Material, size, weight, compatibility info
+        6. 🟣 FEATURE CIRCLES (BOTTOM SECTION):
+           - 3 or 4 Circular Insets at the bottom
+           - Each circle zooms in on a specific tech feature or ingredient
+           - Short caption below each circle
+           - e.g., "Smart Chip", "Natural Ingredients", "Waterproof"
         
-        6. 💬 TESTIMONIALS SECTION:
-           - Section title: "What Our Customers Say"
-           - ${formData.reviews ? `Include these testimonials: "${formData.reviews}"` : '2-3 customer testimonials STACKED VERTICALLY, one below the other'}
-           - Each testimonial: Photo + Name + Rating + Quote - in vertical flow
-           - Verified purchase badges
-        
-        7. ❓ FAQ SECTION:
-           - 3-4 Q&As STACKED VERTICALLY
-           - Each Q&A on its own row
-        
-        8. 🛡️ GUARANTEE & TRUST:
-           - Trust badges in horizontal row (only exception)
-           - Money-back guarantee, secure checkout, shipping info
-        
-        9. 🚀 FINAL CTA SECTION:
+        7. 🚀 FINAL CTA SECTION:
            - Large "Order Now" button centered
            - Payment method icons in a row
            - Contact information
