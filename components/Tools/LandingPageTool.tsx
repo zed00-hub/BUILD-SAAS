@@ -221,52 +221,58 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
           : "Language: ENGLISH.";
 
       const styleInstruction = `
-        🎨 STYLE: ULTRA-PREMIUM E-COMMERCE UI (High-end Brand Style).
-        - AESTHETIC: Clean, Modern, Airy. ample whitespace.
-        - VISUALS: Photorealistic product integration. Soft, professional lighting.
-        - UI ELEMENTS: Glassmorphism cards, rounded buttons, subtle gradients.
-        - MODESTY MANDATE: Respectful clothing, family values (Middle East suitable).
+        🎨 STYLE: VERTICAL SALES INFOGRAPHIC / LONG-FORM PRODUCT BANNER.
+        - FORMAT: A continuous vertical image (like a long screenshot of a mobile sales page).
+        - VISUALS: High-saturation, commercial photography. 
+        - BACKGROUND: Dynamic segments (not just plain white). Use curves, gradients, or split-tones to separate sections smoothly.
         
-        ⛔ CRITICAL VISUAL RULES:
-        1. DO NOT WRITE SECTION NAMES (e.g., NO "Hero", NO "Before", NO "After" written on screen).
-        2. DO NOT make it look like a wireframe or blueprint. It must be a FINAL RENDERED WEBSITE.
-        3. Seamless transitions between sections (No harsh black lines).
+        ⛔ CRITICAL EXCLUSIONS (DO NOT INCLUDE):
+        1. NO WEBSITE NAVIGATION BARS (No Home/About/Contact links at the top).
+        2. NO BROWSER FRAMES or URL bars.
+        3. NO GENERIC HEADER. Start directly with the IMPACT/HEADLINE.
+        4. NO "Hero", "Before", "After" TEXT LABELS (Show, don't label).
+        5. DO NOT SPLIT THE SCREEN VERTICALLY (Left/Right). Keep it STACKED (Top/Bottom).
       `;
 
       const ctaInstruction = `
-        🔴 CTAs: Must have 2-3 PROMINENT "Order Now" / "اطلب الآن" buttons. High contrast colors.
+        🔴 CTAs: Insert attractive "Order Now" buttons between sections. High contrast.
       `;
 
       const contentQualityInstruction = `
-        📝 TEXT CONTENT:
-        - Write ACTUAL MARKETING COPY (Headlines, Benefits, Urgency).
-        - NO META-LABELS (Do not label sections).
-        - NO FAKE INFO (Use "Contact Us" or "000000").
-        - NO FAKE REVIEWS/TESTIMONIALS.
+        📝 TEXT STRATEGY (SALES COPY):
+        - HEADLINES: Benefit-driven (e.g., "Get Smooth Skin" not "Skin Cream").
+        - MICRO-COPY: Use badges like "100% Organic", "Fast Shipping", "Money-back Guarantee".
+        - LANGUAGE: ${formData.language} (Ensure correct RTL for Arabic).
+        - NO FAKE REVIEWS unless provided by user.
       `;
 
-      const prompt = `Design a HIGH-CONVERTING VERTICAL LANDING PAGE.
+      const prompt = `Create a LONG VERTICAL SALES PAGE IMAGE for a product.
       
-      PRODUCT INFO:
-      - Context: ${formData.description || 'Analyze image for context.'}
-      - Market: ${formData.country}
-      - ${languageInstruction}
-      - ${priceInstruction}
-      - ${paymentInstruction}
-      ${formData.customization ? `- Custom: ${formData.customization}` : ''}
+      PRODUCT CONTEXT:
+      - Description: ${formData.description || 'Analyze image.'}
+      - Target Market: ${formData.country}
+      - Language: ${formData.language}
+      - Price Info: ${priceInstruction}
+      - Payment: ${paymentInstruction}
+      ${formData.customization ? `- Custom details: ${formData.customization}` : ''}
       
-      INSTRUCTIONS:
-      ${structureInstruction}
+      STRUCTURE (STACKED VERTICALLY - NO SIDE-BY-SIDE):
+      1. [HEADLINE AREA]: Strong benefit headline + Product Hero Shot + Discount Badge.
+      2. [PROBLEM/SOLUTION]: Visual "Before & After" demonstration (Stacked or creatively merged).
+      ${socialProofSection}
+      4. [KEY FEATURES]: Close-up circular shots of product details with brief captions.
+      5. [OFFER & GUARANTEE]: Pricing box, "Cash on Delivery" badges, Trust seals.
+      6. [FINAL CTA]: Clear Call to Action button.
+      
       ${styleInstruction}
       ${ctaInstruction}
       ${contentQualityInstruction}
       
       Checks:
-      1. Single Vertical Column? Yes. (NO SIDE-BY-SIDE)
-      2. No "Hero"/"Before"/"After" text written? Yes. (CRITICAL)
-      3. Before/After visual shown? Yes.
-      4. Modest/Family friendly? Yes.
-      5. 4K Quality? Yes.
+      1. Is it a continuous vertical strip? Yes.
+      2. Are navigation bars/headers removed? Yes. (CRITICAL)
+      3. Are "Before/After" labels removed (visuals only)? Yes.
+      4. Is text legible and professional? Yes.
       `;
 
       const result = await generateImage({
