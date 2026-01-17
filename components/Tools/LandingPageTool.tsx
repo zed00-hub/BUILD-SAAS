@@ -221,58 +221,59 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
           : "Language: ENGLISH.";
 
       const styleInstruction = `
-        🎨 STYLE: VERTICAL SALES INFOGRAPHIC / LONG-FORM PRODUCT BANNER.
-        - FORMAT: A continuous vertical image (like a long screenshot of a mobile sales page).
-        - VISUALS: High-saturation, commercial photography. 
-        - BACKGROUND: Dynamic segments (not just plain white). Use curves, gradients, or split-tones to separate sections smoothly.
+        🎨 STYLE: ULTRA-REALISTIC 4K PREMIUM WEB DESIGN.
+        - RESOLUTION: 8K/4K photorealistic rendering. Sharp details.
+        - AESTHETIC: High-end E-commerce (Apple/Nike/Dior style). Minimalist, Airy, Sophisticated.
+        - FLOW: SEAMLESS VERTICAL SCROLL. Sections must merge smoothly (Gradient fades or curved separators). NO HARSH LINES between sections.
+        - VISUALS: Cinematic product photography. Soft studio lighting. Depth of field.
         
-        ⛔ CRITICAL EXCLUSIONS (DO NOT INCLUDE):
-        1. NO WEBSITE NAVIGATION BARS (No Home/About/Contact links at the top).
-        2. NO BROWSER FRAMES or URL bars.
-        3. NO GENERIC HEADER. Start directly with the IMPACT/HEADLINE.
-        4. NO "Hero", "Before", "After" TEXT LABELS (Show, don't label).
-        5. DO NOT SPLIT THE SCREEN VERTICALLY (Left/Right). Keep it STACKED (Top/Bottom).
+        ⛔ STRICT PROHIBITIONS:
+        1. NO SPLIT SCREENS (Left/Right division). Content must be STACKED Top-to-Bottom.
+        2. NO WEBSITE NAVIGATION BARS (No Menu, No Search, No "Home/Contact" links).
+        3. NO BROWSER FRAMES.
+        4. NO GENERIC TEXT LABELS (Do not write "Hero Section", "Before/After" on the image).
       `;
 
       const ctaInstruction = `
-        🔴 CTAs: Insert attractive "Order Now" buttons between sections. High contrast.
+        🔴 CTAs: Insert 2-3 GLOSSY, HIGH-CONTRAST "Order Now" BUTTONS placed organically between sections.
       `;
 
       const contentQualityInstruction = `
-        📝 TEXT STRATEGY (SALES COPY):
-        - HEADLINES: Benefit-driven (e.g., "Get Smooth Skin" not "Skin Cream").
-        - MICRO-COPY: Use badges like "100% Organic", "Fast Shipping", "Money-back Guarantee".
-        - LANGUAGE: ${formData.language} (Ensure correct RTL for Arabic).
-        - NO FAKE REVIEWS unless provided by user.
+        📝 TEXT & COPY:
+        - HEADLINES: Big, Bold, Sans-Serif Typography. High readability.
+        - MICRO-COPY: Use premium badges (100% Guaranteed, Fast Shipping).
+        - LANGUAGE: ${formData.language} (Ensure correct RTL alignment for Arabic).
+        - NO FAKE REVIEWS (Use generic trust badges if no reviews provided).
       `;
 
-      const prompt = `Create a LONG VERTICAL SALES PAGE IMAGE for a product.
+      const prompt = `Design a SINGLE CONTINUOUS VERTICAL LANDING PAGE IMAGE (Long Screenshot Style).
       
-      PRODUCT CONTEXT:
+      PRODUCT DETAILS:
       - Description: ${formData.description || 'Analyze image.'}
       - Target Market: ${formData.country}
       - Language: ${formData.language}
-      - Price Info: ${priceInstruction}
+      - Price: ${priceInstruction}
       - Payment: ${paymentInstruction}
-      ${formData.customization ? `- Custom details: ${formData.customization}` : ''}
+      ${formData.customization ? `- Custom: ${formData.customization}` : ''}
       
-      STRUCTURE (STACKED VERTICALLY - NO SIDE-BY-SIDE):
-      1. [HEADLINE AREA]: Strong benefit headline + Product Hero Shot + Discount Badge.
-      2. [PROBLEM/SOLUTION]: Visual "Before & After" demonstration (Stacked or creatively merged).
+      STRICT VERTICAL STRUCTURE (Top to Bottom):
+      1. [HERO SECTION]: LARGE Centered Product Shot + Impactful Headline + CTA Button. (Full width).
+      2. [TRANSFORMATION]: A powerful "Before & After" visual block (Stacked or Integrated Composition, NOT split screen).
       ${socialProofSection}
-      4. [KEY FEATURES]: Close-up circular shots of product details with brief captions.
-      5. [OFFER & GUARANTEE]: Pricing box, "Cash on Delivery" badges, Trust seals.
-      6. [FINAL CTA]: Clear Call to Action button.
+      4. [FEATURES SHOWCASE]: 3-4 High-res circular zoom-ins of product details.
+      5. [OFFER BLOCK]: Distinct colored card with Price, Discount, and Urgency Timer.
+      6. [FOOTER CTA]: High-impact Final Call to Action.
       
       ${styleInstruction}
       ${ctaInstruction}
       ${contentQualityInstruction}
       
       Checks:
-      1. Is it a continuous vertical strip? Yes.
-      2. Are navigation bars/headers removed? Yes. (CRITICAL)
-      3. Are "Before/After" labels removed (visuals only)? Yes.
-      4. Is text legible and professional? Yes.
+      1. Is the image ONE tall vertical strip? Yes.
+      2. Are side-by-side split screens REMOVED? Yes. (CRITICAL)
+      3. Is the quality 4K/Photorealistic? Yes.
+      4. Are Navbars/Menus removed? Yes.
+      5. Is all text legible? Yes.
       `;
 
       const result = await generateImage({
