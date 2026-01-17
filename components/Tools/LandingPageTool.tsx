@@ -221,20 +221,28 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
           : "Language: ENGLISH.";
 
       const styleInstruction = `
-        🎨 STYLE: ULTRA 4K. Premium 2025 UI.
+        🎨 STYLE: ULTRA-PREMIUM E-COMMERCE UI (High-end Brand Style).
+        - AESTHETIC: Clean, Modern, Airy. ample whitespace.
+        - VISUALS: Photorealistic product integration. Soft, professional lighting.
+        - UI ELEMENTS: Glassmorphism cards, rounded buttons, subtle gradients.
         - MODESTY MANDATE: Respectful clothing, family values (Middle East suitable).
-        - VISUALS: Glassmorphism, specific lighting, clear typography.
+        
+        ⛔ CRITICAL VISUAL RULES:
+        1. DO NOT WRITE SECTION NAMES (e.g., NO "Hero", NO "Before", NO "After" written on screen).
+        2. DO NOT make it look like a wireframe or blueprint. It must be a FINAL RENDERED WEBSITE.
+        3. Seamless transitions between sections (No harsh black lines).
       `;
 
       const ctaInstruction = `
-        🔴 CTAs: Must have 2-3 HUGE "Order Now" / "اطلب الآن" buttons. Colorful & Prominent.
+        🔴 CTAs: Must have 2-3 PROMINENT "Order Now" / "اطلب الآن" buttons. High contrast colors.
       `;
 
       const contentQualityInstruction = `
-        📝 TEXT: Meaningful, Selling.
+        📝 TEXT CONTENT:
+        - Write ACTUAL MARKETING COPY (Headlines, Benefits, Urgency).
+        - NO META-LABELS (Do not label sections).
         - NO FAKE INFO (Use "Contact Us" or "000000").
         - NO FAKE REVIEWS/TESTIMONIALS.
-        - Power words + Urgency.
       `;
 
       const prompt = `Design a HIGH-CONVERTING VERTICAL LANDING PAGE.
@@ -253,11 +261,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       ${ctaInstruction}
       ${contentQualityInstruction}
       
-      CHECKS:
-      1. Single Vertical Column? Yes. (NO SIDE-BY-SIDE SECTIONS)
-      2. Before/After shown below Hero? Yes.
-      3. Modest/Family friendly? Yes.
-      4. 4K Quality? Yes.
+      Checks:
+      1. Single Vertical Column? Yes. (NO SIDE-BY-SIDE)
+      2. No "Hero"/"Before"/"After" text written? Yes. (CRITICAL)
+      3. Before/After visual shown? Yes.
+      4. Modest/Family friendly? Yes.
+      5. 4K Quality? Yes.
       `;
 
       const result = await generateImage({
