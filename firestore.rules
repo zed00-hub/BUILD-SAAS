@@ -55,5 +55,11 @@ service cloud.firestore {
       // No updates allowed (designs are immutable)
       allow update: if false;
     }
+
+    // Tool Locks Collection (Global App Config)
+    match /tool_locks/{toolId} {
+      allow read: if true; // Frontend needs to know if tool is locked
+      allow write: if isAdmin(); // Only admins can manage locks
+    }
   }
 }

@@ -23,6 +23,7 @@ const TRANSACTIONS_COLLECTION = 'transactions';
 // Plan configurations with points (matching website pricing)
 export const PLAN_CONFIGS = {
     basic: { name: 'Basic', points: 300, price: 7.99, durationDays: 30 },
+    'e-commerce': { name: 'E-COM STARTER', points: 500, price: 14.99, durationDays: 30 },
     pro: { name: 'Pro', points: 1290, price: 30.99, durationDays: 30 },
     elite: { name: 'Elite', points: 5000, price: 0, durationDays: 30 } // Custom pricing - contact sales
 };
@@ -83,7 +84,7 @@ export const AdminService = {
     /**
      * ترقية مستخدم إلى حساب مدفوع مع خطة محددة
      */
-    async upgradeToPaidPlan(userId: string, planType: 'basic' | 'pro' | 'elite', description: string): Promise<boolean> {
+    async upgradeToPaidPlan(userId: string, planType: 'basic' | 'pro' | 'elite' | 'e-commerce', description: string): Promise<boolean> {
         try {
             const planConfig = PLAN_CONFIGS[planType];
             const now = Timestamp.now();
