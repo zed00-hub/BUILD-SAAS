@@ -10,6 +10,8 @@ const AVAILABLE_TOOLS = [
     { id: 'ad-creative', name: 'Ad Creative Tool', icon: '📢' },
     { id: 'landing-page', name: 'Landing Page Tool', icon: '📄' },
     { id: 'quick-edit', name: 'Quick Edit Tool', icon: '✨' },
+    { id: 'product-description', name: 'Product Description', icon: '📝' },
+    { id: 'virtual-tryon', name: 'Virtual Try-On', icon: '👕' },
 ];
 
 export const ToolManager: React.FC = () => {
@@ -142,9 +144,8 @@ export const ToolManager: React.FC = () => {
                 })}
             </div>
 
-            {/* Edit Modal */}
             {editingTool && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 w-full h-full bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in text-left rtl:text-right">
                         <h4 className="text-lg font-bold mb-4">Lock Settings: {AVAILABLE_TOOLS.find(t => t.id === editingTool)?.name}</h4>
 

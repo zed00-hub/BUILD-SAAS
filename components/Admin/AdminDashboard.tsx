@@ -24,7 +24,7 @@ export const AdminDashboard: React.FC = () => {
     const [adjustmentType, setAdjustmentType] = useState<AdjustmentType>('trial');
     const [amountToAdjust, setAmountToAdjust] = useState<string>('');
     const [adjustReason, setAdjustReason] = useState<string>('');
-    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro' | 'elite'>('basic');
+    const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro' | 'elite' | 'e-commerce'>('basic');
 
     // Pricing Management States
     const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
@@ -519,8 +519,8 @@ export const AdminDashboard: React.FC = () => {
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-bold text-slate-700 mb-2">{t('upgrade_plan')}</label>
-                                            <div className="grid grid-cols-3 gap-3">
-                                                {(['basic', 'pro', 'elite'] as const).map(plan => (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {(['basic', 'e-commerce', 'pro', 'elite'] as const).map(plan => (
                                                     <button
                                                         key={plan}
                                                         type="button"
