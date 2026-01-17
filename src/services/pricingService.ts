@@ -133,7 +133,23 @@ export class PricingService {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                return docSnap.data() as PricingConfig;
+                const config = docSnap.data() as PricingConfig;
+
+                // Auto-fix: Add e-commerce plan if missing from Firestore data
+                if (!config.plans.find(p => p.id === 'e-commerce')) {
+                    const ecommercePlan = DEFAULT_PRICING_CONFIG.plans.find(p => p.id === 'e-commerce');
+                    if (ecommercePlan) {
+                        console.log('Auto-injecting missing e-commerce plan...');
+                        const updatedConfig = {
+                            ...config,
+                            plans: [...config.plans, ecommercePlan].sort((a, b) => a.order - b.order)
+                        };
+                        // Save back to Firestore so it persists
+                        await this.savePricingConfig(updatedConfig);
+                        return updatedConfig;
+                    }
+                }
+                return config;
             }
 
             // If no config exists, save and return default
