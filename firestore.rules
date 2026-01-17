@@ -32,8 +32,8 @@ service cloud.firestore {
     // Transactions Collection
     match /transactions/{transactionId} {
       allow read: if resource.data.userId == request.auth.uid || isAdmin();
-      // Allow creation only if the transaction belongs to the authenticated user
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Allow creation if the transaction belongs to the authenticated user OR if done by an admin
+      allow create: if (request.auth != null && request.resource.data.userId == request.auth.uid) || isAdmin();
     }
     
     // Orders Collection
