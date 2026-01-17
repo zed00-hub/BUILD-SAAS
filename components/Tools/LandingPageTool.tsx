@@ -197,6 +197,10 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       // Enhanced Structure Logic for Comprehensive Landing Pages
       // Enhanced Structure Logic for Comprehensive Landing Pages - SINGLE VERTICAL COLUMN ONLY
       // Simplified & Optimized Prompt for Speed + Quality
+      const socialProofSection = formData.reviews && formData.reviews.trim().length > 0
+        ? `3. SOCIAL PROOF: Display these specific reviews: "${formData.reviews}". Use Happy REAL people (Modest/Family-friendly), 5-Star badge.`
+        : `3. TRUST INDICATORS: Show verified badges/guarantee icons ONLY. DO NOT GENERATE FAKE TEXT REVIEWS.`;
+
       const structureInstruction = `
         📐 LAYOUT: STRICTLY SINGLE VERTICAL COLUMN (Mobile-style feed). 
         ⛔ NO SPLIT SCREENS. NO 2-COLUMN GRIDS. EVERYTHING MUST BE STACKED VERTICALLY.
@@ -204,7 +208,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         SECTIONS (STACKED ONE BELOW ANOTHER):
         1. HERO (TOP): Product Image Centered, Headline, Trust badges, "Order Now" Button.
         2. BEFORE/AFTER (BELOW HERO): Show problem vs solution clearly. If side-by-side, make it a single image element, not a page split.
-        3. SOCIAL PROOF: Happy REAL people (Modest/Family-friendly), Testimonials, 5-Star badge.
+        ${socialProofSection}
         4. FEATURES: 3-4 Circular close-ups (Zoomed details) stacked or in a carousel view.
         5. OFFER BOX (BOTTOM): Distinct color box, Big Price, Countdown, Guarantee, Free Shipping.
         6. FINAL CTA: Big "Order Now" Button.
@@ -229,6 +233,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       const contentQualityInstruction = `
         📝 TEXT: Meaningful, Selling.
         - NO FAKE INFO (Use "Contact Us" or "000000").
+        - NO FAKE REVIEWS/TESTIMONIALS.
         - Power words + Urgency.
       `;
 
