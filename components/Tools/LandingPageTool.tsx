@@ -166,18 +166,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       return;
     }
 
-    // Check E-commerce Limit (2 per day)
-    if (userProfile?.planType === 'e-commerce') {
-      const today = new Date().toDateString();
-      const dailyCount = history.filter(item => new Date(item.timestamp).toDateString() === today).length;
-      if (dailyCount >= 2) {
-        setError(language === 'ar'
-          ? "عفواً، باقة المتاجر الإلكترونية (E-COM STARTER) تتيح لك تصميم صفحتين (2) هبوط فقط يومياً."
-          : "Sorry, E-commerce Starter plan is limited to 2 Landing Pages per day.");
-        return;
-      }
-    }
-
     setIsLoading(true);
     setError(null);
     setResultImage(null);
