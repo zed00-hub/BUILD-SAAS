@@ -166,12 +166,15 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       return;
     }
 
-    const hasPoints = await deductPoints(generationCost, `Generate Landing Page`);
-    if (!hasPoints) return;
-
     setIsLoading(true);
     setError(null);
     setResultImage(null);
+
+    const hasPoints = await deductPoints(generationCost, `Generate Landing Page`);
+    if (!hasPoints) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
       let paymentInstruction = "";
@@ -307,10 +310,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
   const handleEdit = async () => {
     if (!resultImage || !editInstruction) return;
-    const hasPoints = await deductPoints(editCost, "Edit Landing Page");
-    if (!hasPoints) return;
-
     setIsEditing(true);
+    const hasPoints = await deductPoints(editCost, "Edit Landing Page");
+    if (!hasPoints) {
+      setIsEditing(false);
+      return;
+    }
     try {
       const newImage = await editGeneratedImage(resultImage, editInstruction);
       setResultImage(newImage);
