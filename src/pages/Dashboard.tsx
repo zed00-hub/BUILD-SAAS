@@ -215,6 +215,35 @@ export const Dashboard: React.FC = () => {
             return <VerifyEmailScreen />;
         }
 
+        // Fix for missing Firestore Profile (Force Re-init)
+        if (user && !userProfile) {
+            return (
+                <div className="h-screen flex flex-col items-center justify-center p-4 bg-slate-50">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center animate-fade-in border border-slate-100">
+                        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">⚠️</div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-3">{t('account_setup_needed') || 'Account Setup Required'}</h2>
+                        <p className="text-slate-600 mb-8 leading-relaxed text-sm">
+                            {t('account_setup_desc') || 'Your account data could not be loaded automatically. Please click the button below to initialize your wallet and access the platform.'}
+                        </p>
+                        <button
+                            onClick={() => {
+                                setLoadingAuth(true); // Show spinner while retrying
+                                fetchUserProfile(user.uid, user).finally(() => setLoadingAuth(false));
+                            }}
+                            className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                        >
+                            {t('complete_setup') || '🛠️ Initialize Account Now'}
+                        </button>
+                        <div className="mt-6 pt-6 border-t border-slate-50">
+                            <p className="text-[10px] text-slate-400 font-mono bg-slate-50 p-2 rounded cursor-pointer hover:bg-slate-100" onClick={() => navigator.clipboard.writeText(user.uid)}>
+                                ID: {user.uid} (Click to Copy)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         // Context provider for nested routes (Tools)
         return <Outlet context={{ user, points, deductPoints: handleDeduction, isPaidUser, isAdmin, userProfile } as DashboardContextType} />;
     };
