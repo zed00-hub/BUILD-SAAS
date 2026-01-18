@@ -40,12 +40,12 @@ const PrivacyContent = {
                 </ul>
             </section>
             <section className="mb-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900">
-                <h2 className="text-xl font-bold mb-3">6. Compensation & Dispute Resolution</h2>
-                <p className="mb-2">In case of service disruptions or technical issues:</p>
+                <h2 className="text-xl font-bold mb-3">6. Compensation for Technical Issues</h2>
+                <p className="mb-2">In the event of verified technical errors or service disruptions:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>We offer <strong>fair compensation</strong> to ensure the rights of both parties are protected.</li>
-                    <li>Users can request credit refunds or service extensions in case of verified issues.</li>
-                    <li>All disputes will be handled in good faith to reach a mutually satisfactory resolution.</li>
+                    <li>Compensation is provided strictly as <strong>Service Credits (Points)</strong> or <strong>Subscription Extension</strong>.</li>
+                    <li>We ensure the user receives the full value of the service they paid for.</li>
+                    <li>This does <strong>not</strong> imply a monetary refund of the payment.</li>
                 </ul>
             </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
@@ -89,12 +89,12 @@ const PrivacyContent = {
                 </ul>
             </section>
             <section className="mb-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900">
-                <h2 className="text-xl font-bold mb-3">6. التعويض وحل النزاعات</h2>
-                <p className="mb-2">في حالة انقطاع الخدمة أو المشاكل التقنية:</p>
+                <h2 className="text-xl font-bold mb-3">6. التعويض عن المشاكل التقنية</h2>
+                <p className="mb-2">في حال حدوث أخطاء تقنية مثبتة أو انقطاع في الخدمة:</p>
                 <ul className="list-disc list-inside space-y-1 mr-2">
-                    <li>نقدم <strong>تعويضاً عادلاً</strong> لضمان حقوق الطرفين.</li>
-                    <li>يمكن للمستخدمين طلب استرداد الرصيد أو تمديد الخدمة في حالة المشاكل المثبتة.</li>
-                    <li>يتم التعامل مع جميع النزاعات بحسن نية للوصول إلى حل مُرضٍ للطرفين.</li>
+                    <li>يتم التعويض حصراً على شكل <strong>نقاط خدمة (رصيد)</strong> أو <strong>تمديد للاشتراك</strong>.</li>
+                    <li>نضمن حصول المستخدم على القيمة الكاملة للخدمة التي دفع مقابلها.</li>
+                    <li>هذا <strong>لا</strong> يعني استرداداً مالياً للمبلغ المدفوع.</li>
                 </ul>
             </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
@@ -138,12 +138,12 @@ const PrivacyContent = {
                 </ul>
             </section>
             <section className="mb-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900">
-                <h2 className="text-xl font-bold mb-3">6. Compensation & Résolution des Litiges</h2>
-                <p className="mb-2">En cas d'interruption de service ou de problèmes techniques :</p>
+                <h2 className="text-xl font-bold mb-3">6. Compensation pour Problèmes Techniques</h2>
+                <p className="mb-2">En cas d'erreurs techniques vérifiées ou d'interruptions de service :</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>Nous offrons une <strong>compensation équitable</strong> pour garantir les droits des deux parties.</li>
-                    <li>Les utilisateurs peuvent demander des remboursements de crédits ou des extensions de service en cas de problèmes vérifiés.</li>
-                    <li>Tous les litiges seront traités de bonne foi pour parvenir à une résolution mutuellement satisfaisante.</li>
+                    <li>La compensation est fournie strictement sous forme de <strong>Crédits de Service (Points)</strong> ou <strong>d'Extension d'Abonnement</strong>.</li>
+                    <li>Nous garantissons que l'utilisateur reçoit la pleine valeur du service pour lequel il a payé.</li>
+                    <li>Cela n'implique <strong>pas</strong> un remboursement monétaire du paiement.</li>
                 </ul>
             </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
@@ -170,6 +170,16 @@ const TermsContent = {
                 <h2 className="text-xl font-bold mb-4">3. AI Generated Content</h2>
                 <p>You represent and warrant that you have all necessary rights to the content you submit for generation. We do not claim ownership of the content you generate.</p>
             </section>
+            <section className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-900">
+                <h2 className="text-xl font-bold mb-3">4. No Refund Policy</h2>
+                <p className="mb-2"><strong>All purchases are final and non-refundable.</strong></p>
+                <p className="mb-2">Due to the nature of digital products and instant access to AI services:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>We incur immediate server and AI processing costs upon your usage.</li>
+                    <li>We provide a Free Trial for you to test the service quality before purchasing.</li>
+                    <li>Once a purchase is made and credits/access are delivered, no monetary refunds will be issued under any circumstances.</li>
+                </ul>
+            </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
                 <h2 className="text-xl font-bold mb-2">🔴 Important Disclaimer</h2>
                 <p className="font-bold">We fully disclaim responsibility before God Almighty and before everyone for any use of these tools to generate images of living beings, immodest images, or any content prohibited by Sharia. The platform's goal is to assist business owners and designers in their lawful (Halal) work, and any misuse lies solely with the user.</p>
@@ -191,6 +201,16 @@ const TermsContent = {
                 <h2 className="text-xl font-bold mb-4">3. المحتوى المُنشأ بواسطة الذكاء الاصطناعي</h2>
                 <p>تقر وتضمن أنك تمتلك جميع الحقوق اللازمة للمحتوى الذي ترسله للتوليد. نحن لا ندعي ملكية المحتوى الذي تنشئه.</p>
             </section>
+            <section className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-900">
+                <h2 className="text-xl font-bold mb-3">4. سياسة عدم الاسترداد</h2>
+                <p className="mb-2"><strong>جميع عمليات الشراء نهائية وغير قابلة للاسترداد.</strong></p>
+                <p className="mb-2">نظراً لطبيعة المنتجات الرقمية والوصول الفوري لخدمات الذكاء الاصطناعي:</p>
+                <ul className="list-disc list-inside space-y-1 mr-2">
+                    <li>نحن نتحمل تكاليف فورية للخوادم والمعالجة بمجرد استخدامك للخدمة.</li>
+                    <li>نحن نوفر "تجربة مجانية" لتتمكن من اختبار جودة الخدمة قبل الشراء.</li>
+                    <li>بمجرد إتمام الشراء ووصول النقاط/الصلاحيات، لا يتم إصدار أي مبالغ مستردة مالياً تحت أي ظرف.</li>
+                </ul>
+            </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
                 <h2 className="text-xl font-bold mb-2">🔴 إبراء ذمة</h2>
                 <p className="font-bold">نحن نخلي مسؤوليتنا تماماً أمام الله عز وجل ثم أمام الجميع عن أي استخدام لهذه الأدوات في توليد صور ذوات الأرواح، أو صور غير محتشمة (تبرج)، أو أي محتوى محرم شرعاً. الهدف من المنصة هو مساعدة أصحاب الأعمال والمصممين في أعمالهم الحلال، وأي سوء استخدام يقع على عاتق المستخدم وحده.</p>
@@ -211,6 +231,16 @@ const TermsContent = {
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">3. Contenu généré par IA</h2>
                 <p>Vous déclarez et garantissez que vous disposez de tous les droits nécessaires sur le contenu que vous soumettez pour génération. Nous ne revendiquons pas la propriété du contenu que vous générez.</p>
+            </section>
+            <section className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-900">
+                <h2 className="text-xl font-bold mb-3">4. Politique de Non-Remboursement</h2>
+                <p className="mb-2"><strong>Tous les achats sont définitifs et non remboursables.</strong></p>
+                <p className="mb-2">En raison de la nature des produits numériques et de l'accès instantané aux services IA :</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Nous engageons des coûts de serveur et de traitement IA immédiats dès votre utilisation.</li>
+                    <li>Nous proposons un Essai Gratuit pour que vous puissiez tester la qualité du service avant d'acheter.</li>
+                    <li>Une fois l'achat effectué et les crédits/accès livrés, aucun remboursement monétaire ne sera émis en aucune circonstance.</li>
+                </ul>
             </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
                 <h2 className="text-xl font-bold mb-2">🔴 Décharge de responsabilité</h2>
