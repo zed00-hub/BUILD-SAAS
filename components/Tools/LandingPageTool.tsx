@@ -46,7 +46,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const [error, setError] = useState<string | null>(null);
 
   const generationCost = 30;
-  const editCost = 15;
+  const editCost = 10;
 
   const currencies = [
     { code: 'DZD', label: 'Algerian Dinar (د.ج)' },

@@ -165,7 +165,8 @@ export const editGeneratedImage = async (originalImageBase64: string, instructio
 
   const prompt = `Edit this image. Instruction: ${instruction}. 
   CRITICAL REQUIREMENTS:
-  - Maintain ULTRA-HIGH resolution and professional photorealistic quality.
+  - Maintain ULTRA-HIGH 4K Resolution and professional photorealistic quality.
+  - STRICTLY PRESERVE all existing text, especially ARABIC TEXT. It MUST remain crystal clear, sharp, and legible. Do NOT blur, distort, or change the language of any text.
   - Ensure editing logic is precise and blends seamlessly with the original image.
   - Preserve the original lighting, shadows, and texture where appropriate.
   - Output should be crisp, sharp, and artifact-free.`;
@@ -184,7 +185,7 @@ export const editGeneratedImage = async (originalImageBase64: string, instructio
       ],
       config: {
         imageConfig: {
-          imageSize: "2K" // Upgrade to higher resolution
+          imageSize: "4K" // Maximum resolution
         }
       }
     });
