@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { UserData, Order, WalletTransaction, AccountType, PlanType } from '../types/dbTypes';
+import { PricingService } from './pricingService';
 import { ToolLock } from '../../types';
 
 const USERS_COLLECTION = 'users';
@@ -86,9 +87,19 @@ export const AdminService = {
      */
     async upgradeToPaidPlan(userId: string, planType: 'basic' | 'pro' | 'elite' | 'e-commerce', description: string): Promise<boolean> {
         try {
-            const planConfig = PLAN_CONFIGS[planType];
+            // Fetch latest pricing config to ensure points match what is set in DB
+            const pricingConfig = await PricingService.getPricingConfig();
+            const planFromDb = pricingConfig.plans.find(p => p.id === planType);
+
+            // Fallback to hardcoded if DB plan missing (safety net)
+            const fallbackPlan = PLAN_CONFIGS[planType];
+
+            const pointsToAdd = planFromDb ? Number(planFromDb.basePoints) : fallbackPlan.points;
+            const planName = planFromDb ? planFromDb.name : fallbackPlan.name;
+            const durationDays = fallbackPlan.durationDays; // Duration usually constant, or could be added to DB schema later
+
             const now = Timestamp.now();
-            const endDate = Timestamp.fromDate(new Date(Date.now() + planConfig.durationDays * 24 * 60 * 60 * 1000));
+            const endDate = Timestamp.fromDate(new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000));
 
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, USERS_COLLECTION, userId);
@@ -97,7 +108,10 @@ export const AdminService = {
                 if (!userDoc.exists()) throw new Error("User not found");
 
                 const currentBalance = userDoc.data().balance || 0;
-                const newBalance = currentBalance + planConfig.points;
+
+                // If basePoints is 'Custom' (Elite), handle differently or default to 0/fallback
+                const finalPoints = isNaN(pointsToAdd) ? 0 : pointsToAdd;
+                const newBalance = currentBalance + finalPoints;
 
                 // 1. Update user to paid plan
                 transaction.update(userRef, {
@@ -112,9 +126,9 @@ export const AdminService = {
                 const newTxRef = doc(collection(db, TRANSACTIONS_COLLECTION));
                 transaction.set(newTxRef, {
                     userId,
-                    amount: planConfig.points,
+                    amount: finalPoints,
                     type: 'credit',
-                    description: `${planConfig.name} Plan Purchase - ${description} (Admin)`,
+                    description: `${planName} Plan Purchase - ${description} (Admin)`,
                     createdAt: serverTimestamp()
                 });
             });
