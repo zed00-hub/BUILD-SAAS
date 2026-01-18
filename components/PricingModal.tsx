@@ -172,7 +172,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) =
                       } else {
                         if (currency === 'DZD') {
                           const message = `مرحباً، أريد الاشتراك في باقة ${plan.name} (${isYearly ? 'سنوي' : 'شهري'}). السعر: ${formatPrice(plan.prices[currency], currency)}.`;
-                          window.open(`https://wa.me/213658491823?text=${encodeURIComponent(message)}`, '_blank');
+                          window.open(`https://wa.me/213542862836?text=${encodeURIComponent(message)}`, '_blank');
                         } else {
                           // Integration with payment gateway
                           alert(`Selected ${plan.name} Plan (${billingCycle}) - ${formatPrice(plan.prices[currency], currency)}`);

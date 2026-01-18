@@ -417,7 +417,7 @@ export const Dashboard: React.FC = () => {
                             <button
                                 onClick={() => {
                                     const message = `مرحباً، أنشأت حساباً في المنصة وأريد تفعيل النقاط التجريبية. اسم المستخدم: ${userProfile?.displayName || user.email || ''}`;
-                                    window.open(`https://wa.me/213658491823?text=${encodeURIComponent(message)}`, '_blank');
+                                    window.open(`https://wa.me/213542862836?text=${encodeURIComponent(message)}`, '_blank');
                                 }}
                                 className="flex-shrink-0 bg-white text-emerald-700 hover:text-emerald-800 px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-3 group/btn"
                             >
