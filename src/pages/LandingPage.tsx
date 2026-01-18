@@ -4,6 +4,13 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { Logo } from '../../components/Logo';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { PricingSection } from '../../components/PricingSection';
+import {
+    SocialMediaIcon,
+    AdCreativeIcon,
+    LandingPageIcon,
+    ProductDescIcon,
+    VirtualTryOnIcon
+} from '../../components/ToolIcons';
 
 export const LandingPage: React.FC = () => {
     const { t } = useLanguage();
@@ -187,7 +194,9 @@ export const LandingPage: React.FC = () => {
 
                     <div className="grid md:grid-cols-3 gap-8 px-4">
                         <div onClick={() => navigate('/app/social-media')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
-                            <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-inner">📱</div>
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-blue-200">
+                                <SocialMediaIcon size={32} className="text-white" />
+                            </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_social')}</h3>
                             <p className="text-slate-500 mb-8 leading-relaxed text-lg">Generate engaging content for your social media channels tailored to your brand voice.</p>
                             <div className="flex items-center text-blue-600 font-bold group-hover:gap-3 transition-all">
@@ -196,7 +205,9 @@ export const LandingPage: React.FC = () => {
                         </div>
 
                         <div onClick={() => navigate('/app/ad-creative')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
-                            <div className="w-20 h-20 bg-purple-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-inner">📢</div>
+                            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-lg shadow-purple-200">
+                                <AdCreativeIcon size={32} className="text-white" />
+                            </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_ad')}</h3>
                             <p className="text-slate-500 mb-8 leading-relaxed text-lg">Create high-conversion ad creatives perfectly sized for Facebook, Instagram & Google Ads.</p>
                             <div className="flex items-center text-purple-600 font-bold group-hover:gap-3 transition-all">
@@ -205,7 +216,9 @@ export const LandingPage: React.FC = () => {
                         </div>
 
                         <div onClick={() => navigate('/app/landing-page')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
-                            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-inner">🌐</div>
+                            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-emerald-200">
+                                <LandingPageIcon size={32} className="text-white" />
+                            </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_landing')}</h3>
                             <p className="text-slate-500 mb-8 leading-relaxed text-lg">Instant landing page layouts based on your product. Turn visitors into customers.</p>
                             <div className="flex items-center text-emerald-600 font-bold group-hover:gap-3 transition-all">
@@ -213,22 +226,26 @@ export const LandingPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* New Tool: Product Description */}
-                        <div onClick={() => navigate('/app/product-description')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-amber-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
-                            <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-inner">📝</div>
+                        {/* Product Description */}
+                        <div onClick={() => navigate('/app/product-description')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-rose-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
+                            <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-red-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-rose-200">
+                                <ProductDescIcon size={32} className="text-white" />
+                            </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_product_desc')}</h3>
                             <p className="text-slate-500 mb-8 leading-relaxed text-lg">Generate compelling, SEO-optimized product descriptions that sell instantly.</p>
-                            <div className="flex items-center text-amber-600 font-bold group-hover:gap-3 transition-all">
+                            <div className="flex items-center text-rose-600 font-bold group-hover:gap-3 transition-all">
                                 Write Now <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
                             </div>
                         </div>
 
-                        {/* New Tool: Virtual Try-On */}
-                        <div onClick={() => navigate('/app/virtual-tryon')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-pink-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
-                            <div className="w-20 h-20 bg-pink-50 rounded-3xl flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-inner">👗</div>
+                        {/* Virtual Try-On */}
+                        <div onClick={() => navigate('/app/virtual-tryon')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-violet-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
+                            <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-lg shadow-violet-200">
+                                <VirtualTryOnIcon size={32} className="text-white" />
+                            </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_virtual_tryon')}</h3>
                             <p className="text-slate-500 mb-8 leading-relaxed text-lg">Let customers try clothes virtually. Upload a photo and see the magic.</p>
-                            <div className="flex items-center text-pink-600 font-bold group-hover:gap-3 transition-all">
+                            <div className="flex items-center text-violet-600 font-bold group-hover:gap-3 transition-all">
                                 Try It On <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
                             </div>
                         </div>

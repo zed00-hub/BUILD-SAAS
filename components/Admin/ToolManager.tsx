@@ -4,14 +4,22 @@ import { AdminService } from '../../src/services/adminService';
 import { ToolLock } from '../../types';
 import { Button } from '../Button';
 import { auth } from '../../src/firebase';
+import {
+    SocialMediaIcon,
+    AdCreativeIcon,
+    LandingPageIcon,
+    QuickEditIcon,
+    ProductDescIcon,
+    VirtualTryOnIcon
+} from '../ToolIcons';
 
 const AVAILABLE_TOOLS = [
-    { id: 'social-media', name: 'Social Media Tool', icon: '📱' },
-    { id: 'ad-creative', name: 'Ad Creative Tool', icon: '📢' },
-    { id: 'landing-page', name: 'Landing Page Tool', icon: '📄' },
-    { id: 'quick-edit', name: 'Quick Edit Tool', icon: '✨' },
-    { id: 'product-description', name: 'Product Description', icon: '📝' },
-    { id: 'virtual-tryon', name: 'Virtual Try-On', icon: '👕' },
+    { id: 'social-media', name: 'Social Media Tool', Icon: SocialMediaIcon, gradient: 'from-blue-500 to-cyan-500' },
+    { id: 'ad-creative', name: 'Ad Creative Tool', Icon: AdCreativeIcon, gradient: 'from-purple-500 to-pink-500' },
+    { id: 'landing-page', name: 'Landing Page Tool', Icon: LandingPageIcon, gradient: 'from-emerald-500 to-teal-500' },
+    { id: 'quick-edit', name: 'Quick Edit Tool', Icon: QuickEditIcon, gradient: 'from-amber-500 to-orange-500' },
+    { id: 'product-description', name: 'Product Description', Icon: ProductDescIcon, gradient: 'from-rose-500 to-red-500' },
+    { id: 'virtual-tryon', name: 'Virtual Try-On', Icon: VirtualTryOnIcon, gradient: 'from-violet-500 to-indigo-500' },
 ];
 
 // Modal Component using Portal
@@ -267,7 +275,9 @@ export const ToolManager: React.FC = () => {
                             <div key={tool.id} className={`bg-white rounded-xl shadow-sm border p-6 transition-all ${isLocked ? 'border-red-200 bg-red-50' : 'border-slate-200'}`}>
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-2xl">{tool.icon}</span>
+                                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-md`}>
+                                            <tool.Icon size={20} className="text-white" />
+                                        </div>
                                         <div>
                                             <h4 className="font-bold text-slate-800">{tool.name}</h4>
                                             <div className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit mt-1 ${isLocked ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>

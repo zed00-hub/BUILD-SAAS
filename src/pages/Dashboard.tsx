@@ -17,6 +17,17 @@ import { OrderService } from '../services/orderService';
 import { ProfileSettingsModal } from '../../components/ProfileSettingsModal';
 import { DesignGallery } from '../../components/DesignGallery';
 import { UserData } from '../types/dbTypes';
+import {
+    SocialMediaIcon,
+    AdCreativeIcon,
+    LandingPageIcon,
+    QuickEditIcon,
+    ProductDescIcon,
+    VirtualTryOnIcon,
+    HomeIcon,
+    ProjectsIcon,
+    AdminIcon
+} from '../../components/ToolIcons';
 
 export interface DashboardContextType {
     user: User | null;
@@ -57,7 +68,7 @@ export const TrialBanner: React.FC = () => {
     );
 };
 
-const SidebarItem: React.FC<{ active: boolean; onClick: () => void; icon: string; label: string }> = ({ active, onClick, icon, label }) => (
+const SidebarItem: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; label: string }> = ({ active, onClick, icon, label }) => (
     <button
         onClick={onClick}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left rtl:text-right
@@ -66,7 +77,7 @@ const SidebarItem: React.FC<{ active: boolean; onClick: () => void; icon: string
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
     `}
     >
-        <span className="text-lg">{icon}</span>
+        <span className="w-5 h-5 flex-shrink-0">{icon}</span>
         <span>{label}</span>
     </button>
 );
@@ -258,51 +269,51 @@ export const Dashboard: React.FC = () => {
                             <SidebarItem
                                 active={location.pathname === '/' || location.pathname === '/app' || location.pathname === '/app/'}
                                 onClick={() => { navigate('/'); setIsSidebarOpen(false); }}
-                                icon="🏠"
+                                icon={<HomeIcon size={20} />}
                                 label={t('home')}
                             />
                             <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('tools')}</div>
                             <SidebarItem
                                 active={isActive('social-media')}
                                 onClick={() => { navigate('social-media'); setIsSidebarOpen(false); }}
-                                icon="📱"
+                                icon={<SocialMediaIcon size={20} />}
                                 label={t('tool_social')}
                             />
                             <SidebarItem
                                 active={isActive('ad-creative')}
                                 onClick={() => { navigate('ad-creative'); setIsSidebarOpen(false); }}
-                                icon="📢"
+                                icon={<AdCreativeIcon size={20} />}
                                 label={t('tool_ad')}
                             />
                             <SidebarItem
                                 active={isActive('landing-page')}
                                 onClick={() => { navigate('landing-page'); setIsSidebarOpen(false); }}
-                                icon="🌐"
+                                icon={<LandingPageIcon size={20} />}
                                 label={t('tool_landing')}
                             />
                             <SidebarItem
                                 active={isActive('quick-edit')}
                                 onClick={() => { navigate('quick-edit'); setIsSidebarOpen(false); }}
-                                icon="✨"
+                                icon={<QuickEditIcon size={20} />}
                                 label={t('tool_quick_edit')}
                             />
                             <SidebarItem
                                 active={isActive('product-description')}
                                 onClick={() => { navigate('product-description'); setIsSidebarOpen(false); }}
-                                icon="📝"
+                                icon={<ProductDescIcon size={20} />}
                                 label={t('tool_product_desc')}
                             />
                             <SidebarItem
                                 active={isActive('virtual-tryon')}
                                 onClick={() => { navigate('virtual-tryon'); setIsSidebarOpen(false); }}
-                                icon="👗"
+                                icon={<VirtualTryOnIcon size={20} />}
                                 label={t('tool_virtual_tryon')}
                             />
                             <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('my_projects')}</div>
                             <SidebarItem
                                 active={isGalleryOpen}
                                 onClick={() => { setIsGalleryOpen(true); setIsSidebarOpen(false); }}
-                                icon="📂"
+                                icon={<ProjectsIcon size={20} />}
                                 label={t('my_projects')}
                             />
 
@@ -312,7 +323,7 @@ export const Dashboard: React.FC = () => {
                                     <SidebarItem
                                         active={isActive('admin')}
                                         onClick={() => { navigate('admin'); setIsSidebarOpen(false); }}
-                                        icon="🛡️"
+                                        icon={<AdminIcon size={20} />}
                                         label="Admin Panel"
                                     />
                                 </>
