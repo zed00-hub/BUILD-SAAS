@@ -146,14 +146,25 @@ export const ToolManager: React.FC = () => {
 
             {editingTool && (
                 <div
-                    className="fixed inset-0 w-full h-full bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm"
+                    className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
                     onClick={() => setEditingTool(null)}
+                    onKeyDown={(e) => e.key === 'Escape' && setEditingTool(null)}
+                    role="dialog"
+                    aria-modal="true"
                 >
                     <div
-                        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in text-left rtl:text-right"
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in text-left rtl:text-right relative"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h4 className="text-lg font-bold mb-4">Lock Settings: {AVAILABLE_TOOLS.find(t => t.id === editingTool)?.name}</h4>
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setEditingTool(null)}
+                            className="absolute top-4 right-4 rtl:right-auto rtl:left-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                        <h4 className="text-lg font-bold mb-4 pr-8 rtl:pr-0 rtl:pl-8">Lock Settings: {AVAILABLE_TOOLS.find(t => t.id === editingTool)?.name}</h4>
 
                         <div className="space-y-4">
                             <div>
