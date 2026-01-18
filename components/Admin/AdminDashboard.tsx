@@ -16,7 +16,7 @@ export const AdminDashboard: React.FC = () => {
     const { t } = useLanguage();
     const [users, setUsers] = useState<UserData[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits' | 'pricing' | 'tools'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'orders' | 'limits' | 'pricing' | 'tools' | 'recovery'>('users');
     const [isLoading, setIsLoading] = useState(true);
 
     // Action States
@@ -32,6 +32,11 @@ export const AdminDashboard: React.FC = () => {
     // Limits Management States
     const [limitsConfig, setLimitsConfig] = useState<LimitsConfig>(DEFAULT_LIMITS);
     const [customLimit, setCustomLimit] = useState<string>('');
+
+    // Recovery States
+    const [manualUid, setManualUid] = useState('');
+    const [manualEmail, setManualEmail] = useState('');
+    const [manualName, setManualName] = useState('');
 
     useEffect(() => {
         loadData();
@@ -154,6 +159,28 @@ export const AdminDashboard: React.FC = () => {
         }));
     };
 
+    const handleManualUserCreation = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!manualUid || !manualEmail) {
+            alert('User ID and Email are required!');
+            return;
+        }
+
+        if (confirm(`Are you sure you want to forcibly create/recover wallet for UID: ${manualUid}? This will initialize their database record if missing.`)) {
+            try {
+                await WalletService.initializeUserWallet(manualUid, manualEmail, manualName || undefined);
+                alert('User Account Recovered/Initialized Successfully! Refreshing list...');
+                setManualUid('');
+                setManualEmail('');
+                setManualName('');
+                loadData();
+            } catch (err: any) {
+                console.error(err);
+                alert('Failed to recover user: ' + err.message);
+            }
+        }
+    };
+
     const getAccountBadge = (user: UserData) => {
         if (user.accountType === 'paid') {
             const planName = user.planType ? PLAN_CONFIGS[user.planType as keyof typeof PLAN_CONFIGS]?.name : 'Paid';
@@ -236,6 +263,12 @@ export const AdminDashboard: React.FC = () => {
                     className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'limits' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
                 >
                     {t('system_limits')}
+                </button>
+                <button
+                    onClick={() => setActiveTab('recovery')}
+                    className={`pb-4 px-2 font-semibold whitespace-nowrap ${activeTab === 'recovery' ? 'text-rose-600 border-b-2 border-rose-600' : 'text-slate-500 hover:text-rose-800'}`}
+                >
+                    🚑 Recovery
                 </button>
             </div>
 
@@ -497,6 +530,77 @@ export const AdminDashboard: React.FC = () => {
 
             {activeTab === 'tools' && (
                 <ToolManager />
+            )}
+
+            {activeTab === 'recovery' && (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-sm border border-rose-100 p-8">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center text-2xl">🚑</div>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">Force User Account Creation / Recovery</h3>
+                                <p className="text-slate-500 text-sm">Manually initialize a user's wallet and database record if automated creation failed.</p>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 mb-8 text-sm flex gap-3 items-start">
+                            <span className="text-lg">⚠️</span>
+                            <div>
+                                <strong>When to use this?</strong> Use this only if a user reports they have signed up (and verified email) but <strong>do not appear in the User List</strong> below.
+                                <br />
+                                Ask the user to click their profile icon in the top-right and copy their <strong>User ID</strong> specific to them.
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleManualUserCreation} className="max-w-xl space-y-5">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">
+                                    User Auth ID (UID) <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={manualUid}
+                                    onChange={e => setManualUid(e.target.value)}
+                                    placeholder="e.g. 5Xy89... (Ask user for this)"
+                                    className="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 font-mono text-sm bg-slate-50"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">
+                                    User Email <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    value={manualEmail}
+                                    onChange={e => setManualEmail(e.target.value)}
+                                    placeholder="user@example.com"
+                                    className="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">Display Name (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={manualName}
+                                    onChange={e => setManualName(e.target.value)}
+                                    placeholder="John Doe"
+                                    className="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500"
+                                />
+                            </div>
+
+                            <div className="pt-4">
+                                <Button
+                                    variant="secondary"
+                                    className="w-full py-4 text-base bg-rose-600 hover:bg-rose-700 text-white border-none shadow-lg shadow-rose-200"
+                                >
+                                    🛠️ Force Initialize / Recover User
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
 
             {/* Modal for Balance/Plan Adjustment */}

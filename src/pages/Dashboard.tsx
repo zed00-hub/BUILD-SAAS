@@ -359,6 +359,14 @@ export const Dashboard: React.FC = () => {
                                 <div className="px-3 py-2 border-b border-slate-50 mb-1">
                                     <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || t('welcome_back')}</p>
                                     <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
+                                    <div
+                                        onClick={() => { navigator.clipboard.writeText(user.uid); alert('User ID Copied to Clipboard!'); }}
+                                        className="text-[9px] text-slate-400 mt-1 cursor-pointer hover:text-indigo-500 font-mono bg-slate-50 p-1 rounded flex items-center gap-1 justify-between group/id"
+                                        title="Click to copy ID for support"
+                                    >
+                                        <span className="truncate max-w-[120px]">ID: {user.uid?.substring(0, 12)}...</span>
+                                        <span className="opacity-0 group-hover/id:opacity-100">📋</span>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => setIsProfileSettingsOpen(true)}
