@@ -113,8 +113,8 @@ export const WalletService = {
             const userData: UserData = {
                 uid,
                 email,
-                displayName,
-                photoURL,
+                displayName: displayName || null,
+                photoURL: photoURL || null,
                 balance: initialBalance,
                 isDisabled: false,
                 isAdmin,
