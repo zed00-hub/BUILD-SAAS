@@ -8,7 +8,7 @@ const PrivacyContent = {
     en: (
         <>
             <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-            <p className="mb-4">Last updated: January 1, 2026</p>
+            <p className="mb-4">Last updated: January 18, 2026</p>
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">1. Information We Collect</h2>
                 <p>We collect information you provide directly to us, such as when you create an account, use our AI tools, or communicate with us.</p>
@@ -21,6 +21,33 @@ const PrivacyContent = {
                 <h2 className="text-xl font-bold mb-4">3. Data Security</h2>
                 <p>We implement appropriate security measures to protect your personal information.</p>
             </section>
+            <section className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-900">
+                <h2 className="text-xl font-bold mb-3">4. Design Hosting Service</h2>
+                <p className="mb-2">We provide a <strong>design hosting service only upon explicit user request</strong>. If you choose to save your designs to our cloud storage:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Your designs are stored securely and accessible only to you.</li>
+                    <li>We do <strong>not</strong> have access to your unsaved images or temporary files.</li>
+                    <li>You can delete your saved designs at any time from your account.</li>
+                </ul>
+            </section>
+            <section className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
+                <h2 className="text-xl font-bold mb-3">5. Your Privacy & Unsaved Content</h2>
+                <p>We prioritize your privacy:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2 mt-2">
+                    <li><strong>Unsaved images are never stored or accessed by us.</strong></li>
+                    <li>All AI processing happens securely and data is not retained after session ends.</li>
+                    <li>We have no access to images that you did not explicitly save to your account.</li>
+                </ul>
+            </section>
+            <section className="mb-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900">
+                <h2 className="text-xl font-bold mb-3">6. Compensation & Dispute Resolution</h2>
+                <p className="mb-2">In case of service disruptions or technical issues:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>We offer <strong>fair compensation</strong> to ensure the rights of both parties are protected.</li>
+                    <li>Users can request credit refunds or service extensions in case of verified issues.</li>
+                    <li>All disputes will be handled in good faith to reach a mutually satisfactory resolution.</li>
+                </ul>
+            </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
                 <h2 className="text-xl font-bold mb-2">🔴 Important Disclaimer</h2>
                 <p className="font-bold">We are not responsible before God Almighty for any use of the platform to produce images of living beings, immodest images, or any content that violates Islamic Sharia or public morals. The user bears full responsibility for the content they generate.</p>
@@ -30,7 +57,7 @@ const PrivacyContent = {
     ar: (
         <>
             <h1 className="text-3xl font-bold mb-6">سياسة الخصوصية</h1>
-            <p className="mb-4">آخر تحديث: 1 يناير 2026</p>
+            <p className="mb-4">آخر تحديث: 18 يناير 2026</p>
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">1. المعلومات التي نجمعها</h2>
                 <p>نقوم بجمع المعلومات التي تقدمها لنا مباشرة، مثل عند إنشاء حساب، أو استخدام أدوات الذكاء الاصطناعي الخاصة بنا، أو التواصل معنا.</p>
@@ -43,6 +70,33 @@ const PrivacyContent = {
                 <h2 className="text-xl font-bold mb-4">3. أمان البيانات</h2>
                 <p>نقوم بتنفيذ تدابير أمنية مناسبة لحماية معلوماتك الشخصية.</p>
             </section>
+            <section className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-900">
+                <h2 className="text-xl font-bold mb-3">4. خدمة استضافة التصاميم</h2>
+                <p className="mb-2">نقدم <strong>خدمة استضافة التصاميم فقط عند طلب المستخدم صراحةً</strong>. إذا اخترت حفظ تصاميمك في التخزين السحابي الخاص بنا:</p>
+                <ul className="list-disc list-inside space-y-1 mr-2">
+                    <li>يتم تخزين تصاميمك بشكل آمن ولا يمكن الوصول إليها إلا أنت.</li>
+                    <li><strong>ليس لدينا</strong> أي وصول إلى صورك غير المحفوظة أو الملفات المؤقتة.</li>
+                    <li>يمكنك حذف تصاميمك المحفوظة في أي وقت من حسابك.</li>
+                </ul>
+            </section>
+            <section className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
+                <h2 className="text-xl font-bold mb-3">5. خصوصيتك والمحتوى غير المحفوظ</h2>
+                <p>نحن نولي أولوية قصوى لخصوصيتك:</p>
+                <ul className="list-disc list-inside space-y-1 mr-2 mt-2">
+                    <li><strong>الصور غير المحفوظة لا يتم تخزينها أو الوصول إليها من قبلنا أبداً.</strong></li>
+                    <li>تتم جميع عمليات الذكاء الاصطناعي بشكل آمن ولا يتم الاحتفاظ بالبيانات بعد انتهاء الجلسة.</li>
+                    <li>ليس لدينا أي وصول للصور التي لم تقم بحفظها صراحةً في حسابك.</li>
+                </ul>
+            </section>
+            <section className="mb-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900">
+                <h2 className="text-xl font-bold mb-3">6. التعويض وحل النزاعات</h2>
+                <p className="mb-2">في حالة انقطاع الخدمة أو المشاكل التقنية:</p>
+                <ul className="list-disc list-inside space-y-1 mr-2">
+                    <li>نقدم <strong>تعويضاً عادلاً</strong> لضمان حقوق الطرفين.</li>
+                    <li>يمكن للمستخدمين طلب استرداد الرصيد أو تمديد الخدمة في حالة المشاكل المثبتة.</li>
+                    <li>يتم التعامل مع جميع النزاعات بحسن نية للوصول إلى حل مُرضٍ للطرفين.</li>
+                </ul>
+            </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
                 <h2 className="text-xl font-bold mb-2">🔴 إخلاء مسؤولية هام</h2>
                 <p className="font-bold">نحن غير مسؤولين أمام الله عز وجل عن أي استخدام للمنصة في إنتاج صور لذوات الأرواح، أو صور تبرج، أو أي محتوى يخالف الشريعة الإسلامية أو الآداب العامة. المستخدم يتحمل المسؤولية الكاملة عن المحتوى الذي يقوم بتوليده.</p>
@@ -52,7 +106,7 @@ const PrivacyContent = {
     fr: (
         <>
             <h1 className="text-3xl font-bold mb-6">Politique de Confidentialité</h1>
-            <p className="mb-4">Dernière mise à jour : 1er janvier 2026</p>
+            <p className="mb-4">Dernière mise à jour : 18 janvier 2026</p>
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">1. Informations que nous collectons</h2>
                 <p>Nous collectons les informations que vous nous fournissez directement, par exemple lorsque vous créez un compte, utilisez nos outils d'IA ou communiquez avec nous.</p>
@@ -64,6 +118,33 @@ const PrivacyContent = {
             <section className="mb-8">
                 <h2 className="text-xl font-bold mb-4">3. Sécurité des données</h2>
                 <p>Nous mettons en œuvre des mesures de sécurité appropriées pour protéger vos informations personnelles.</p>
+            </section>
+            <section className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-900">
+                <h2 className="text-xl font-bold mb-3">4. Service d'Hébergement de Designs</h2>
+                <p className="mb-2">Nous fournissons un <strong>service d'hébergement de designs uniquement sur demande explicite de l'utilisateur</strong>. Si vous choisissez de sauvegarder vos designs dans notre stockage cloud :</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Vos designs sont stockés en toute sécurité et accessibles uniquement par vous.</li>
+                    <li>Nous n'avons <strong>pas</strong> accès à vos images non sauvegardées ou fichiers temporaires.</li>
+                    <li>Vous pouvez supprimer vos designs sauvegardés à tout moment depuis votre compte.</li>
+                </ul>
+            </section>
+            <section className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
+                <h2 className="text-xl font-bold mb-3">5. Votre Vie Privée & Contenu Non Sauvegardé</h2>
+                <p>Nous accordons la priorité à votre vie privée :</p>
+                <ul className="list-disc list-inside space-y-1 ml-2 mt-2">
+                    <li><strong>Les images non sauvegardées ne sont jamais stockées ni accessibles par nous.</strong></li>
+                    <li>Tout le traitement IA se fait de manière sécurisée et les données ne sont pas conservées après la fin de la session.</li>
+                    <li>Nous n'avons aucun accès aux images que vous n'avez pas explicitement sauvegardées dans votre compte.</li>
+                </ul>
+            </section>
+            <section className="mb-8 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900">
+                <h2 className="text-xl font-bold mb-3">6. Compensation & Résolution des Litiges</h2>
+                <p className="mb-2">En cas d'interruption de service ou de problèmes techniques :</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Nous offrons une <strong>compensation équitable</strong> pour garantir les droits des deux parties.</li>
+                    <li>Les utilisateurs peuvent demander des remboursements de crédits ou des extensions de service en cas de problèmes vérifiés.</li>
+                    <li>Tous les litiges seront traités de bonne foi pour parvenir à une résolution mutuellement satisfaisante.</li>
+                </ul>
             </section>
             <section className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
                 <h2 className="text-xl font-bold mb-2">🔴 Avis de non-responsabilité important</h2>
