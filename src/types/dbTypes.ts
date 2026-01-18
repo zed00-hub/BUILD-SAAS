@@ -26,6 +26,7 @@ export interface UserData {
     lastUsageTime?: Timestamp; // وقت آخر عملية توليد (لحساب فترة الانتظار)
     dailyUsageCount?: number; // عدد العمليات/الصور المولدة اليوم
     lastResetDate?: string; // تاريخ آخر تصفير للعداد (YYYY-MM-DD)
+    customDailyLimit?: number; // Optional override for daily limit
 
     createdAt: Timestamp;
     lastLogin?: Timestamp;

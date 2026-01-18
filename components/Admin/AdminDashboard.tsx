@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AdminService, PLAN_CONFIGS } from '../../src/services/adminService';
-import { LIMITS } from '../../src/services/walletService';
+import { WalletService, LimitsConfig, DEFAULT_LIMITS } from '../../src/services/walletService';
 import { PricingService, PricingConfig, PricingPlan, DEFAULT_PRICING_CONFIG } from '../../src/services/pricingService';
 import { UserData, Order } from '../../src/types/dbTypes';
 import { Button } from '../Button';
@@ -29,6 +29,10 @@ export const AdminDashboard: React.FC = () => {
     // Pricing Management States
     const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
 
+    // Limits Management States
+    const [limitsConfig, setLimitsConfig] = useState<LimitsConfig>(DEFAULT_LIMITS);
+    const [customLimit, setCustomLimit] = useState<string>('');
+
     useEffect(() => {
         loadData();
     }, []);
@@ -36,14 +40,16 @@ export const AdminDashboard: React.FC = () => {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const [usersData, ordersData, pricingData] = await Promise.all([
+            const [usersData, ordersData, pricingData, limitsData] = await Promise.all([
                 AdminService.getAllUsers(),
                 AdminService.getAllOrders(),
-                PricingService.getPricingConfig()
+                PricingService.getPricingConfig(),
+                WalletService.getLimitsConfig()
             ]);
             setUsers(usersData);
             setOrders(ordersData);
             setPricingConfig(pricingData);
+            setLimitsConfig(limitsData);
         } catch (e) {
             console.error("Failed to load admin data", e);
         } finally {
@@ -113,6 +119,39 @@ export const AdminDashboard: React.FC = () => {
         setAdjustReason('');
         setAdjustmentType('trial');
         setSelectedPlan('basic');
+        setCustomLimit('');
+    };
+
+    const handleUpdateCustomLimit = async () => {
+        if (!selectedUser) return;
+        const limit = customLimit === '' ? null : parseInt(customLimit);
+        const success = await WalletService.updateUserCustomLimit(selectedUser.uid, limit);
+        if (success) {
+            alert("User custom daily limit updated!");
+            loadData();
+            closeModal();
+        } else {
+            alert("Failed to update custom limit");
+        }
+    };
+
+    const handleSaveGlobalLimits = async () => {
+        const success = await WalletService.saveLimitsConfig(limitsConfig);
+        if (success) {
+            alert("Global limits configuration saved successfully!");
+        } else {
+            alert("Failed to save global limits");
+        }
+    };
+
+    const updateLimitConfig = (plan: keyof LimitsConfig, field: 'maxDaily' | 'cooldownMin', value: string) => {
+        setLimitsConfig(prev => ({
+            ...prev,
+            [plan]: {
+                ...prev[plan],
+                [field]: parseInt(value) || 0
+            }
+        }));
     };
 
     const getAccountBadge = (user: UserData) => {
@@ -243,7 +282,10 @@ export const AdminDashboard: React.FC = () => {
                                         <td className="p-4">
                                             <div className="flex gap-2 flex-wrap">
                                                 <button
-                                                    onClick={() => setSelectedUser(user)}
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setCustomLimit(user.customDailyLimit?.toString() || '');
+                                                    }}
                                                     className="px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg hover:bg-indigo-100"
                                                 >
                                                     💰 {t('manage_points_btn')}
@@ -361,47 +403,54 @@ export const AdminDashboard: React.FC = () => {
 
                     {/* Gen Limits */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            ⚡ {t('daily_gen_limits')}
-                        </h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                ⚡ {t('daily_gen_limits')}
+                            </h2>
+                            <Button onClick={handleSaveGlobalLimits} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                                💾 Save Limits
+                            </Button>
+                        </div>
+
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="border-b border-slate-100 text-slate-500 text-xs uppercase">
                                         <th className="py-3 px-4">{t('account_type_col')}</th>
                                         <th className="py-3 px-4">{t('daily_limit_col')}</th>
-                                        <th className="py-3 px-4">{t('cooldown_col')}</th>
+                                        <th className="py-3 px-4">{t('cooldown_col')} (min)</th>
                                         <th className="py-3 px-4">{t('reset_time_col')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
-                                    <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-amber-600">{t('trial_plan')}</td>
-                                        <td className="py-3 px-4">{LIMITS.trial.maxDaily}</td>
-                                        <td className="py-3 px-4">{LIMITS.trial.cooldownMin > 0 ? `${LIMITS.trial.cooldownMin} mins` : t('none')}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
-                                    </tr>
-                                    <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-slate-700">{t('basic_plan')}</td>
-                                        <td className="py-3 px-4">{LIMITS.basic.maxDaily}</td>
-                                        <td className="py-3 px-4">{LIMITS.basic.cooldownMin > 0 ? `${LIMITS.basic.cooldownMin} mins` : t('none')}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
-                                    </tr>
-                                    <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-indigo-600">{t('pro_plan')}</td>
-                                        <td className="py-3 px-4">{LIMITS.pro.maxDaily}</td>
-                                        <td className="py-3 px-4">{LIMITS.pro.cooldownMin > 0 ? `${LIMITS.pro.cooldownMin} mins` : t('none')}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
-                                    </tr>
-                                    <tr className="hover:bg-slate-50">
-                                        <td className="py-3 px-4 font-bold text-emerald-600">{t('elite_plan')}</td>
-                                        <td className="py-3 px-4">{t('unlimited')}</td>
-                                        <td className="py-3 px-4">{t('none')}</td>
-                                        <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
-                                    </tr>
+                                    {(['trial', 'basic', 'e-commerce', 'pro', 'elite'] as const).map(plan => (
+                                        <tr key={plan} className="hover:bg-slate-50">
+                                            <td className="py-3 px-4 font-bold capitalize text-slate-700">
+                                                {plan === 'e-commerce' ? 'E-Com' : plan}
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <input
+                                                    type="number"
+                                                    value={limitsConfig[plan]?.maxDaily ?? 0}
+                                                    onChange={(e) => updateLimitConfig(plan, 'maxDaily', e.target.value)}
+                                                    className="w-24 px-2 py-1 border border-slate-300 rounded text-sm"
+                                                />
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <input
+                                                    type="number"
+                                                    value={limitsConfig[plan]?.cooldownMin ?? 0}
+                                                    onChange={(e) => updateLimitConfig(plan, 'cooldownMin', e.target.value)}
+                                                    className="w-24 px-2 py-1 border border-slate-300 rounded text-sm"
+                                                />
+                                            </td>
+                                            <td className="py-3 px-4 text-slate-400 text-sm">{t('midnight_utc')}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
+                        <p className="text-xs text-slate-400 mt-4">* Set Max Daily to a high number (e.g. 9999) for unlimited.</p>
                     </div>
 
                     {/* Points System Explanation */}
@@ -464,7 +513,6 @@ export const AdminDashboard: React.FC = () => {
                                 {getAccountBadge(selectedUser)}
                             </div>
 
-                            {/* Type Selection */}
                             <div className="flex gap-2 mb-6">
                                 <button
                                     type="button"
@@ -486,6 +534,27 @@ export const AdminDashboard: React.FC = () => {
                                 >
                                     💎 {t('upgrade_plan')}
                                 </button>
+                            </div>
+
+                            {/* Custom Daily Limit Override */}
+                            <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 flex justify-between">
+                                    <span>⚙️ Custom Daily Limit</span>
+                                    <span className="text-xs font-normal text-slate-500">Override Plan Default</span>
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="number"
+                                        value={customLimit}
+                                        onChange={e => setCustomLimit(e.target.value)}
+                                        placeholder="Empty = Plan Default"
+                                        className="flex-1 px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-400"
+                                    />
+                                    <Button type="button" onClick={handleUpdateCustomLimit} size="sm" className="bg-slate-800 hover:bg-slate-900 text-white whitespace-nowrap">
+                                        Update
+                                    </Button>
+                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1">Leave empty to revert to standard plan limits.</p>
                             </div>
 
                             <form onSubmit={handleBalanceAdjustment}>

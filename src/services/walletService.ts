@@ -11,7 +11,9 @@ import {
     serverTimestamp,
     Timestamp,
     setDoc,
-    onSnapshot
+    onSnapshot,
+    updateDoc,
+    deleteField
 } from 'firebase/firestore';
 import { db } from '../firebase'; // تأكد أن ملف firebase exports db
 import { UserData, WalletTransaction, TransactionType } from '../types/dbTypes';
@@ -20,24 +22,92 @@ const USERS_COLLECTION = 'users';
 const TRANSACTIONS_COLLECTION = 'transactions';
 
 // Limits Configuration
-export const LIMITS = {
+// Limits Configuration Interface
+export interface PlanLimits {
+    maxDaily: number;
+    cooldownMin: number;
+}
+
+export interface LimitsConfig {
+    trial: PlanLimits;
+    basic: PlanLimits;
+    pro: PlanLimits;
+    elite: PlanLimits;
+    'e-commerce': PlanLimits;
+}
+
+// Default limits (fallback)
+export const DEFAULT_LIMITS: LimitsConfig = {
     trial: { maxDaily: 2, cooldownMin: 0 },
     basic: { maxDaily: 20, cooldownMin: 30 },
-    pro: { maxDaily: 30, cooldownMin: 15 }, // Distributed usage
-    elite: { maxDaily: 9999, cooldownMin: 0 }
+    pro: { maxDaily: 30, cooldownMin: 15 },
+    elite: { maxDaily: 9999, cooldownMin: 0 },
+    'e-commerce': { maxDaily: 25, cooldownMin: 20 }
 };
 
 export const WalletService = {
     /**
-     * تهيئة محفظة المستخدم الجديد (تعطى رصيد افتراضي)
+     * Get global limits configuration
+     */
+    async getLimitsConfig(): Promise<LimitsConfig> {
+        try {
+            const docRef = doc(db, 'settings', 'limitsConfig');
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                // Merge with defaults to ensure all keys exist
+                return { ...DEFAULT_LIMITS, ...snap.data() } as LimitsConfig;
+            }
+            return DEFAULT_LIMITS;
+        } catch (error) {
+            console.error("Error fetching limits:", error);
+            return DEFAULT_LIMITS;
+        }
+    },
+
+    /**
+     * Save global limits configuration
+     */
+    async saveLimitsConfig(config: LimitsConfig): Promise<boolean> {
+        try {
+            await setDoc(doc(db, 'settings', 'limitsConfig'), config);
+            return true;
+        } catch (error) {
+            console.error("Error saving limits:", error);
+            return false;
+        }
+    },
+
+    /**
+     * Set a custom limit for a specific user
+     */
+    async updateUserCustomLimit(uid: string, limit: number | null): Promise<boolean> {
+        try {
+            const userRef = doc(db, USERS_COLLECTION, uid);
+            // If null, delete the field (revert to plan limit)
+            if (limit === null) {
+                await updateDoc(userRef, {
+                    customDailyLimit: deleteField()
+                } as any);
+            } else {
+                await updateDoc(userRef, { customDailyLimit: limit });
+            }
+            return true;
+        } catch (error) {
+            console.error("Error updating user limit:", error);
+            return false;
+        }
+    },
+
+    /**
+     * Initialize User Wallet
      */
     async initializeUserWallet(uid: string, email: string, displayName?: string, photoURL?: string) {
+        // ... (existing implementation) ...
         const userRef = doc(db, USERS_COLLECTION, uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
             const isAdmin = email.toLowerCase() === 'ziadgaid001@gmail.com';
-            // Trial gets 0 points by default logic, Admin manual add required
             const initialBalance = isAdmin ? 5000 : 0;
 
             const userData: UserData = {
@@ -49,10 +119,8 @@ export const WalletService = {
                 isDisabled: false,
                 isAdmin,
                 accountType: isAdmin ? 'paid' : 'trial',
-                planType: isAdmin ? 'elite' : null, // Admin gets Elite
+                planType: isAdmin ? 'elite' : null,
                 createdAt: Timestamp.now(),
-
-                // Initialize usage tracking
                 dailyUsageCount: 0,
                 lastResetDate: new Date().toISOString().split('T')[0]
             };
@@ -67,44 +135,21 @@ export const WalletService = {
                     createdAt: serverTimestamp()
                 });
             }
-        } else {
-            // Retroactive Check
-            if (email.toLowerCase() === 'ziadgaid001@gmail.com') {
-                const data = userSnap.data();
-                if (!data.isAdmin) {
-                    await setDoc(userRef, { isAdmin: true, planType: 'elite' }, { merge: true });
-                }
-            }
         }
     },
 
-    /**
-     * الحصول على رصيد المستخدم الحالي
-     */
     async getUserBalance(uid: string): Promise<number> {
         const userRef = doc(db, USERS_COLLECTION, uid);
         const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-            return userSnap.data().balance as number;
-        }
-        return 0;
+        return userSnap.exists() ? (userSnap.data().balance as number) : 0;
     },
 
-    /**
-     * جلب بيانات الملف الشخصي (بما في ذلك حالة الآدمن)
-     */
     async getUserProfile(uid: string): Promise<UserData | null> {
         const userRef = doc(db, USERS_COLLECTION, uid);
         const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-            return userSnap.data() as UserData;
-        }
-        return null;
+        return userSnap.exists() ? (userSnap.data() as UserData) : null;
     },
 
-    /**
-     * تحديث بيانات الملف الشخصي (الاسم، الصورة، Brand Kit)
-     */
     async updateUserProfile(uid: string, data: Partial<UserData>): Promise<boolean> {
         try {
             const userRef = doc(db, USERS_COLLECTION, uid);
@@ -117,71 +162,83 @@ export const WalletService = {
     },
 
     /**
-     * خصم رصيد مقابل خدمة (عملية آمنة باستخدام Transaction)
-     * includesUsageCount: عدد الصور/المحاولات في هذا الطلب (لحساب الحد اليومي)
+     * Deduct points with Dynamic Limits Check
      */
     async deductPoints(uid: string, amount: number, description: string, orderId?: string, usageDelta: number = 1): Promise<boolean> {
         try {
+            // Fetch Global Limits Config OUTSIDE transaction to avoid read overhead inside tx (optimistic)
+            // Or ideally inside, but let's fetch first.
+            let globalLimits = DEFAULT_LIMITS;
+            try {
+                const limitSnap = await getDoc(doc(db, 'settings', 'limitsConfig'));
+                if (limitSnap.exists()) globalLimits = { ...DEFAULT_LIMITS, ...limitSnap.data() } as LimitsConfig;
+            } catch (e) {
+                console.warn("Using default limits due to fetch error");
+            }
+
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, USERS_COLLECTION, uid);
                 const userDoc = await transaction.get(userRef);
 
-                if (!userDoc.exists()) {
-                    throw new Error("User does not exist!");
-                }
+                if (!userDoc.exists()) throw new Error("User does not exist!");
 
                 const userData = userDoc.data() as UserData;
                 const currentBalance = userData.balance;
 
                 // 1. Check Balance
-                if (currentBalance < amount) {
-                    throw new Error("INSUFFICIENT_FUNDS");
+                if (currentBalance < amount) throw new Error("INSUFFICIENT_FUNDS");
+
+                // 2. Check Limits
+                let maxDaily = 0;
+                let cooldownMin = 0;
+
+                // Priority 1: Custom User Limit
+                if (userData.customDailyLimit !== undefined && userData.customDailyLimit !== null) {
+                    maxDaily = userData.customDailyLimit;
+                    cooldownMin = 0; // Usually custom limits don't have cooldown, or we could add customCooldown field later
+                }
+                // Priority 2: Global Plan Limit
+                else {
+                    let planKey: keyof LimitsConfig = 'trial';
+                    if (userData.accountType === 'paid') {
+                        if (userData.planType && globalLimits[userData.planType]) {
+                            // Correctly map planType to limits key
+                            planKey = userData.planType as keyof LimitsConfig;
+                        } else {
+                            planKey = 'basic'; // Default for paid
+                        }
+                    }
+                    maxDaily = globalLimits[planKey]?.maxDaily ?? DEFAULT_LIMITS[planKey].maxDaily;
+                    cooldownMin = globalLimits[planKey]?.cooldownMin ?? DEFAULT_LIMITS[planKey].cooldownMin;
                 }
 
-                // 2. Check Plan Limits
-                const plan = userData.planType || 'trial'; // if paid but no planType set, assuming basic? no, let's treat 'paid' without plan as 'basic' or fallback. 
-                // Actually trial users have accountType='trial'. Paid have 'paid'.
-                // Let's determine the key for LIMITS
-                let limitKey: 'trial' | 'basic' | 'pro' | 'elite' = 'trial';
-
-                if (userData.accountType === 'paid') {
-                    if (userData.planType === 'pro') limitKey = 'pro';
-                    else if (userData.planType === 'elite') limitKey = 'elite';
-                    else limitKey = 'basic'; // Default paid is basic
-                } else {
-                    limitKey = 'trial';
-                }
-
-                const limits = LIMITS[limitKey];
-
-                // Date Check for Reset
+                // Date Check
                 const today = new Date().toISOString().split('T')[0];
                 let currentDailyCount = userData.dailyUsageCount || 0;
-
                 if (userData.lastResetDate !== today) {
-                    currentDailyCount = 0; // New day, reset count
+                    currentDailyCount = 0;
                 }
 
-                // A. Check Max Daily
-                if (currentDailyCount + usageDelta > limits.maxDaily) {
-                    throw new Error(`DAILY_LIMIT_EXCEEDED: You have reached your daily limit of ${limits.maxDaily} generations.`);
+                // A. Verify Max Daily
+                if (currentDailyCount + usageDelta > maxDaily) {
+                    throw new Error(`DAILY_LIMIT_EXCEEDED: You have reached your daily limit of ${maxDaily} generations.`);
                 }
 
-                // B. Check Cooldown (Only if usageDelta > 0 meaning it's a generation request)
-                if (usageDelta > 0 && limits.cooldownMin > 0 && userData.lastUsageTime) {
+                // B. Verify Cooldown
+                if (usageDelta > 0 && cooldownMin > 0 && userData.lastUsageTime) {
                     const lastTime = userData.lastUsageTime.toDate().getTime();
                     const now = Date.now();
                     const diffMinutes = (now - lastTime) / (1000 * 60);
 
-                    if (diffMinutes < limits.cooldownMin) {
-                        const waitTime = Math.ceil(limits.cooldownMin - diffMinutes);
+                    if (diffMinutes < cooldownMin) {
+                        const waitTime = Math.ceil(cooldownMin - diffMinutes);
                         throw new Error(`COOLDOWN_ACTIVE: Please wait ${waitTime} minutes before next generation.`);
                     }
                 }
 
                 const newBalance = currentBalance - amount;
 
-                // 3. Update User (Balance + Usage Stats)
+                // 3. Update User
                 transaction.update(userRef, {
                     balance: newBalance,
                     dailyUsageCount: currentDailyCount + usageDelta,
@@ -189,7 +246,7 @@ export const WalletService = {
                     lastUsageTime: serverTimestamp()
                 });
 
-                // 4. Add Transaction Record
+                // 4. Add Transaction
                 const newTransactionRef = doc(collection(db, TRANSACTIONS_COLLECTION));
                 transaction.set(newTransactionRef, {
                     userId: uid,
@@ -206,21 +263,19 @@ export const WalletService = {
         } catch (e: any) {
             if (e.message === "INSUFFICIENT_FUNDS") {
                 console.warn("Insufficient funds for user:", uid);
-                throw e; // Let UI handle it
+                throw e;
             }
             if (e.message.startsWith("DAILY_LIMIT") || e.message.startsWith("COOLDOWN")) {
                 console.warn(e.message);
-                throw e; // Let UI handle it to show message
+                throw e;
             }
             console.error("Transaction failed: ", e);
             throw e;
         }
     },
 
-    /**
-     * استرجاع النقاط (Refund)
-     */
     async refundPoints(uid: string, amount: number, description: string, orderId?: string, usageRestoreCount: number = 1) {
+        // ... (existing implementation) ...
         try {
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, USERS_COLLECTION, uid);
@@ -231,10 +286,8 @@ export const WalletService = {
                 }
 
                 const newBalance = (userDoc.data().balance || 0) + amount;
-
                 const currentDailyCount = userDoc.data().dailyUsageCount || 0;
 
-                // Refund logic with fairness: Decrement daily usage if it was incremented
                 transaction.update(userRef, {
                     balance: newBalance,
                     dailyUsageCount: Math.max(0, currentDailyCount - usageRestoreCount)
@@ -257,30 +310,15 @@ export const WalletService = {
         }
     },
 
-    /**
-     * جلب سجل المعاملات للمستخدم
-     */
     async getTransactionHistory(uid: string) {
-        const q = query(
-            collection(db, TRANSACTIONS_COLLECTION),
-            where("userId", "==", uid),
-            orderBy("createdAt", "desc")
-        );
-
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WalletTransaction));
+        const q = query(collection(db, TRANSACTIONS_COLLECTION), where("userId", "==", uid), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WalletTransaction));
     },
 
-    /**
-     * الاشتراك في تحديثات المحفظة لحظياً
-     */
     subscribeToWallet(uid: string, callback: (balance: number) => void) {
-        const userRef = doc(db, USERS_COLLECTION, uid);
-        return onSnapshot(userRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                callback(data.balance || 0);
-            }
+        return onSnapshot(doc(db, USERS_COLLECTION, uid), (doc) => {
+            if (doc.exists()) callback(doc.data().balance || 0);
         });
     }
 };

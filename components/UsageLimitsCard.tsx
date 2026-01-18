@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { CloudStorageService, StorageQuota, STORAGE_LIMITS } from '../src/services/cloudStorageService';
-import { LIMITS } from '../src/services/walletService';
+import { DEFAULT_LIMITS } from '../src/services/walletService';
 import { auth } from '../src/firebase';
 import { UserData } from '../src/types/dbTypes';
 
@@ -37,26 +37,28 @@ export const UsageLimitsCard: React.FC<UsageLimitsCardProps> = ({ userProfile, c
     };
 
     // Determine plan type
-    const getPlanType = (): 'trial' | 'basic' | 'pro' | 'elite' => {
+    const getPlanType = (): 'trial' | 'basic' | 'pro' | 'elite' | 'e-commerce' => {
         if (!userProfile) return 'trial';
         if (userProfile.accountType === 'paid') {
             if (userProfile.planType === 'pro') return 'pro';
             if (userProfile.planType === 'elite') return 'elite';
+            if (userProfile.planType === 'e-commerce') return 'e-commerce';
             return 'basic';
         }
         return 'trial';
     };
 
     const planType = getPlanType();
-    const dailyLimits = LIMITS[planType];
-    const storageLimits = STORAGE_LIMITS[planType];
+    const dailyLimits = DEFAULT_LIMITS[planType];
+    const storageLimits = STORAGE_LIMITS[planType] || STORAGE_LIMITS.basic; // Fallback for e-commerce if not defined in storage
 
     const getPlanLabel = () => {
         const labels = {
             trial: { ar: 'تجريبي', en: 'Trial' },
             basic: { ar: 'أساسي', en: 'Basic' },
             pro: { ar: 'احترافي', en: 'Pro' },
-            elite: { ar: 'متميز', en: 'Elite' }
+            elite: { ar: 'متميز', en: 'Elite' },
+            'e-commerce': { ar: 'تاجر', en: 'E-Com' }
         };
         return isRtl ? labels[planType].ar : labels[planType].en;
     };
@@ -66,7 +68,8 @@ export const UsageLimitsCard: React.FC<UsageLimitsCardProps> = ({ userProfile, c
             trial: 'bg-slate-100 text-slate-600',
             basic: 'bg-blue-100 text-blue-700',
             pro: 'bg-purple-100 text-purple-700',
-            elite: 'bg-amber-100 text-amber-700'
+            elite: 'bg-amber-100 text-amber-700',
+            'e-commerce': 'bg-pink-100 text-pink-700'
         };
         return colors[planType];
     };
