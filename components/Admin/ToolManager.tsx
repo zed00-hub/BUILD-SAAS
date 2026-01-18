@@ -145,8 +145,14 @@ export const ToolManager: React.FC = () => {
             </div>
 
             {editingTool && (
-                <div className="fixed inset-0 w-full h-full bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in text-left rtl:text-right">
+                <div
+                    className="fixed inset-0 w-full h-full bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm"
+                    onClick={() => setEditingTool(null)}
+                >
+                    <div
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in text-left rtl:text-right"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <h4 className="text-lg font-bold mb-4">Lock Settings: {AVAILABLE_TOOLS.find(t => t.id === editingTool)?.name}</h4>
 
                         <div className="space-y-4">

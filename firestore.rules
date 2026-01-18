@@ -19,6 +19,12 @@ service cloud.firestore {
       allow write: if isAdmin(); // Only Admin can edit
     }
 
+    // --- NEW: Limits Configuration ---
+    match /settings/limitsConfig {
+      allow read: if true; // Everyone needs to read limits
+      allow write: if isAdmin(); // Only Admin can edit limits
+    }
+
     // Users Collection
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
