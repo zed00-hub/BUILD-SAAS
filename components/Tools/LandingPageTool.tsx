@@ -44,6 +44,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const [isEditing, setIsEditing] = useState(false);
   const [editInstruction, setEditInstruction] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const isSubmittingRef = React.useRef(false);
 
   const generationCost = 30;
   const editCost = 10;
@@ -161,11 +162,14 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingRef.current) return; // STOP double clicks immediately
+
     if (!productImage) {
       setError("Product image is required.");
       return;
     }
 
+    isSubmittingRef.current = true; // LOCK
     setIsLoading(true);
     setError(null);
     setResultImage(null);
@@ -173,6 +177,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     const hasPoints = await deductPoints(generationCost, `Generate Landing Page`);
     if (!hasPoints) {
       setIsLoading(false);
+      isSubmittingRef.current = false; // UNLOCK
       return;
     }
 
@@ -305,15 +310,22 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       setError(err.message || "Failed to generate design.");
     } finally {
       setIsLoading(false);
+      isSubmittingRef.current = false; // UNLOCK
     }
   };
 
   const handleEdit = async () => {
     if (!resultImage || !editInstruction) return;
+
+    // Prevent double charge
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     setIsEditing(true);
     const hasPoints = await deductPoints(editCost, "Edit Landing Page");
     if (!hasPoints) {
       setIsEditing(false);
+      isSubmittingRef.current = false; // UNLOCK
       return;
     }
     try {
@@ -327,6 +339,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       setError("Edit failed: " + err.message);
     } finally {
       setIsEditing(false);
+      isSubmittingRef.current = false; // UNLOCK
     }
   };
 
