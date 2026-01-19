@@ -209,16 +209,22 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         ? `3. SOCIAL PROOF: Display these specific reviews: "${formData.reviews}". Use Happy REAL people (Modest/Family-friendly), 5-Star badge.`
         : `3. TRUST INDICATORS: Show verified badges/guarantee icons ONLY. DO NOT GENERATE FAKE TEXT REVIEWS.`;
 
+      const hasDiscount = formData.discount && parseInt(formData.discount) > 0;
+      const urgencyInstruction = hasDiscount
+        ? "Include a dynamic COUNTDOWN TIMER (00:00:00 style) to create urgency for the discount."
+        : "DO NOT include any countdown timers or clocks.";
+
       const structureInstruction = `
-        📐 LAYOUT: STRICTLY SINGLE VERTICAL COLUMN (Mobile-style feed). 
-        ⛔ NO SPLIT SCREENS. NO 2-COLUMN GRIDS. EVERYTHING MUST BE STACKED VERTICALLY.
+        📐 LAYOUT: STRICTLY SINGLE VERTICAL STRIP (Mobile Feed Style).
+        ⛔ CRITICAL: ABSOLUTELY NO LEFT/RIGHT SPLIT SCREENS or 2-COLUMN GRIDS. 
+        ✅ ALL CONTENT MUST BE CENTERED OR FULL-WIDTH STACKED VERTICALLY (One Element Below Another).
         
         SECTIONS (STACKED ONE BELOW ANOTHER):
         1. HERO (TOP): Product Image Centered, Headline, Trust badges, "Order Now" Button.
-        2. BEFORE/AFTER (BELOW HERO): Show problem vs solution clearly. If side-by-side, make it a single image element, not a page split.
+        2. BEFORE/AFTER (BELOW HERO): Show problem vs solution clearly. (Single composite image).
         ${socialProofSection}
-        4. FEATURES: 3-4 Circular close-ups (Zoomed details) stacked or in a carousel view.
-        5. OFFER BOX (BOTTOM): Distinct color box, Big Price, Countdown, Guarantee, Free Shipping.
+        4. FEATURES: 3-4 Circular close-ups (Zoomed details) stacked vertically (NOT side-by-side).
+        5. OFFER BOX (BOTTOM): Distinct color box, Big Price, ${hasDiscount ? 'Countdown Timer,' : ''} Guarantee, Free Shipping.
         6. FINAL CTA: Big "Order Now" Button.
       `;
 
@@ -230,7 +236,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       const styleInstruction = `
         🎨 STYLE: ULTRA-REALISTIC 4K PREMIUM WEB DESIGN.
-        - RESOLUTION: 8K/4K photorealistic rendering. Sharp details.
+        - RESOLUTION: FORCE 4K (High-Definition). CRYSTAL CLEAR DETAILS.
         - AESTHETIC: High-end E-commerce (Apple/Nike/Dior style). Minimalist, Airy, Sophisticated.
         - FLOW: SEAMLESS VERTICAL SCROLL. Sections must merge smoothly (Gradient fades or curved separators). NO HARSH LINES between sections.
         - VISUALS: Cinematic product photography. Soft studio lighting. Depth of field.
@@ -262,14 +268,15 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       - Language: ${formData.language}
       - Price: ${priceInstruction}
       - Payment: ${paymentInstruction}
+      - Urgency: ${urgencyInstruction}
       ${formData.customization ? `- Custom: ${formData.customization}` : ''}
       
       STRICT VERTICAL STRUCTURE (Top to Bottom):
       1. [HERO SECTION]: LARGE Centered Product Shot + Impactful Headline + CTA Button. (Full width).
-      2. [TRANSFORMATION]: A powerful "Before & After" visual block (Stacked or Integrated Composition, NOT split screen).
+      2. [TRANSFORMATION]: A powerful "Before & After" visual block.
       ${socialProofSection}
       4. [FEATURES SHOWCASE]: 3-4 High-res circular zoom-ins of product details.
-      5. [OFFER BLOCK]: Distinct colored card with Price, Discount, and Urgency Timer.
+      5. [OFFER BLOCK]: Distinct colored card with Price, ${hasDiscount ? 'Countdown Timer,' : ''} and Guarantee.
       6. [FOOTER CTA]: High-impact Final Call to Action.
       
       ${styleInstruction}
@@ -280,7 +287,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       1. Is the image ONE tall vertical strip? Yes.
       2. Are side-by-side split screens REMOVED? Yes. (CRITICAL)
       3. Is the quality 4K/Photorealistic? Yes.
-      4. Are Navbars/Menus removed? Yes.
+      4. Are Navbars/Menus/Time Counters removed (unless requested)? Yes.
       5. Is all text legible? Yes.
       `;
 
