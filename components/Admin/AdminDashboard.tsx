@@ -365,8 +365,19 @@ export const AdminDashboard: React.FC = () => {
                                         <td className="p-4 text-xs font-mono text-slate-400">
                                             {order.id.slice(0, 8)}...
                                         </td>
-                                        <td className="p-4 text-xs font-mono text-indigo-600">
-                                            {order.userId.slice(0, 8)}...
+                                        <td className="p-4">
+                                            {(() => {
+                                                const orderUser = users.find(u => u.uid === order.userId);
+                                                return orderUser ? (
+                                                    <div>
+                                                        <div className="font-bold text-slate-800 text-sm">{orderUser.displayName || 'No Name'}</div>
+                                                        <div className="text-[10px] text-slate-500 font-mono">{orderUser.email}</div>
+                                                        <div className="text-[9px] text-slate-300 font-mono mt-0.5">{order.userId.slice(0, 8)}...</div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-slate-400 text-xs font-mono">{order.userId.slice(0, 8)}...</span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="p-4">
                                             <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold">{order.toolType}</span>
@@ -675,6 +686,9 @@ export const AdminDashboard: React.FC = () => {
                                                 autoFocus
                                                 required
                                             />
+                                            <p className="text-[11px] text-slate-500 mt-1">
+                                                💡 Tip: Use a <strong>negative value</strong> (e.g. -100) to <strong>remove points</strong> from the user.
+                                            </p>
                                         </div>
                                         <div>
                                             <label className="block text-sm font-bold text-slate-700 mb-1">{t('reason')}</label>
