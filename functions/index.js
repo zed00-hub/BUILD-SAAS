@@ -12,7 +12,7 @@ exports.generateContent = functions
     .runWith({
         secrets: ["GEMINI_API_KEY"],
         timeoutSeconds: 540,
-        memory: "2GB"
+        memory: "1GB"
     })
     .https.onCall(async (data, context) => {
         // Get API key from secret (injected as environment variable)

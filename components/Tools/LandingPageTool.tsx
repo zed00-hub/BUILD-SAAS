@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Country, Language, HistoryItem } from '../../types';
 import { UserData } from '../../src/types/dbTypes';
 import { Button } from '../Button';
-import { fileToBase64, generateImage, editGeneratedImage, compressImage } from '../../services/geminiService';
+import { fileToBase64, generateImage, editGeneratedImage } from '../../services/geminiService';
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
@@ -97,7 +97,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
     if (e.target.files && e.target.files[0]) {
       try {
-        const base64 = await compressImage(e.target.files[0]); // Optimize image before upload
+        const base64 = await fileToBase64(e.target.files[0]);
         setter(base64);
         setError(null);
       } catch (err) {
