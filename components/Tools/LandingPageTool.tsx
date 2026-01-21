@@ -203,92 +203,110 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       }
 
       // Enhanced Structure Logic for Comprehensive Landing Pages
-      // Enhanced Structure Logic for Comprehensive Landing Pages - SINGLE VERTICAL COLUMN ONLY
-      // Simplified & Optimized Prompt for Speed + Quality
-      const socialProofSection = formData.reviews && formData.reviews.trim().length > 0
-        ? `3. SOCIAL PROOF: Display these specific reviews: "${formData.reviews}". Use Happy REAL people (Modest/Family-friendly), 5-Star badge.`
-        : `3. TRUST INDICATORS: Show verified badges/guarantee icons ONLY. DO NOT GENERATE FAKE TEXT REVIEWS.`;
+      // SINGLE VERTICAL COLUMN ONLY - Extended Version
 
+      // NO REVIEWS - Only trust badges
+      const socialProofSection = formData.reviews && formData.reviews.trim().length > 0
+        ? `SOCIAL PROOF: Display ONLY these testimonials: "${formData.reviews}" with 5-star ratings.`
+        : `TRUST SECTION: Show ONLY trust badges and guarantee icons (✓ Guaranteed, ✓ Fast Shipping, ✓ Secure Payment). DO NOT generate any fake reviews or testimonials.`;
+
+      // Countdown ONLY if discount exists
       const hasDiscount = formData.discount && parseInt(formData.discount) > 0;
       const urgencyInstruction = hasDiscount
-        ? "Include a dynamic COUNTDOWN TIMER (00:00:00 style) to create urgency for the discount."
-        : "DO NOT include any countdown timers or clocks.";
+        ? "Include a COUNTDOWN TIMER to show urgency for the limited discount."
+        : "DO NOT include any countdown timers, clocks, or time-limited offers.";
 
       const structureInstruction = `
-        📐 LAYOUT: STRICTLY SINGLE VERTICAL STRIP (Mobile Feed Style).
+        📐 LAYOUT: STRICTLY SINGLE VERTICAL STRIP (EXTRA LONG Mobile Feed Style).
         ⛔ CRITICAL: ABSOLUTELY NO LEFT/RIGHT SPLIT SCREENS or 2-COLUMN GRIDS. 
-        ✅ ALL CONTENT MUST BE CENTERED OR FULL-WIDTH STACKED VERTICALLY (One Element Below Another).
+        ✅ ALL CONTENT MUST BE CENTERED OR FULL-WIDTH STACKED VERTICALLY.
         
-        SECTIONS (STACKED ONE BELOW ANOTHER):
-        1. HERO (TOP): Product Image Centered, Headline, Trust badges, "Order Now" Button.
-        2. BEFORE/AFTER (BELOW HERO): Show problem vs solution clearly. (Single composite image).
-        ${socialProofSection}
-        4. FEATURES: 3-4 Circular close-ups (Zoomed details) stacked vertically (NOT side-by-side).
-        5. OFFER BOX (BOTTOM): Distinct color box, Big Price, ${hasDiscount ? 'Countdown Timer,' : ''} Guarantee, Free Shipping.
-        6. FINAL CTA: Big "Order Now" Button.
+        EXTENDED SECTIONS (8+ Sections for a LONGER page):
+        1. HERO (TOP): Large Product Image, Bold Headline, Trust badges, "Order Now" Button.
+        2. PROBLEM/PAIN POINT: Visual showing the problem customers face.
+        3. SOLUTION/BENEFIT: How this product solves the problem.
+        4. BEFORE/AFTER: Clear transformation visual (single composite image).
+        5. KEY FEATURES: 4-5 Feature highlights with icons, stacked vertically.
+        6. ${socialProofSection}
+        7. OFFER BOX: Distinct colored box with Price, ${hasDiscount ? 'Countdown,' : ''} Guarantee, Free Shipping.
+        8. FAQ/OBJECTIONS: Address common concerns (2-3 items).
+        9. FINAL CTA: Large "Order Now" Button with urgency text.
       `;
 
       const languageInstruction = formData.language === Language.Arabic
-        ? "Language: ARABIC (Professional Marketing). RTL."
+        ? `Language: ARABIC (العربية الفصحى). 
+           - RTL Layout (Right-to-Left).
+           - Use PERFECT Arabic grammar and spelling with NO ERRORS.
+           - Use professional marketing Arabic copywriting.
+           - All text must be crystal clear and legible.`
         : formData.language === Language.French
-          ? "Language: FRENCH."
-          : "Language: ENGLISH.";
+          ? "Language: FRENCH (Professional Marketing)."
+          : "Language: ENGLISH (Professional Marketing).";
 
       const styleInstruction = `
         🎨 STYLE: ULTRA-REALISTIC 4K PREMIUM WEB DESIGN.
-        - RESOLUTION: FORCE 4K (High-Definition). CRYSTAL CLEAR DETAILS.
-        - AESTHETIC: High-end E-commerce (Apple/Nike/Dior style). Minimalist, Airy, Sophisticated.
-        - FLOW: SEAMLESS VERTICAL SCROLL. Sections must merge smoothly (Gradient fades or curved separators). NO HARSH LINES between sections.
-        - VISUALS: Cinematic product photography. Soft studio lighting. Depth of field.
+        - RESOLUTION: FORCE 4K (3840x2160). MAXIMUM SHARPNESS AND CLARITY.
+        - AESTHETIC: High-end E-commerce (Apple/Nike/Dior level). Clean, Minimalist, Luxurious.
+        - FLOW: SEAMLESS VERTICAL SCROLL. Sections merge smoothly with gradient transitions.
+        - VISUALS: Cinematic product photography. Professional studio lighting.
+        - TEXT: All text must be PERFECTLY LEGIBLE and grammatically correct.
         
         ⛔ STRICT PROHIBITIONS:
-        1. NO SPLIT SCREENS (Left/Right division). Content must be STACKED Top-to-Bottom.
-        2. NO WEBSITE NAVIGATION BARS (No Menu, No Search, No "Home/Contact" links).
-        3. NO BROWSER FRAMES.
-        4. NO GENERIC TEXT LABELS (Do not write "Hero Section", "Before/After" on the image).
+        1. NO SPLIT SCREENS (Left/Right division).
+        2. NO WEBSITE NAVIGATION BARS or menus.
+        3. NO BROWSER FRAMES or device mockups.
+        4. NO COUNTDOWN TIMERS unless discount is specified.
+        5. NO FAKE REVIEWS or testimonials.
+        6. NO SPELLING OR GRAMMAR ERRORS (especially in Arabic).
       `;
 
       const ctaInstruction = `
-        🔴 CTAs: Insert 2-3 GLOSSY, HIGH-CONTRAST "Order Now" BUTTONS placed organically between sections.
+        🔴 CTAs: Insert 3-4 GLOSSY, HIGH-CONTRAST "Order Now" BUTTONS placed between sections.
+        Make buttons large, colorful, and impossible to miss.
       `;
 
       const contentQualityInstruction = `
-        📝 TEXT & COPY:
-        - HEADLINES: Big, Bold, Sans-Serif Typography. High readability.
-        - MICRO-COPY: Use premium badges (100% Guaranteed, Fast Shipping).
-        - LANGUAGE: ${formData.language} (Ensure correct RTL alignment for Arabic).
-        - NO FAKE REVIEWS (Use generic trust badges if no reviews provided).
+        📝 TEXT & COPY QUALITY:
+        - HEADLINES: Big, Bold, Eye-catching. Use powerful marketing language.
+        - ${languageInstruction}
+        - Arabic text must have ZERO spelling mistakes and proper grammar.
+        - All text must be sharp and readable at any zoom level.
+        - Use trust badges (✓ 100% Guaranteed, ✓ Fast Shipping, ✓ Secure) instead of fake reviews.
       `;
 
-      const prompt = `Design a SINGLE CONTINUOUS VERTICAL LANDING PAGE IMAGE (Long Screenshot Style).
+      const prompt = `Create an EXTENDED VERTICAL LANDING PAGE (Extra Long Screenshot Style).
       
       PRODUCT DETAILS:
-      - Description: ${formData.description || 'Analyze image.'}
+      - Description: ${formData.description || 'Analyze the product image.'}
       - Target Market: ${formData.country}
       - Language: ${formData.language}
       - Price: ${priceInstruction}
       - Payment: ${paymentInstruction}
-      - Urgency: ${urgencyInstruction}
-      ${formData.customization ? `- Custom: ${formData.customization}` : ''}
+      ${hasDiscount ? '- SHOW COUNTDOWN: Yes (Discount active)' : '- SHOW COUNTDOWN: No'}
+      ${formData.customization ? `- Custom Instructions: ${formData.customization}` : ''}
       
-      STRICT VERTICAL STRUCTURE (Top to Bottom):
-      1. [HERO SECTION]: LARGE Centered Product Shot + Impactful Headline + CTA Button. (Full width).
-      2. [TRANSFORMATION]: A powerful "Before & After" visual block.
-      ${socialProofSection}
-      4. [FEATURES SHOWCASE]: 3-4 High-res circular zoom-ins of product details.
-      5. [OFFER BLOCK]: Distinct colored card with Price, ${hasDiscount ? 'Countdown Timer,' : ''} and Guarantee.
-      6. [FOOTER CTA]: High-impact Final Call to Action.
+      STRUCTURE (Top to Bottom - Make it LONG):
+      1. [HERO]: Stunning product showcase + Bold headline + CTA
+      2. [PROBLEM]: Visual pain points
+      3. [SOLUTION]: Product benefits
+      4. [BEFORE/AFTER]: Transformation visual
+      5. [FEATURES]: 4-5 Key features with icons
+      6. [TRUST]: Badges and guarantees only (NO fake reviews)
+      7. [OFFER]: ${hasDiscount ? 'Price + Countdown + ' : 'Price + '}Guarantee
+      8. [FAQ]: 2-3 Common questions addressed
+      9. [FINAL CTA]: Strong closing call-to-action
       
       ${styleInstruction}
       ${ctaInstruction}
       ${contentQualityInstruction}
       
-      Checks:
-      1. Is the image ONE tall vertical strip? Yes.
-      2. Are side-by-side split screens REMOVED? Yes. (CRITICAL)
-      3. Is the quality 4K/Photorealistic? Yes.
-      4. Are Navbars/Menus/Time Counters removed (unless requested)? Yes.
-      5. Is all text legible? Yes.
+      FINAL CHECKS:
+      ✓ Is the page EXTRA LONG (8+ sections)? YES
+      ✓ Is quality 4K Ultra-HD? YES
+      ✓ Are there NO fake reviews? YES
+      ✓ Is countdown shown ONLY if discount exists? YES
+      ✓ Is Arabic text perfect (if used)? YES
+      ✓ Is there NO split-screen layout? YES
       `;
 
       const result = await generateImage({
