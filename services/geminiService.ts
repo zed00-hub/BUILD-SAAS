@@ -17,6 +17,43 @@ export const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
+// Helper to Compress Image (Resize to max width, maintaining aspect ratio)
+export const compressImage = (file: File, maxWidth = 1200, quality = 0.85): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error("Canvas context failed"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to JPEG base64
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl.split(',')[1]);
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 // Map "Nano Banana Pro" request to `gemini-3-pro-image-preview`
 const IMAGE_MODEL_NAME = 'gemini-3-pro-image-preview';
 // Use Flash for logic/planning tasks
