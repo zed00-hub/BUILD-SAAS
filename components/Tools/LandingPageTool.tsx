@@ -215,63 +215,62 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
           ? "Langue: FRANÇAIS professionnel."
           : "Language: Professional ENGLISH.";
 
-      const prompt = `أنشئ صفحة هبوط احترافية عمودية طويلة لمنتج تجاري (Long Vertical Infographic Style).
+      // 🚀 STRATEGY CHANGE: Request an "Infographic/Poster" NOT a "Landing Page" to avoid web UI artifacts.
+      const prompt = `Design a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC (Long Marketing Strip).
+      
+      🚨 CRITICAL RULES (ZERO TOLERANCE):
+      1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
+      2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
+      3. ⛔ NO IMMODESTY: Models MUST wear modest, loose clothing (Long sleeves). Family-friendly atmosphere.
+      4. ✅ ARABIC TEXT: Use High-Quality, Legible Arabic Text for all headlines.
 
-📱 المتطلبات الأساسية (Strict Requirements):
-1. تصميم عمودي متسلسل 100% (بدون تقسيم يمين/يسار).
-2. جودة 4K فائقة الوضوح.
-3. ⛔ ممنوع الأزرار: لا تضع أي زر "شراء" أو "طلب". التصميم للعرض فقط.
-4. ⛔ ممنوع التبرج: أي عارض بشري يجب أن يرتدي ملابس محتشمة جداً (أكمام طويلة، فضفاضة). يفضل جو عائلي أو التركيز على المنتج فقط.
+      📦 PRODUCT INFO:
+      - Description: ${formData.description || 'Analyze image'}
+      - ${languageInstruction}
+      - ${priceInstruction}
+      ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a circular badge, NOT a button)` : ''}
 
-🎯 معلومات المنتج:
-- الوصف: ${formData.description || 'حلل صورة المنتج'}
-- ${languageInstruction}
-- ${priceInstruction}
-${hasDiscount ? `- الخصم: ${formData.discount}% (شارة خصم فقط)` : ''}
-- الدفع: ${formData.paymentMethod === 'cod' ? 'الدفع عند الاستلام' : 'دفع آمن'}
+      📐 LAYOUT STRUCTURE (Must follow this EXACT sequence from Top to Bottom):
 
-📐 تسلسل التصميم (Layout Flow - Like Attached Examples):
+      SECTION 1: [TOP TRUST STRIP]
+      - A narrow solid color strip at the very top.
+      - 3 small floating icons in a row: [🚚 Fast Shipping] [🛡️ Secure Payment] [✅ Satisfaction Guarantee].
+      - No text other than the icon labels.
 
-1️⃣ [Top Banner]: شريط علوي ملون يحتوي أيقونات صغيرة (شحن مجاني | دفع آمن | ضمان).
+      SECTION 2: [HERO COMPOSITION]
+      - Main Visual: Large 3D render of the PRODUCT in a realistic home setting.
+      - Context: A happy person (MODESTLY DRESSED) using the product or smiling near it.
+      - Text: Big, bold Arabic Headline floating in empty space (e.g., "The Perfect Solution").
 
-2️⃣ [Hero Section]: 
-   - صورة المنتج كبيرة وواضحة في المنتصف.
-   - عنوان رئيسي قوي جذاب.
-   - 3 أيقونات دائرية مميزات بجانب المنتج.
-   - (بدون أزرار).
+      SECTION 3: [VISUAL TRANSFORMATION]
+      - Style: A "Split Screen" or "Arrow Flow" visual.
+      - Content: 
+        * Left Side (Gray/Dull): The "Problem" (e.g., dirty floor, tired face). Label: "BEFORE".
+        * Right Side (Bright/Vibrant): The "Solution" (e.g., clean floor, glowing face). Label: "AFTER".
+      - Connecting Element: A large Gold/Green arrow pointing from Before to After.
 
-3️⃣ [Before & After]: 
-   - تصميم ابداعي يظهر المشكلة (قبل) والحل (بعد).
-   - ربط الصورتين بسهم أو تأثير تحول.
+      SECTION 4: [KEY FEATURES - CIRCLES]
+      - Layout: A row of 3 or 4 Circular Frames (Bubbles) at the bottom.
+      - Content: Inside each circle, show a zoomed-in detail of the product (e.g., Texture, Mechanism, Ingredients).
+      - Labels: Short Arabic text under each circle.
 
-4️⃣ [Features & Benefits]:
-   - 3-4 مميزات رئيسية.
-   - كل ميزة بأيقونة ملونة ووصف قصير.
-   - ترتيب عمودي أنيق.
+      SECTION 5: [OFFER FOOTER]
+      - A distinct colored box at the bottom.
+      - Content: The Price (Large Font) + Quality Seal Badge.
+      - background: Clean, contrasting color (e.g., Deep Blue or Gold).
 
-${hasReviews ? `5️⃣ [Testimonials]: صورة شخص (محتشم/طبيب) مع نص الرأي.` : '5️⃣ [Quality Guarantee]: قسم ضمان الجودة وتأكيد الفعالية.'}
+      🎨 ART DIRECTION & STYLE:
+      - Vibe: Commercial Advertising, High-End Packaging Design.
+      - Lighting: Studio brightness, soft shadows.
+      - Colors: Fresh and Vivid (match product branding).
+      - Textures: Glossy, Clean.
 
-6️⃣ [Why Choose Us]: 
-   - صور أيقونات توضيحية (سرعة، جودة، أمان).
-
-7️⃣ [Footer Offer Box]: 
-   - صندوق ملون في الأسفل.
-   - السعر الكبير والواضح.
-   - شارات الضمان الذهبي.
-   - (بدون أزرار).
-
-🎨 الستايل والألوان:
-- نمط نظيف وعصري (Clean, Modern, Medical/Cosmetic/Home style based on product).
-- ألوان متناسقة: أزرق/أبيض (للنظافة)، ذهبي/بني (للفخامة).
-- خلفيات هادئة لا تشتت الانتباه.
-- نصوص عربية واضحة جداً وخالية من الأخطاء.
-
-⚠️ تأكيدات الجودة:
-✓ خالي تماماً من الأزرار (No Buttons).
-✓ ملابس محتشمة (Modest Clothing) - صفر تسامح مع التبرج.
-✓ جودة 4K.
-✓ تسلسل عمودي منطقي.
-`;
+      FINAL CHECKLIST:
+      - Is it vertical? YES.
+      - Are there buttons? NO.
+      - Is the text Arabic? YES.
+      - Are the women modest? YES.
+      `;
 
       const result = await generateImage({
         prompt,
