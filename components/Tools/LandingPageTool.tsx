@@ -207,13 +207,13 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       const hasReviews = formData.reviews && formData.reviews.trim().length > 0;
 
       const languageInstruction = formData.language === Language.Arabic
-        ? `اللغة: العربية الفصحى. 
-           - تخطيط RTL (من اليمين لليسار).
-           - كتابة تسويقية احترافية بدون أخطاء إملائية.
-           - نصوص واضحة وقابلة للقراءة.`
+        ? `🔴 TARGET LANGUAGE: ARABIC (العربية الفصحى). 
+           - RULE 1: ALL TEXT MUST BE IN ARABIC.
+           - RULE 2: IF the user provided reviews/descriptions in English/French, TRANSLATE THEM TO PROFESSIONAL MARKETING ARABIC IMMEDIATELY.
+           - RULE 3: Use RTL layout logic for text alignment.`
         : formData.language === Language.French
-          ? "Langue: FRANÇAIS professionnel."
-          : "Language: Professional ENGLISH.";
+          ? "🔴 TARGET LANGUAGE: FRENCH (Français). TRANSLATE ALL USER INPUTS TO FRENCH."
+          : "🔴 TARGET LANGUAGE: ENGLISH. TRANSLATE ALL USER INPUTS TO ENGLISH.";
 
       // 🚀 STRATEGY CHANGE: Request an "Infographic/Poster" NOT a "Landing Page" to avoid web UI artifacts.
       const prompt = `Design a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC (Long Marketing Strip).
@@ -222,13 +222,14 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
       2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
       3. ⛔ NO IMMODESTY: Models MUST wear modest, loose clothing (Long sleeves). Family-friendly atmosphere.
-      4. ✅ ARABIC TEXT: Use High-Quality, Legible Arabic Text for all headlines.
+      4. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
 
       📦 PRODUCT INFO:
       - Description: ${formData.description || 'Analyze image'}
       - ${languageInstruction}
       - ${priceInstruction}
       ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a circular badge, NOT a button)` : ''}
+      ${hasReviews ? `- Reviews to Translate & Display: "${formData.reviews}"` : ''}
 
       📐 LAYOUT STRUCTURE (Must follow this EXACT sequence from Top to Bottom):
 
