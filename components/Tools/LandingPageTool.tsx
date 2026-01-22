@@ -169,6 +169,11 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       return;
     }
 
+    if (formData.showPrice && !formData.price) {
+      setError("Please enter the product price or uncheck 'Show Price'.");
+      return;
+    }
+
     isSubmittingRef.current = true; // LOCK
     setIsLoading(true);
     setError(null);
@@ -191,16 +196,10 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         paymentInstruction = "Include trust badges for both Secure Payment and Cash on Delivery.";
       }
 
-      let priceInstruction = "";
-      if (formData.showPrice && formData.price) {
-        if (formData.discount && parseInt(formData.discount) > 0) {
-          priceInstruction = `Price: ${formData.price} ${formData.currency} ${formData.discount ? `(Sale: -${formData.discount}%)` : ''}`;
-        } else {
-          priceInstruction = `Price: ${formData.price} ${formData.currency}`;
-        }
-      } else {
-        priceInstruction = "No price shown.";
-      }
+      // STRICT PRICE LOGIC
+      const priceInstruction = formData.showPrice && formData.price
+        ? `السعر: ${formData.price} ${formData.currency}`
+        : "⛔ ممنوع عرض السعر نهائياً. (DO NOT SHOW ANY PRICE).";
 
       // Enhanced Landing Page Prompt - Based on Professional Arabic Example
 
@@ -227,7 +226,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 🎯 معلومات المنتج:
 - الوصف: ${formData.description || 'حلل صورة المنتج'}
 - ${languageInstruction}
-- السعر: ${formData.showPrice && formData.price ? formData.price + ' ' + formData.currency : 'غير محدد'}
+- ${priceInstruction}
 ${hasDiscount ? `- الخصم: ${formData.discount}% (شارة خصم فقط)` : ''}
 - الدفع: ${formData.paymentMethod === 'cod' ? 'الدفع عند الاستلام' : 'دفع آمن'}
 
