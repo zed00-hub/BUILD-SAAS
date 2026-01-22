@@ -202,112 +202,88 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         priceInstruction = "No price shown.";
       }
 
-      // Enhanced Structure Logic for Comprehensive Landing Pages
-      // SINGLE VERTICAL COLUMN ONLY - Extended Version
+      // Enhanced Landing Page Prompt - Based on Professional Arabic Example
 
-      // NO REVIEWS - Only trust badges
-      const socialProofSection = formData.reviews && formData.reviews.trim().length > 0
-        ? `SOCIAL PROOF: Display ONLY these testimonials: "${formData.reviews}" with 5-star ratings.`
-        : `TRUST SECTION: Show ONLY trust badges and guarantee icons (✓ Guaranteed, ✓ Fast Shipping, ✓ Secure Payment). DO NOT generate any fake reviews or testimonials.`;
-
-      // Countdown ONLY if discount exists
       const hasDiscount = formData.discount && parseInt(formData.discount) > 0;
-      const urgencyInstruction = hasDiscount
-        ? "Include a COUNTDOWN TIMER to show urgency for the limited discount."
-        : "DO NOT include any countdown timers, clocks, or time-limited offers.";
-
-      const structureInstruction = `
-        📐 LAYOUT: STRICTLY SINGLE VERTICAL STRIP (EXTRA LONG Mobile Feed Style).
-        ⛔ CRITICAL: ABSOLUTELY NO LEFT/RIGHT SPLIT SCREENS or 2-COLUMN GRIDS. 
-        ✅ ALL CONTENT MUST BE CENTERED OR FULL-WIDTH STACKED VERTICALLY.
-        
-        EXTENDED SECTIONS (8+ Sections for a LONGER page):
-        1. HERO (TOP): Large Product Image, Bold Headline, Trust badges, "Order Now" Button.
-        2. PROBLEM/PAIN POINT: Visual showing the problem customers face.
-        3. SOLUTION/BENEFIT: How this product solves the problem.
-        4. BEFORE/AFTER: Clear transformation visual (single composite image).
-        5. KEY FEATURES: 4-5 Feature highlights with icons, stacked vertically.
-        6. ${socialProofSection}
-        7. OFFER BOX: Distinct colored box with Price, ${hasDiscount ? 'Countdown,' : ''} Guarantee, Free Shipping.
-        8. FAQ/OBJECTIONS: Address common concerns (2-3 items).
-        9. FINAL CTA: Large "Order Now" Button with urgency text.
-      `;
+      const hasReviews = formData.reviews && formData.reviews.trim().length > 0;
 
       const languageInstruction = formData.language === Language.Arabic
-        ? `Language: ARABIC (العربية الفصحى). 
-           - RTL Layout (Right-to-Left).
-           - Use PERFECT Arabic grammar and spelling with NO ERRORS.
-           - Use professional marketing Arabic copywriting.
-           - All text must be crystal clear and legible.`
+        ? `اللغة: العربية الفصحى. 
+           - تخطيط RTL (من اليمين لليسار).
+           - كتابة تسويقية احترافية بدون أخطاء إملائية.
+           - نصوص واضحة وقابلة للقراءة.`
         : formData.language === Language.French
-          ? "Language: FRENCH (Professional Marketing)."
-          : "Language: ENGLISH (Professional Marketing).";
+          ? "Langue: FRANÇAIS professionnel."
+          : "Language: Professional ENGLISH.";
 
-      const styleInstruction = `
-        🎨 STYLE: ULTRA-REALISTIC 4K PREMIUM WEB DESIGN.
-        - RESOLUTION: FORCE 4K (3840x2160). MAXIMUM SHARPNESS AND CLARITY.
-        - AESTHETIC: High-end E-commerce (Apple/Nike/Dior level). Clean, Minimalist, Luxurious.
-        - FLOW: SEAMLESS VERTICAL SCROLL. Sections merge smoothly with gradient transitions.
-        - VISUALS: Cinematic product photography. Professional studio lighting.
-        - TEXT: All text must be PERFECTLY LEGIBLE and grammatically correct.
-        
-        ⛔ STRICT PROHIBITIONS:
-        1. NO SPLIT SCREENS (Left/Right division).
-        2. NO WEBSITE NAVIGATION BARS or menus.
-        3. NO BROWSER FRAMES or device mockups.
-        4. NO COUNTDOWN TIMERS unless discount is specified.
-        5. NO FAKE REVIEWS or testimonials.
-        6. NO SPELLING OR GRAMMAR ERRORS (especially in Arabic).
-      `;
+      const prompt = `أنشئ صفحة هبوط احترافية عمودية طويلة لمنتج تجاري.
 
-      const ctaInstruction = `
-        🔴 CTAs: Insert 3-4 GLOSSY, HIGH-CONTRAST "Order Now" BUTTONS placed between sections.
-        Make buttons large, colorful, and impossible to miss.
-      `;
+📱 المتطلبات الأساسية:
+- تصميم عمودي متسلسل (Mobile-First) - كل العناصر فوق بعض
+- جودة 4K فائقة الوضوح
+- ⛔ ممنوع تماماً: التقسيم الأفقي (يمين/يسار)
+- ⛔ ممنوع: كتابة أسماء الأقسام مثل "Hero Section" أو "قسم البطل"
+- ⛔ ممنوع: شريط التنقل أو القوائم
+- ⛔ ممنوع: إطارات المتصفح
 
-      const contentQualityInstruction = `
-        📝 TEXT & COPY QUALITY:
-        - HEADLINES: Big, Bold, Eye-catching. Use powerful marketing language.
-        - ${languageInstruction}
-        - Arabic text must have ZERO spelling mistakes and proper grammar.
-        - All text must be sharp and readable at any zoom level.
-        - Use trust badges (✓ 100% Guaranteed, ✓ Fast Shipping, ✓ Secure) instead of fake reviews.
-      `;
+🎯 معلومات المنتج:
+- الوصف: ${formData.description || 'حلل صورة المنتج'}
+- السوق المستهدف: ${formData.country}
+- ${languageInstruction}
+- السعر: ${formData.showPrice && formData.price ? formData.price + ' ' + formData.currency : 'غير محدد'}
+${hasDiscount ? `- الخصم: ${formData.discount}% (اعرض عداد تنازلي)` : '- لا يوجد خصم (لا تعرض عداد)'}
+- طريقة الدفع: ${formData.paymentMethod === 'cod' ? 'الدفع عند الاستلام' : formData.paymentMethod === 'online' ? 'دفع إلكتروني' : 'الدفع عند الاستلام + دفع إلكتروني'}
+${formData.customization ? `- تخصيصات: ${formData.customization}` : ''}
 
-      const prompt = `Create an EXTENDED VERTICAL LANDING PAGE (Extra Long Screenshot Style).
-      
-      PRODUCT DETAILS:
-      - Description: ${formData.description || 'Analyze the product image.'}
-      - Target Market: ${formData.country}
-      - Language: ${formData.language}
-      - Price: ${priceInstruction}
-      - Payment: ${paymentInstruction}
-      ${hasDiscount ? '- SHOW COUNTDOWN: Yes (Discount active)' : '- SHOW COUNTDOWN: No'}
-      ${formData.customization ? `- Custom Instructions: ${formData.customization}` : ''}
-      
-      STRUCTURE (Top to Bottom - Make it LONG):
-      1. [HERO]: Stunning product showcase + Bold headline + CTA
-      2. [PROBLEM]: Visual pain points
-      3. [SOLUTION]: Product benefits
-      4. [BEFORE/AFTER]: Transformation visual
-      5. [FEATURES]: 4-5 Key features with icons
-      6. [TRUST]: Badges and guarantees only (NO fake reviews)
-      7. [OFFER]: ${hasDiscount ? 'Price + Countdown + ' : 'Price + '}Guarantee
-      8. [FAQ]: 2-3 Common questions addressed
-      9. [FINAL CTA]: Strong closing call-to-action
-      
-      ${styleInstruction}
-      ${ctaInstruction}
-      ${contentQualityInstruction}
-      
-      FINAL CHECKS:
-      ✓ Is the page EXTRA LONG (8+ sections)? YES
-      ✓ Is quality 4K Ultra-HD? YES
-      ✓ Are there NO fake reviews? YES
-      ✓ Is countdown shown ONLY if discount exists? YES
-      ✓ Is Arabic text perfect (if used)? YES
-      ✓ Is there NO split-screen layout? YES
-      `;
+📐 هيكل الصفحة (من الأعلى للأسفل):
+
+1️⃣ شريط العرض الخاص: خصم + شحن سريع + دفع آمن (شريط ملون أعلى الصفحة)
+
+2️⃣ قسم البطل: 
+   - صورة المنتج كبيرة ومركزية
+   - عنوان رئيسي جذاب وقوي
+   - 3-4 أيقونات مميزات صغيرة
+
+3️⃣ قسم المقارنة (قبل/بعد):
+   - عرض المشكلة والحل بصرياً
+   - "قبل" و "بعد" بتصميم جذاب
+
+4️⃣ قسم المميزات:
+   - 3-4 مميزات رئيسية
+   - كل ميزة بأيقونة ووصف قصير
+   - تصميم أنيق مع خلفيات ملونة
+
+${hasReviews ? `5️⃣ آراء العملاء: "${formData.reviews}"` : '5️⃣ شارات الثقة: ضمان 30 يوم + شحن سريع + دفع آمن'}
+
+6️⃣ صندوق العرض:
+   - السعر بخط كبير
+   ${hasDiscount ? '- عداد تنازلي للعرض' : ''}
+   - زر "اطلب الآن" كبير وملون
+   - شارات الضمان
+
+7️⃣ المميزات التقنية:
+   - 3-4 أيقونات دائرية
+   - وصف قصير لكل ميزة
+
+8️⃣ زر الطلب النهائي:
+   - "اضغط هنا للطلب بأفضل سعر!"
+   - زر كبير وبارز
+
+🎨 الستايل:
+- ألوان: أزرق + أبيض + لمسات ذهبية/برتقالية
+- خطوط عربية واضحة وعصرية
+- تدرجات لونية ناعمة بين الأقسام
+- أيقونات احترافية ملونة
+- صور عالية الجودة
+
+⚠️ تأكيدات نهائية:
+✓ التصميم عمودي 100% بدون تقسيمات
+✓ لا يوجد نص يكتب "Hero Section" أو أي اسم قسم
+✓ النص العربي صحيح إملائياً ونحوياً
+✓ الجودة 4K فائقة الوضوح
+✓ يركز على المنتج ويبرزه
+${hasDiscount ? '✓ عداد تنازلي موجود' : '✓ لا يوجد عداد تنازلي'}
+`;
 
       const result = await generateImage({
         prompt,
