@@ -226,6 +226,23 @@ export const LandingPage: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Landing Page Pro (NEW) */}
+                        <div onClick={() => navigate('/app/landing-page-pro')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-indigo-100/50 transition-all duration-300 cursor-pointer border-2 border-indigo-100 overflow-hidden hover:-translate-y-2 ring-4 ring-transparent hover:ring-indigo-50">
+                            {/* New Badge */}
+                            <div className="absolute top-6 right-6 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider animate-pulse">
+                                NEW
+                            </div>
+
+                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-indigo-200">
+                                <span className="text-3xl text-white">🚀</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_landing')} PRO</h3>
+                            <p className="text-slate-500 mb-8 leading-relaxed text-lg">Create extensive, multi-section landing pages with professional copywriting and layout.</p>
+                            <div className="flex items-center text-indigo-600 font-bold group-hover:gap-3 transition-all">
+                                Build Pro Pages <span className="opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180">→</span>
+                            </div>
+                        </div>
+
                         {/* Product Description */}
                         <div onClick={() => navigate('/app/product-description')} className="group relative bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-sm hover:shadow-2xl hover:shadow-rose-100/50 transition-all duration-300 cursor-pointer border border-slate-100 overflow-hidden hover:-translate-y-2">
                             <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-red-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-rose-200">
