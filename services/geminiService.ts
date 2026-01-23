@@ -54,6 +54,61 @@ export const compressImage = (file: File, maxWidth = 1200, quality = 0.85): Prom
   });
 };
 
+// Helper to stitch multiple images vertically into one long image
+export const stitchImagesVertically = async (images: string[]): Promise<string> => {
+  if (images.length === 0) return '';
+  if (images.length === 1) return images[0];
+
+  return new Promise((resolve, reject) => {
+    const loadedImages: HTMLImageElement[] = [];
+    let loadedCount = 0;
+
+    images.forEach((src, index) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        loadedImages[index] = img;
+        loadedCount++;
+        if (loadedCount === images.length) {
+          // All images loaded, now stitch
+          try {
+            // Calculate total dimensions (use max width, sum of heights)
+            const maxWidth = Math.max(...loadedImages.map(i => i.width));
+            const totalHeight = loadedImages.reduce((sum, i) => sum + i.height, 0);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = maxWidth;
+            canvas.height = totalHeight;
+            const ctx = canvas.getContext('2d');
+
+            if (!ctx) {
+              reject(new Error('Canvas context failed'));
+              return;
+            }
+
+            // Draw each image, stacking vertically
+            let currentY = 0;
+            loadedImages.forEach((loadedImg) => {
+              // Center horizontally if narrower than max width
+              const x = (maxWidth - loadedImg.width) / 2;
+              ctx.drawImage(loadedImg, x, currentY);
+              currentY += loadedImg.height;
+            });
+
+            // Convert to data URL
+            const result = canvas.toDataURL('image/png', 1.0);
+            resolve(result);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      };
+      img.onerror = () => reject(new Error(`Failed to load image ${index + 1}`));
+      img.src = src;
+    });
+  });
+};
+
 // Map "Nano Banana Pro" request to `gemini-3-pro-image-preview`
 const IMAGE_MODEL_NAME = 'gemini-3-pro-image-preview';
 // Use Flash for logic/planning tasks

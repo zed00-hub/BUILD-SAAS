@@ -63,7 +63,7 @@ export interface SlidePlan {
 
 // --- History Types ---
 
-export type HistoryToolType = 'social' | 'ad' | 'landing' | 'quick-edit' | 'virtual-tryon';
+export type HistoryToolType = 'social' | 'ad' | 'landing' | 'landing-pro' | 'quick-edit' | 'virtual-tryon';
 
 export interface HistoryItem {
   id: string;

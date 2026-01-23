@@ -9,6 +9,7 @@ import {
   SocialMediaWrapper,
   AdCreativeWrapper,
   LandingPageToolWrapper,
+  LandingPageProWrapper,
   QuickEditWrapper,
   ProductDescriptionWrapper,
   VirtualTryOnWrapper,
@@ -29,6 +30,7 @@ const App: React.FC = () => {
             <Route path="social-media" element={<SocialMediaWrapper />} />
             <Route path="ad-creative" element={<AdCreativeWrapper />} />
             <Route path="landing-page" element={<LandingPageToolWrapper />} />
+            <Route path="landing-page-pro" element={<LandingPageProWrapper />} />
             <Route path="quick-edit" element={<QuickEditWrapper />} />
             <Route path="product-description" element={<ProductDescriptionWrapper />} />
             <Route path="virtual-tryon" element={<VirtualTryOnWrapper />} />

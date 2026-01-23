@@ -7,6 +7,7 @@ import { DashboardContextType, TrialBanner } from './Dashboard';
 import { SocialMediaTool } from '../../components/Tools/SocialMediaTool';
 import { AdCreativeTool } from '../../components/Tools/AdCreativeTool';
 import { LandingPageTool } from '../../components/Tools/LandingPageTool';
+import { LandingPageToolPro } from '../../components/Tools/LandingPageToolPro';
 import { QuickEditTool } from '../../components/Tools/QuickEditTool';
 import { ProductDescriptionTool } from '../../components/Tools/ProductDescriptionTool';
 import { VirtualTryOnTool } from '../../components/Tools/VirtualTryOnTool';
@@ -166,3 +167,12 @@ export const VirtualTryOnWrapper: React.FC = () => {
     );
 };
 
+export const LandingPageProWrapper: React.FC = () => {
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+    return (
+        <ToolGuard toolId="landing-page-pro">
+            {!isPaidUser && <TrialBanner />}
+            <LandingPageToolPro points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
+        </ToolGuard>
+    );
+};

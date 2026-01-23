@@ -315,10 +315,16 @@ export const Dashboard: React.FC = () => {
                                 label={t('tool_ad')}
                             />
                             <SidebarItem
-                                active={isActive('landing-page')}
+                                active={isActive('landing-page') && !isActive('landing-page-pro')}
                                 onClick={() => { navigate('landing-page'); setIsSidebarOpen(false); }}
                                 icon={<LandingPageIcon size={20} />}
                                 label={t('tool_landing')}
+                            />
+                            <SidebarItem
+                                active={isActive('landing-page-pro')}
+                                onClick={() => { navigate('landing-page-pro'); setIsSidebarOpen(false); }}
+                                icon={<span className="text-lg">🚀</span>}
+                                label={isRtl ? 'لاندنق برو' : 'Landing Pro'}
                             />
                             <SidebarItem
                                 active={isActive('quick-edit')}
