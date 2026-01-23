@@ -8,6 +8,7 @@ import {
     SocialMediaIcon,
     AdCreativeIcon,
     LandingPageIcon,
+    LandingPageProIcon,
     ProductDescIcon,
     VirtualTryOnIcon
 } from '../../components/ToolIcons';
@@ -234,7 +235,7 @@ export const LandingPage: React.FC = () => {
                             </div>
 
                             <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-indigo-200">
-                                <span className="text-3xl text-white">🚀</span>
+                                <LandingPageProIcon size={32} className="text-white" />
                             </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-4">{t('tool_landing')} PRO</h3>
                             <p className="text-slate-500 mb-8 leading-relaxed text-lg">Create extensive, multi-section landing pages with professional copywriting and layout.</p>

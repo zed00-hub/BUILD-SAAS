@@ -24,6 +24,7 @@ import {
     QuickEditIcon,
     ProductDescIcon,
     VirtualTryOnIcon,
+    LandingPageProIcon,
     HomeIcon,
     ProjectsIcon,
     AdminIcon
@@ -323,7 +324,7 @@ export const Dashboard: React.FC = () => {
                             <SidebarItem
                                 active={isActive('landing-page-pro')}
                                 onClick={() => { navigate('landing-page-pro'); setIsSidebarOpen(false); }}
-                                icon={<span className="text-lg">🚀</span>}
+                                icon={<LandingPageProIcon size={20} />}
                                 label={isRtl ? 'لاندنق برو' : 'Landing Pro'}
                             />
                             <SidebarItem
