@@ -10,13 +10,15 @@ import {
     LandingPageIcon,
     QuickEditIcon,
     ProductDescIcon,
-    VirtualTryOnIcon
+    VirtualTryOnIcon,
+    LandingPageProIcon
 } from '../ToolIcons';
 
 const AVAILABLE_TOOLS = [
     { id: 'social-media', name: 'Social Media Tool', Icon: SocialMediaIcon, gradient: 'from-blue-500 to-cyan-500' },
     { id: 'ad-creative', name: 'Ad Creative Tool', Icon: AdCreativeIcon, gradient: 'from-purple-500 to-pink-500' },
     { id: 'landing-page', name: 'Landing Page Tool', Icon: LandingPageIcon, gradient: 'from-emerald-500 to-teal-500' },
+    { id: 'landing-page-pro', name: 'Landing Page Flow Pro', Icon: LandingPageProIcon, gradient: 'from-blue-600 to-indigo-600' },
     { id: 'quick-edit', name: 'Quick Edit Tool', Icon: QuickEditIcon, gradient: 'from-amber-500 to-orange-500' },
     { id: 'product-description', name: 'Product Description', Icon: ProductDescIcon, gradient: 'from-rose-500 to-red-500' },
     { id: 'virtual-tryon', name: 'Virtual Try-On', Icon: VirtualTryOnIcon, gradient: 'from-violet-500 to-indigo-500' },
