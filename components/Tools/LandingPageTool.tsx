@@ -220,8 +220,9 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
       2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
       3. ⛔ NO IMMODESTY: Models MUST wear modest, loose clothing (Long sleeves). Family-friendly atmosphere.
-      4. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
-      5. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
+      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout instructions on the image. Only write the actual marketing copy (Headline, Description, Price).
+      5. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
+      6. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
 
       📦 PRODUCT INFO:
       - Description: ${formData.description || 'Analyze image'}
@@ -465,8 +466,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
                 <div className="grid grid-cols-2 gap-3">
                   <label
                     className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${formData.pageType === 'standard'
-                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                        : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                      ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                      : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
                       }`}
                   >
                     <input
@@ -490,8 +491,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
                   <label
                     className={`cursor-pointer p-4 rounded-xl border-2 transition-all relative overflow-hidden ${formData.pageType === 'extended'
-                        ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-200'
-                        : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50'
+                      ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-200'
+                      : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50'
                       }`}
                   >
                     <div className="absolute top-0 right-0 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">PRO</div>
