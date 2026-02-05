@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Country, Language, HistoryItem } from '../../types';
 import { UserData } from '../../src/types/dbTypes';
 import { Button } from '../Button';
-import { fileToBase64, generateImage, editGeneratedImage } from '../../services/geminiService';
+import { fileToBase64, generateImage, editGeneratedImage, stitchImagesVertically } from '../../services/geminiService';
 import { CoinIcon } from '../CoinIcon';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getHistory, saveHistoryItem, deleteHistoryItem } from '../../services/storageService';
@@ -32,6 +32,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     country: Country.Algeria,
     customization: '',
     reviews: '', // New field for expert reviews
+    pageType: 'standard' as 'standard' | 'extended', // الوضع العادي أو الموسع
   });
 
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -46,7 +47,8 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const [error, setError] = useState<string | null>(null);
   const isSubmittingRef = React.useRef(false);
 
-  const generationCost = 30;
+  // التكلفة تعتمد على نوع الصفحة: عادية 30، موسعة 45 (1.5×)
+  const generationCost = formData.pageType === 'extended' ? 45 : 30;
   const editCost = 10;
 
   const currencies = [
@@ -179,7 +181,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     setError(null);
     setResultImage(null);
 
-    const hasPoints = await deductPoints(generationCost, `Generate Landing Page`);
+    const hasPoints = await deductPoints(generationCost, `Generate Landing Page ${formData.pageType === 'extended' ? '(Extended)' : ''}`);
     if (!hasPoints) {
       setIsLoading(false);
       isSubmittingRef.current = false; // UNLOCK
@@ -201,8 +203,6 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         ? `السعر: ${formData.price} ${formData.currency}`
         : "⛔ ممنوع عرض السعر نهائياً. (DO NOT SHOW ANY PRICE).";
 
-      // Enhanced Landing Page Prompt - Based on Professional Arabic Example
-
       const hasDiscount = formData.discount && parseInt(formData.discount) > 0;
       const hasReviews = formData.reviews && formData.reviews.trim().length > 0;
 
@@ -215,71 +215,177 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
           ? "🔴 TARGET LANGUAGE: FRENCH (Français). TRANSLATE ALL USER INPUTS TO FRENCH."
           : "🔴 TARGET LANGUAGE: ENGLISH. TRANSLATE ALL USER INPUTS TO ENGLISH.";
 
-      // 🚀 STRATEGY CHANGE: Request an "Infographic/Poster" NOT a "Landing Page" to avoid web UI artifacts.
-      const prompt = `Design a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC (Long Marketing Strip).
-      
+      const baseRules = `
       🚨 CRITICAL RULES (ZERO TOLERANCE):
       1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
       2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
       3. ⛔ NO IMMODESTY: Models MUST wear modest, loose clothing (Long sleeves). Family-friendly atmosphere.
       4. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
+      5. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
 
       📦 PRODUCT INFO:
       - Description: ${formData.description || 'Analyze image'}
       - ${languageInstruction}
-      - ${priceInstruction}
-      ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a circular badge, NOT a button)` : ''}
       ${hasReviews ? `- Reviews to Translate & Display: "${formData.reviews}"` : ''}
-
-      📐 LAYOUT STRUCTURE (Must follow this EXACT sequence from Top to Bottom):
-
-      SECTION 1: [TOP TRUST STRIP]
-      - A narrow solid color strip at the very top.
-      - 3 small floating icons in a row: [🚚 Fast Shipping] [🛡️ Secure Payment] [✅ Satisfaction Guarantee].
-      - No text other than the icon labels.
-
-      SECTION 2: [HERO COMPOSITION]
-      - Main Visual: Large 3D render of the PRODUCT in a realistic home setting.
-      - Context: A happy person (MODESTLY DRESSED) using the product or smiling near it.
-      - Text: Big, bold Arabic Headline floating in empty space (e.g., "The Perfect Solution").
-
-      SECTION 3: [VISUAL TRANSFORMATION]
-      - Style: A "Split Screen" or "Arrow Flow" visual.
-      - Content: 
-        * Left Side (Gray/Dull): The "Problem" (e.g., dirty floor, tired face). Label: "BEFORE".
-        * Right Side (Bright/Vibrant): The "Solution" (e.g., clean floor, glowing face). Label: "AFTER".
-      - Connecting Element: A large Gold/Green arrow pointing from Before to After.
-
-      SECTION 4: [KEY FEATURES - CIRCLES]
-      - Layout: A row of 3 or 4 Circular Frames (Bubbles) at the bottom.
-      - Content: Inside each circle, show a zoomed-in detail of the product (e.g., Texture, Mechanism, Ingredients).
-      - Labels: Short Arabic text under each circle.
-
-      SECTION 5: [OFFER FOOTER]
-      - A distinct colored box at the bottom.
-      - Content: The Price (Large Font) + Quality Seal Badge.
-      - background: Clean, contrasting color (e.g., Deep Blue or Gold).
-
+      
       🎨 ART DIRECTION & STYLE:
       - Vibe: Commercial Advertising, High-End Packaging Design.
       - Lighting: Studio brightness, soft shadows.
       - Colors: Fresh and Vivid (match product branding).
       - Textures: Glossy, Clean.
-
-      FINAL CHECKLIST:
-      - Is it vertical? YES.
-      - Are there buttons? NO.
-      - Is the text Arabic? YES.
-      - Are the women modest? YES.
       `;
 
-      const result = await generateImage({
-        prompt,
-        referenceImage: productImage,
-        logoImage: logoImage || undefined,
-        aspectRatio: "9:16",
-        imageSize: "4K"
-      });
+      let result: string;
+
+      if (formData.pageType === 'extended') {
+        // ===== النسخة الموسعة: صورتين متكاملتين ثم دمج =====
+
+        // الصورة الأولى: Hero Section + Before/After (تفاصيل غنية)
+        const prompt1 = `Design the UPPER HALF of a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC.
+        ${baseRules}
+
+        📐 THIS IMAGE CONTAINS (Top to Bottom):
+
+        SECTION 1: [PREMIUM TRUST HEADER]
+        - Luxurious header strip with gradient background.
+        - 4 trust icons with elegant styling: [🚚 التوصيل السريع] [🛡️ ضمان الجودة] [✅ رضا مضمون] [💳 دفع آمن].
+        - Subtle gold/silver accents.
+
+        SECTION 2: [HERO COMPOSITION - EXPANDED]
+        - DOMINANT Visual: Ultra-large 3D render of the PRODUCT (60% of this section).
+        - Rich Context: A happy person (MODESTLY DRESSED - full coverage, long sleeves) demonstrating the product in an elegant setting.
+        - Floating Elements: Golden sparkles, light rays, quality stamps.
+        - Main Headline: Big, bold Arabic text with drop shadow effect.
+        - Sub-headline: Supporting text explaining the core benefit.
+
+        SECTION 3: [BEFORE/AFTER TRANSFORMATION - DETAILED]
+        - Style: Dramatic split-screen with diagonal divider.
+        - BEFORE Side (Left/Gray):
+          * Detailed visualization of the problem.
+          * Sad/tired expression, dull colors.
+          * Red X marks or warning icons.
+          * Label: "قبل" with timestamp styling.
+        - AFTER Side (Right/Vibrant):
+          * Detailed visualization of the solution.
+          * Happy expression, vibrant colors, glow effects.
+          * Green checkmarks, sparkle effects.
+          * Label: "بعد" with success styling.
+        - Large Gold/Green arrow with "التحول" text.
+        - Include real transformation statistics if applicable.
+
+        ⚠️ IMPORTANT: This is the TOP HALF only. End with a subtle visual transition (gradient fade) at the bottom for seamless stitching.
+        `;
+
+        // الصورة الثانية: Authority + Ingredients/Mechanism (تفاصيل غنية)
+        const prompt2 = `Design the LOWER HALF of a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC.
+        ${baseRules}
+        - ${priceInstruction}
+        ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a luxurious circular badge)` : ''}
+
+        📐 THIS IMAGE CONTAINS (Top to Bottom):
+
+        ⚠️ START: Begin with a subtle visual transition (gradient fade) at the top for seamless stitching with the upper half.
+
+        SECTION 4: [AUTHORITY & SOCIAL PROOF - EXPANDED]
+        - Background: Premium gradient section.
+        - Star Ratings: Large 5-star display with review count.
+        - Customer Testimonials: 2-3 quote boxes with customer photos (modest dress).
+        - Trust Badges: "مختبر سريرياً" / "معتمد" / "الأكثر مبيعاً".
+        - Statistics: "10,000+ عميل راضٍ" style counters.
+        - Expert Endorsement section if applicable.
+
+        SECTION 5: [INGREDIENTS/MECHANISM - DETAILED CIRCLES]
+        - Layout: 4-5 Large Circular Frames in elegant arrangement.
+        - Each Circle Contains:
+          * High-quality zoomed detail of product component.
+          * Arabic label below with benefit description.
+          * Subtle glow/ring effect around circles.
+        - Connecting lines/arrows showing how components work together.
+        - "كيف يعمل؟" section title with decorative styling.
+
+        SECTION 6: [PREMIUM OFFER FOOTER]
+        - Luxurious box with gradient background.
+        - Price Display: Large, bold, with original price struck through if discount.
+        - ${priceInstruction}
+        ${hasDiscount ? `- Discount Badge: -${formData.discount}% in a premium circular design.` : ''}
+        - ${paymentInstruction}
+        - Quality seals, warranty badges, limited time offer styling.
+        - Final CTA text (not button): "اطلب الآن ووفر!".
+        `;
+
+        // توليد الصورتين بالتوازي
+        const [image1, image2] = await Promise.all([
+          generateImage({
+            prompt: prompt1,
+            referenceImage: productImage,
+            logoImage: logoImage || undefined,
+            aspectRatio: "9:16",
+            imageSize: "4K"
+          }),
+          generateImage({
+            prompt: prompt2,
+            referenceImage: productImage,
+            logoImage: logoImage || undefined,
+            aspectRatio: "9:16",
+            imageSize: "4K"
+          })
+        ]);
+
+        // دمج الصورتين عمودياً
+        result = await stitchImagesVertically([image1, image2]);
+
+      } else {
+        // ===== النسخة العادية: صورة واحدة =====
+        const prompt = `Design a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC (Long Marketing Strip).
+        ${baseRules}
+        - ${priceInstruction}
+        ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a circular badge, NOT a button)` : ''}
+
+        📐 LAYOUT STRUCTURE (Must follow this EXACT sequence from Top to Bottom):
+
+        SECTION 1: [TOP TRUST STRIP]
+        - A narrow solid color strip at the very top.
+        - 3 small floating icons in a row: [🚚 Fast Shipping] [🛡️ Secure Payment] [✅ Satisfaction Guarantee].
+        - No text other than the icon labels.
+
+        SECTION 2: [HERO COMPOSITION]
+        - Main Visual: Large 3D render of the PRODUCT in a realistic home setting.
+        - Context: A happy person (MODESTLY DRESSED) using the product or smiling near it.
+        - Text: Big, bold Arabic Headline floating in empty space (e.g., "The Perfect Solution").
+
+        SECTION 3: [VISUAL TRANSFORMATION]
+        - Style: A "Split Screen" or "Arrow Flow" visual.
+        - Content: 
+          * Left Side (Gray/Dull): The "Problem" (e.g., dirty floor, tired face). Label: "BEFORE".
+          * Right Side (Bright/Vibrant): The "Solution" (e.g., clean floor, glowing face). Label: "AFTER".
+        - Connecting Element: A large Gold/Green arrow pointing from Before to After.
+
+        SECTION 4: [KEY FEATURES - CIRCLES]
+        - Layout: A row of 3 or 4 Circular Frames (Bubbles) at the bottom.
+        - Content: Inside each circle, show a zoomed-in detail of the product (e.g., Texture, Mechanism, Ingredients).
+        - Labels: Short Arabic text under each circle.
+
+        SECTION 5: [OFFER FOOTER]
+        - A distinct colored box at the bottom.
+        - Content: The Price (Large Font) + Quality Seal Badge.
+        - background: Clean, contrasting color (e.g., Deep Blue or Gold).
+
+        FINAL CHECKLIST:
+        - Is it vertical? YES.
+        - Are there buttons? NO.
+        - Is the text Arabic? YES.
+        - Are the women modest? YES.
+        `;
+
+        result = await generateImage({
+          prompt,
+          referenceImage: productImage,
+          logoImage: logoImage || undefined,
+          aspectRatio: "9:16",
+          imageSize: "4K"
+        });
+      }
+
       setResultImage(result);
 
       if (isPaidUser) {
@@ -352,6 +458,75 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
+
+              {/* Page Type Selection */}
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-slate-800">{t('page_type') || 'نوع الصفحة'}</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${formData.pageType === 'standard'
+                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                        : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name="pageType"
+                      value="standard"
+                      checked={formData.pageType === 'standard'}
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">📄</div>
+                      <div className="font-bold text-slate-800 text-sm">{t('standard_page') || 'عادية'}</div>
+                      <div className="text-xs text-slate-500 mt-1">{t('standard_desc') || 'صورة واحدة شاملة'}</div>
+                      <div className="mt-2 inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-full">
+                        <span className="text-xs font-bold text-slate-700">30</span>
+                        <CoinIcon className="w-3 h-3 text-amber-500" />
+                      </div>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all relative overflow-hidden ${formData.pageType === 'extended'
+                        ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-200'
+                        : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50'
+                      }`}
+                  >
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">PRO</div>
+                    <input
+                      type="radio"
+                      name="pageType"
+                      value="extended"
+                      checked={formData.pageType === 'extended'}
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">📑</div>
+                      <div className="font-bold text-slate-800 text-sm">{t('extended_page') || 'موسعة'}</div>
+                      <div className="text-xs text-slate-500 mt-1">{t('extended_desc') || 'صورتين مدمجتين بتفاصيل أكثر'}</div>
+                      <div className="mt-2 inline-flex items-center gap-1 bg-violet-100 px-2 py-1 rounded-full">
+                        <span className="text-xs font-bold text-violet-700">45</span>
+                        <CoinIcon className="w-3 h-3 text-amber-500" />
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                {formData.pageType === 'extended' && (
+                  <div className="bg-violet-50 border border-violet-100 rounded-lg p-3 text-xs text-violet-800 animate-fade-in">
+                    <div className="font-bold mb-1">✨ {t('extended_features') || 'مميزات النسخة الموسعة:'}</div>
+                    <ul className="space-y-1 list-disc list-inside text-violet-700">
+                      <li>{t('ext_feat_1') || 'Hero Section + Before/After بتفاصيل غنية'}</li>
+                      <li>{t('ext_feat_2') || 'Authority & Social Proof موسع'}</li>
+                      <li>{t('ext_feat_3') || 'Ingredients/Mechanism مع دوائر تفصيلية'}</li>
+                      <li>{t('ext_feat_4') || 'دمج تلقائي لصورتين عالية الجودة'}</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
 
               {/* Targeting */}
               <div className="grid grid-cols-2 gap-4">
