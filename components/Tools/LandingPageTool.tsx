@@ -258,11 +258,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       `;
 
       const narrativeStyleInstruction = `
-      🎨 VISUAL STYLE & VIBE:
-      - Create a masterpiece of commercial art. The image should feel ALIVE, DYNAMIC, and VIBRANT.
-      - Use rich, deep colors and professional studio lighting giving a "High-End Magazine" feel.
-      - Layout must be SEAMLESS and FLUID. Do NOT separate sections with hard lines; use soft gradients and light effects to transition.
-      - Text should be bold, modern, and perfectly legible.
+      🎨 VISUAL STYLE & COLOR CONSISTENCY (CRITICAL):
+      - **UNIFIED COLOR PALETTE:** Analyze the PRODUCT COLOR. Use this color scheme for the ENTIRE image background, gradients, and accents. Do NOT use random colors.
+      - **RICH & DENSE DESIGN:** Avoid empty white spaces. Fill backgrounds with subtle textures, patterns, soft luxury gradients, or bokeh effects matching the product theme.
+      - **SEAMLESS FLOW:** This is a VERTICAL SCROLLING STRIP. Sections must MELT into each other using gradients. NO hard horizontal lines or section dividers.
+      - **COMMERCIAL VIBRANCE:** Use high-saturation, commercial-grade lighting. Make it look like a premium packaging box or a high-end flyer.
+      - **TEXT STYLING:** Use modern, bold fonts with thick strokes and distinctive shadows/outlines for maximum readability relative to the background.
       `;
 
       let result: string;
@@ -271,53 +272,57 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         // ===== EXTENDED EDITION (Two merged images) =====
 
         // Image 1: Top Half (Hero + Splie-Screen Transformation)
-        const prompt1 = `Design the UPPER HALF of a seamless E-Commerce vertical strip (Infographic style) for the ${formData.country} market.
+        const prompt1 = `Design the UPPER HALF of a seamless, RICHLY DETAILED E-Commerce vertical strip for the ${formData.country} market.
         ${narrativeStyleInstruction}
         ${baseRules}
 
-        VISUAL COMPOSITION (Top to Bottom):
+        VISUAL NARRATIVE (Top to Bottom):
         
-        1. Start with a sleek, narrow top strip (gradient background) containing 4 elegant trust icons.
+        1. **TRUST HEADER (The Entry):** A sleek, professional top bar using the Main Brand Color (Darker Shade). Place 4 golden trust icons (Delivery, Quality, Guarantee, Secure) evenly.
         
-        2. Below that, create a MASSIVE, IMMERSIVE HERO SCENE (60% of image). 
-           - Show the PRODUCT in a hyper-realistic, elegant home setting suitable for ${formData.country}.
-           - Include a happy person (${ethnicityInstruction}, wearing MODEST long-sleeve clothing) smiling while using or holding the product.
-           - Add magical visual effects like golden sparkles or soft light rays around the product.
-           - Write a compelling HEADLINE in ${formData.language} in the empty space causing high intrigue.
+        2. **IMMERSIVE HERO SCENE (The Hook):** 
+           - Create a deep, immersive background (e.g., a modern kitchen, a cozy living room, or abstract luxury abstract) that complements the product.
+           - Place the PRODUCT centrally, larger than life, with studio lighting making it pop.
+           - Show a Happy Model (${ethnicityInstruction}, Modest) interacting naturally.
+           - **KEY DETAIL:** Integrate a localized context beat suitable for ${formData.country}.
+           - Text: A huge, attractive 3D Headline in ${formData.language} floating within the scene.
 
-        3. Transition smoothly into a DRAMATIC BEFORE/AFTER SPLIT-SCREEN.
-           - The Left side (Grayish filter) shows the "Pain/Problem" clearly (e.g., tired face, dirty surface) labeled "قبل" (Before).
-           - The Right side (Vibrant/Bright) shows the "Solution/Benefit" (e.g., happy face, clean surface) labeled "بعد" (After) with sparkles.
-           - A large graphical arrow should point from the problem to the solution labeled "التحول" (Transformation).
+        3. **VISUAL TRANSFORMATION (The Proof):**
+           - Seamlessly fade into a Split-Screen comparison.
+           - **BEFORE (Left):** Desaturated, dull colors showing the problem. Text: "قبل" (Before).
+           - **AFTER (Right):** Bright, glowing, saturated colors showing the perfection/result. Text: "بعد" (After).
+           - Connect them with a dynamic 3D Arrow (Gold or Red) with the text "التحول" (Transformation).
 
-        ⚠️ NOTE: This image is the TOP HALF. Fade the bottom edge gently for stitching. NO "Section" labels.
+        ⚠️ DESIGN NOTE: Ensure the bottom of this image fades into a neutral or gradient texture to allow seamless stitching with Part 2. NO hard borders at the bottom.
         `;
 
         // Image 2: Bottom Half (Authority + Mechanism + Offer)
-        const prompt2 = `Design the LOWER HALF of a seamless E-Commerce vertical strip.
+        const prompt2 = `Design the LOWER HALF of a seamless, RICHLY DETAILED E-Commerce vertical strip.
         ${narrativeStyleInstruction}
         ${baseRules}
         
-        VISUAL COMPOSITION (Top to Bottom):
+        VISUAL NARRATIVE (Top to Bottom):
         
-        1. Start with a "Social Proof" area using a soft gradient background.
-           - Display a large 5-Star Rating visualization.
-           - ${hasReviews ? 'Include 2 or 3 speech bubbles containing the customer reviews provided.' : 'Show generic badges like "Top Rated" and "Customer Choice" without specific quotes.'}
-           - Add "10,000+ Happy Customers" text counter.
+        1. **AUTHORITY & SOCIAL PROOF (Validation):**
+           - Continue the background flow from the top half using a smooth gradient transition.
+           - Display a sophisticated 5-Star Rating Element (Gold Stars).
+           - ${hasReviews ? 'Include 2 or 3 elegant "Glassmorphism" styled speech bubbles containing the provided customer reviews.' : 'Show premium trust badges like "Top Rated", "Best Choice", and "100% Satisfaction" in Gold/Silver metallic finish.'}
+           - Add a bold text counter: "+10,000 ${t('total_users') || 'Clients'}".
 
-        2. Flow into a "How it Works" or "Key Ingredients" visualization.
-           - Use 4 floating circular frames (bubbles) arranged elegantly. 
-           - Inside each circle, show a MACRO close-up detail of the product or its ingredients.
-           - Under each circle, write a short 2-word Arabic benefit.
+        2. **MECHANISM & FEATURES (The Logic):**
+           - Create a dynamic section with 4 Floating Circular Lenses (Bubbles).
+           - Inside each circle, show a MACRO close-up of the product's texture, ingredients, or inner mechanism.
+           - Connect the circles with subtle golden lines or light paths.
+           - Under each circle, write a short, punchy benefit in ${formData.language}.
 
-        3. End with a STRONG, HIGH-CONVERTING OFFER BOX at the bottom.
-           - Use a contrasting, rich background color (e.g., Deep Gold or Royal Blue).
-           - Display the Price clearly (${priceInstruction}).
-           - ${hasDiscount ? 'Add a "Special Discount" badge.' : ''}
-           - Show "${paymentInstruction}" visually with icons.
-           - Write a final bold call-to-action text: "اطلب الآن والدفع عند الاستلام".
+        3. **PREMIUM OFFER FOOTER (The Closing):**
+           - This bottom section must feel heavy and grounding. Use a Deep Royal Blue or Rich Burgundy background (or dark complementary brand color).
+           - **CENTERPIECE:** The Price (${priceInstruction}) in large, glowing typography.
+           - ${hasDiscount ? 'Add a circular "Special Discount" badge with 3D effects.' : ''}
+           - **TRUST SEALS:** Add "Money Back Guarantee" and "Secure Payment" golden seals.
+           - **CTA:** A huge, bold call-to-action label: "اطلب الآن" (Order Now).
 
-        ⚠️ NOTE: This image is the BOTTOM HALF. Start the top edge gently for stitching. NO "Section" labels.
+        ⚠️ DESIGN NOTE: Start the top edge with a soft fade to match the upper half. The aim is a SINGLE continuous image look once stitched.
         `;
 
         // توليد الصورتين بالتوازي
@@ -343,27 +348,30 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       } else {
         // ===== STANDARD EDITION (Single Image) =====
-        const prompt = `Design a COMPLETE, seamless vertical E-Commerce Infographic (Long Marketing Strip).
+        const prompt = `Design a COMPLETE, seamless vertical E-Commerce Infographic (Long Strip) for ${formData.country}.
         ${narrativeStyleInstruction}
         ${baseRules}
 
-        VISUAL COMPOSITION (Top to Bottom Flow):
+        VISUAL NARRATIVE (Continuous Vertical Flow):
 
-        1. TOP: A sleek trust strip with 3 small icons (Shipping, Warranty, Guarantee).
+        1. **TOP HEADER:** A sleek trust strip with 3 small icons (Shipping, Warranty, Guarantee).
+        
+        2. **HERO SECTION:** A Vivid, fully realized scene showing the PRODUCT + HAPPY PERSON (${ethnicityInstruction}, Modest) in a relevant setting. Big captivating Arabic Headline.
 
-        2. UPPER MIDDLE: A Vivid Hero Scene. Large Product render + Happy Model (Modest/Long Sleeves) + Bold Arabic Headline.
+        3. **TRANSFORMATION ZONE:** A soft-blended Split-View. 
+           - Left: "Before" (Dull/Problem). 
+           - Right: "After" (Bright/Solution). 
+           - Connected by a flowing stylistic Arrow.
 
-        3. MIDDLE: A "Before & After" Split visual. Left side (Dull/Problem) vs Right side (Bright/Solution). Label them "قبل" and "بعد".
+        4. **FEATURE BUBBLES:** 3 Circular close-ups floating on a textured background, showing product details.
 
-        4. LOWER MIDDLE: A row of 3 circular "Feature Bubbles" showing close-up details or ingredients.
-
-        5. BOTTOM: A Distinct Offer Box.
-           - Big Price Display (${priceInstruction}).
+        5. **OFFER FOOTER:** A distinct, bold bottom section (Darker background).
+           - Large Price Display (${priceInstruction}).
            - ${hasDiscount ? 'Discount Badge.' : ''}
-           - Payment Icons (Cash on Delivery).
-           - Final text: "اطلب الآن".
+           - Trust Seals & "${paymentInstruction}" icons.
+           - Final Call-To-Action text.
 
-        ⚠️ CRITICAL: Ensure a smooth flow between these elements. Do NOT write "Section 1", "Hero", etc. Just the marketing text.
+        ⚠️ CRITICAL: The entire image must look like ONE cohesive design. Use color gradients to blend sections. Do NOT use white borders between sections.
         `;
 
         result = await generateImage({
