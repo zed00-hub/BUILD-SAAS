@@ -219,18 +219,20 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       🚨 CRITICAL RULES (ZERO TOLERANCE):
       1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
       2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
-      3. ⛔ NO IMMODESTY: Models MUST wear modest, loose clothing (Long sleeves). Family-friendly atmosphere.
-      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout instructions on the image. Only write the actual marketing copy (Headline, Description, Price).
-      5. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
-      6. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
+      3. ⛔ NO IMMODESTY (STRICT): Models MUST wear modest, loose clothing (Long sleeves, High necklines). AVOID any skin exposure or tight clothing. Family-friendly atmosphere is MANDATORY.
+      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout instructions on the image. Only write the actual marketing copy.
+      5. ⛔ NO FAKE REVIEWS: If no specific review text is provided below, DO NOT invent fake customer quotes. Use generic trust badges (e.g., "5 Stars", "Trusted Choice") instead.
+      6. ✅ MARKETING FOCUS: Focus on PAIN POINTS vs. SOLUTIONS. Use visual storytelling to show the *benefit* not just the features.
+      7. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
+      8. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
 
       📦 PRODUCT INFO:
-      - Description: ${formData.description || 'Analyze image'}
+      - Description: ${formData.description || 'Analyze image to identify key marketing angles and benefits'}
       - ${languageInstruction}
-      ${hasReviews ? `- Reviews to Translate & Display: "${formData.reviews}"` : ''}
+      ${hasReviews ? `- Reviews to Display: "${formData.reviews}" (Present these EXACTLY as customer quotes)` : '- NO CUSTOMER REVIEWS PROVIDED. Do NOT create fake quotes. Focus on Star Ratings and Trust Badges only.'}
       
       🎨 ART DIRECTION & STYLE:
-      - Vibe: Commercial Advertising, High-End Packaging Design.
+      - Vibe: Commercial Advertising, High-End Packaging Design, Persuasive.
       - Lighting: Studio brightness, soft shadows.
       - Colors: Fresh and Vivid (match product branding).
       - Textures: Glossy, Clean.
@@ -290,7 +292,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         SECTION 4: [AUTHORITY & SOCIAL PROOF - EXPANDED]
         - Background: Premium gradient section.
         - Star Ratings: Large 5-star display with review count.
-        - Customer Testimonials: 2-3 quote boxes with customer photos (modest dress).
+        ${hasReviews ? '- Customer Testimonials: 2-3 quote boxes with customer photos (modest dress) displaying the PROVIDED reviews.' : '- NO QUOTES: Do not display any text bubbles or fake testimonials.'}
         - Trust Badges: "مختبر سريرياً" / "معتمد" / "الأكثر مبيعاً".
         - Statistics: "10,000+ عميل راضٍ" style counters.
         - Expert Endorsement section if applicable.
