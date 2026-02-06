@@ -270,59 +270,66 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       if (formData.pageType === 'extended') {
         // ===== EXTENDED EDITION (Two merged images) =====
+        // "صورتين متناسقتين كل قسمين في صورة" -> 2 Images x 2 Sections each = 4 Distinct Sections.
 
-        // Image 1: Top Half (Hero + Split-Screen Transformation)
-        const prompt1 = `PART 1 of 2: TOP HALF of a RICH, DENSELY PACKED E-Commerce Strip for ${formData.country}.
-        ${narrativeStyleInstruction}
-        ${baseRules}
-
-        VISUAL STRUCTURE (Top to Bottom):
-        
-        1. **HEADER (The Hook):** A slim, professional top bar with the Brand Color. 4 Gold Trust Icons (Delivery, Warranty, Secure, Quality).
-        
-        2. **HERO SECTION (The Dream):** 
-           - A FULLY IMMERSIVE scene (e.g., Luxury Kitchen, Modern Clinic, Cozy Living Room) filled with props and depth.
-           - **CENTRAL FOCUS:** The PRODUCT (Large, High Detail).
-           - **MODEL:** A Happy Professional or User (${ethnicityInstruction}, Modest) interacting with the product.
-           - **TEXT:** A Massive 3D Headline in [${formData.language}] describing the main benefit.
-           - **VIBE:** Extremely cheerful, bright lighting, high energy.
-
-        3. **BEFORE & AFTER (The Logic):**
-           - A clear SPLIT-SCREEN comparison section immediately following the hero.
-           - **LEFT (Before):** Desaturated/Gray. Shows the problem (e.g., Chaos, Pain, Fog). Label: "BEFORE" (in ${formData.language}).
-           - **RIGHT (After):** Super Saturated/Bright. Shows the solution (e.g., Peace, Relief, Focus). Label: "AFTER" (in ${formData.language}).
-           - **ICON:** A large 3D Arrow pointing from Left to Right.
-
-        ⚠️ DESIGN NOTE: Ensure the bottom edge ends with a soft gradient to blend with Part 2. NO hard borders.
+        const splitStyleInstruction = `
+        🎨 VISUAL STRUCTURE: STRICT 50/50 SPLIT (Classic Vertical Rhythm)
+        - This image must be visually divided into TWO DISTINCT EQUAL HALVES (Top 50% and Bottom 50%).
+        - SEAMLESS TRANSITION: Use a soft gradient or texture bleed to connect the two halves. Do NOT use hard white lines.
+        - ATMOSPHERE: High-End, Magazine Quality, Commercial yet Authentic.
         `;
 
-        // Image 2: Bottom Half (Lifestyle + Offer + Features)
-        const prompt2 = `PART 2 of 2: BOTTOM HALF of a RICH, DENSELY PACKED E-Commerce Strip.
+        // Image 1: The Hook & The Logic (Hero + Before/After)
+        const prompt1 = `PART 1 of 2: TOP HALF of the Landing Page (Sections 1 & 2).
         ${narrativeStyleInstruction}
+        ${splitStyleInstruction}
+        ${baseRules}
+
+        CONTENTS (Top to Bottom):
+
+        🔻 [TOP 50%] SECTION 1: THE HERO (The Dream & Spirit)
+        - **Visual:** A Cinematic, fully immersive product shot in a real-life context (${ethnicityInstruction}).
+        - **Focus:** Capture the "Spirit" and "Vibe" of the product. If it's cozy, make it warm. If it's tech, make it sleek.
+        - **Elements:** 
+           - Massive, 3D Headline in [${formData.language}] centered or distinct.
+           - Product shining with studio lighting.
+           - Trust badges (small) at the very top.
+
+        🔻 [BOTTOM 50%] SECTION 2: BEFORE & AFTER (The Proof)
+        - **Visual:** A powerful "Split-Screen" comparison.
+        - **Structure:**
+           - LEFT: The "Old Way" (Gray, Problematic). Label: "BEFORE" (in ${formData.language}).
+           - RIGHT: The "New Way" (Bright, Solved with Product). Label: "AFTER" (in ${formData.language}).
+        - **Style:** Clean, convincing transformation visual. Labels in [${formData.language}].
+        
+        ⚠️ IMPORTANT: Ideally, show the user's problem disappearing.
+        `;
+
+        // Image 2: The Trust & The Deal (Social + Ingredients/Offer)
+        const prompt2 = `PART 2 of 2: BOTTOM HALF of the Landing Page (Sections 3 & 4).
+        ${narrativeStyleInstruction}
+        ${splitStyleInstruction}
         ${baseRules}
         
-        VISUAL STRUCTURE (Top to Bottom):
-        
-        1. **LIFESTYLE & SOCIAL PROOF (The Vibe):**
-           - A heartwarming scene of a GROUP of people (Family, Friends, Colleagues) enjoying the result of the product.
-           - Atmosphere: Warm, inviting, and community-focused. 
-           - Overlay: A gold "5-Star Rating" badge and a "Trusted by +10k Users" label.
+        CONTENTS (Top to Bottom):
 
-        2. **OFFER BOX (The Deal):**
-           - A DISTINCT, central rectangular box with a thick Gold or Green border.
-           - Inside the box:
-             - **PRICE:** Big Glowing Text: "${priceInstruction}".
-             - **payment:** ${paymentInstruction} icons.
-             - **CTA:** A huge "Order Now" button graphic in ${formData.language}.
-             - ${hasDiscount ? 'A "Special Offer" or "Discount" badge.' : ''}
+        🔻 [TOP 50%] SECTION 3: AUTHORITY & SOCIAL VALIDATION (The Trust)
+        - **Layout:** A dedicated "Wall of Love" or "Testimonial Section".
+        - **CONTENT - CRITICAL:** You MUST display the specific user reviews provided below.
+        - **TEXT TO WRITE:**
+          ${hasReviews ? `"${formData.reviews}" (DISTRIBUTE these sentences into 2-3 visual bubbles/cards).` : 'Use generic terms like "Excellent Quality", "Recommended", "Top Rated".'}
+        - **Visuals:** Add small avatars of happy users next to the text + 5-Star Badges.
 
-        3. **FEATURE BUBBLES (The Details - BOTTOM):**
-           - At the very bottom, place 3 CIRCULAR LENSES (Bubbles) side-by-side.
-           - **Content:** Each bubble shows a MACRO ZOOM or ICON of a specific feature (Ingredients, Motor, Silence, Speed).
-           - **Labels:** Small text under each bubble describing the feature in ${formData.language}.
-           - **Background:** This bottom area should be dark and heavy (branding color) to ground the design.
+        🔻 [BOTTOM 50%] SECTION 4: INGREDIENTS/MECHANISM & OFFER (The Logic & Action)
+        - **Visual:** A technical or detailed breakdown (Ingredients/Mechanism) combined with the Final Offer.
+        - **Components:**
+           1. **Mechanism/Ingredients:** 3 Circular "Lens" bubbles showing what's inside (Micro-zoom).
+           2. **The Offer:** A distinct box with:
+              - **PRICE:** Giant "${priceInstruction}".
+              - **CTA:** A huge "Order Now" button graphic in ${formData.language}.
+              - **Trust:** ${paymentInstruction} icons.
 
-        ⚠️ DESIGN NOTE: Start the top edge with a soft fade to match the upper half.
+        ⚠️ INTEGRATION NOTE: The Top of this image (Section 3) must blend seamlessly with the Bottom of the previous image (Section 2).
         `;
 
         // توليد الصورتين بالتوازي
@@ -345,6 +352,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
         // دمج الصورتين عمودياً
         result = await stitchImagesVertically([image1, image2]);
+
 
       } else {
         // ===== STANDARD EDITION (Single Image) =====
