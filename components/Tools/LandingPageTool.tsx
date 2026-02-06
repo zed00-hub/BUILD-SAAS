@@ -234,17 +234,24 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       const hasDiscount = !!formData.discount && formData.showPrice;
       const hasReviews = !!formData.reviews && formData.reviews.length > 5;
 
+      // 3. Number Format Instruction
+      const useLatinNumerals = [Country.Algeria, Country.Morocco, Country.Tunisia].includes(formData.country);
+      const numberInstruction = useLatinNumerals
+        ? "🔢 NUMERALS: MUST use Western Arabic Numerals (1234567890) ONLY. Do NOT use Eastern Arabic numerals (١٢٣)."
+        : "";
+
       const baseRules = `
       🚨 CRITICAL RULES (ZERO TOLERANCE):
       1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
       2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
       3. ⛔ NO IMMODESTY (STRICT): Models MUST wear modest, loose clothing (Long sleeves, High necklines). AVOID any skin exposure or tight clothing. Family-friendly atmosphere is MANDATORY.
-      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout instructions on the image. Only write the actual marketing copy.
+      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout labels like "Header", "Footer" on the image. Only write the actual marketing copy.
       5. ⛔ NO FAKE REVIEWS: If no specific review text is provided below, DO NOT invent fake customer quotes. Use generic trust badges (e.g., "5 Stars", "Trusted Choice") instead.
       6. ✅ MARKETING FOCUS: Focus on PAIN POINTS vs. SOLUTIONS. Use visual storytelling to show the *benefit* not just the features.
       7. ✅ LANGUAGE ADHERENCE: ${languageInstruction}
       8. ✅ ETHNICITY & LOCALIZATION: ${ethnicityInstruction}
-      9. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
+      9. ✅ NUMBER FORMAT: ${numberInstruction}
+      10. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
 
       📦 PRODUCT INFO:
       - Description: ${formData.description || 'Analyze image to identify key marketing angles and benefits'}
@@ -314,11 +321,11 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         CONTENTS (Top to Bottom):
 
         🔻 [TOP 50%] SECTION 3: AUTHORITY & SOCIAL VALIDATION (The Trust)
-        - **Layout:** A dedicated "Wall of Love" or "Testimonial Section".
-        - **CONTENT - CRITICAL:** You MUST display the specific user reviews provided below.
+        - **Layout:** ${hasReviews ? 'A dedicated "Wall of Love" or "Testimonial Section".' : 'A sleek "Trust & Authority" section with Badges & Logos.'}
+        - **CONTENT:** ${hasReviews ? 'You MUST display the specific user reviews provided below in CHAT BUBBLES or CARDS.' : 'Do NOT invent reviews. Display only "Trusted by 10k+" badge, 5-Star Icons, and potentially Media Logos.'}
         - **TEXT TO WRITE:**
-          ${hasReviews ? `"${formData.reviews}" (DISTRIBUTE these sentences into 2-3 visual bubbles/cards).` : 'Use generic terms like "Excellent Quality", "Recommended", "Top Rated".'}
-        - **Visuals:** Add small avatars of happy users next to the text + 5-Star Badges.
+          ${hasReviews ? `"${formData.reviews}" (DISTRIBUTE these sentences into 2-3 visual bubbles/cards).` : 'Use generic terms like "Excellent Quality", "Recommended", "Top Rated". NO FAKE QUOTES.'}
+        - **Visuals:** ${hasReviews ? 'User avatars + bubbles.' : 'Shield icons, Checkmarks, Gold Seals.'}
 
         🔻 [BOTTOM 50%] SECTION 4: INGREDIENTS/MECHANISM & OFFER (The Logic & Action)
         - **Visual:** A technical or detailed breakdown (Ingredients/Mechanism) combined with the Final Offer.
