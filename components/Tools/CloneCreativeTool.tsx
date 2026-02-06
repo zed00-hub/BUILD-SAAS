@@ -28,6 +28,10 @@ const CloneCreativeTool: React.FC<CloneCreativeToolProps> = ({ points, deductPoi
     const [formData, setFormData] = useState({
         language: Language.Arabic,
         country: Country.Algeria,
+        price: '',
+        currency: 'DZD',
+        paymentMethod: 'cod', // cod | online
+        discount: false,
         additionalInfo: ''
     });
 
@@ -55,6 +59,11 @@ const CloneCreativeTool: React.FC<CloneCreativeToolProps> = ({ points, deductPoi
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: checked }));
     };
 
     const handleDownload = (format: 'png' | 'webp') => {
@@ -101,6 +110,11 @@ const CloneCreativeTool: React.FC<CloneCreativeToolProps> = ({ points, deductPoi
             return;
         }
 
+        if (!formData.price) {
+            setError("Please enter a price for the product.");
+            return;
+        }
+
         isSubmittingRef.current = true;
         setIsLoading(true);
         setError(null);
@@ -114,33 +128,106 @@ const CloneCreativeTool: React.FC<CloneCreativeToolProps> = ({ points, deductPoi
         }
 
         try {
+            // --- COPY OF ADVANCED LOGIC FROM LANDING PAGE TOOL ---
+
+            // 1. Smart Ethnicity & Style Selection
+            let ethnicityInstruction = "Models should have an International/Universal appearance.";
+            if ([Country.Algeria, Country.Morocco, Country.Tunisia].includes(formData.country)) {
+                ethnicityInstruction = "Models MUST have a North African (Maghrebi) appearance (Olive skin, Mediterranean features). Authentic representation of Algerian/Moroccan people.";
+            } else if (formData.country === Country.Gulf) {
+                ethnicityInstruction = "Models MUST have a Gulf Arab (Khaleeji) appearance. Clothing can include modern-traditional fusion (e.g., Thobe/Abaya hints) but keep it commercial.";
+            } else if ([Country.France, Country.Spain, Country.Italy, Country.Germany, Country.UK, Country.USA].includes(formData.country)) {
+                ethnicityInstruction = "Models should have a Western/European appearance.";
+            }
+
+            // 2. Advanced Language Instructions
+            let languageInstruction = "";
+            switch (formData.language) {
+                case Language.Darija:
+                    languageInstruction = "🔴 WRITING LANGUAGE: NORTH AFRICAN DARIJA (Arabic Script). Use local dialect expressions common in Algeria/Morocco (e.g., 'بزاف', 'ديالك', 'شري دابا'). Mix strictly necessary French terms only if common in marketing.";
+                    break;
+                case Language.Amazigh:
+                    languageInstruction = "🔴 WRITING LANGUAGE: AMAZIGH (Tamazight) using LATIN SCRIPT (e.g., 'Azul', 'Tanmmirt'). Ensure correct Latin spelling for Berber languages.";
+                    break;
+                case Language.Arabic:
+                    languageInstruction = "🔴 WRITING LANGUAGE: Modern Standard Arabic (Fusha). Elegant and professional.";
+                    break;
+                case Language.French:
+                    languageInstruction = "🔴 WRITING LANGUAGE: Professional French.";
+                    break;
+                default:
+                    languageInstruction = `🔴 WRITING LANGUAGE: ${formData.language}. Translate all text to this language.`;
+            }
+
+            let paymentInstruction = "";
+            if (formData.paymentMethod === 'cod') {
+                paymentInstruction = "Include prominent icons/badges for 'Cash on Delivery'.";
+            } else if (formData.paymentMethod === 'online') {
+                paymentInstruction = "Include secure payment icons (Visa/Mastercard).";
+            } else {
+                paymentInstruction = "Include trust badges for both Secure Payment and Cash on Delivery.";
+            }
+
+            const priceInstruction = `PRICE DISPLAY: Show the price "${formData.price} ${formData.currency}" clearly.`;
+            const hasDiscount = formData.discount;
+
+            const baseRules = `
+      🚨 CRITICAL RULES (ZERO TOLERANCE):
+      1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
+      2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
+      3. ⛔ NO IMMODESTY (STRICT): Models MUST wear modest, loose clothing (Long sleeves, High necklines). AVOID any skin exposure or tight clothing. Family-friendly atmosphere is MANDATORY.
+      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout instructions on the image. Only write the actual marketing copy.
+      5. ⛔ NO FAKE REVIEWS: Use generic trust badges (e.g., "5 Stars", "Trusted Choice") unless specific reviews are provided.
+      6. ✅ MARKETING FOCUS: Focus on PAIN POINTS vs. SOLUTIONS. Use visual storytelling.
+      7. ✅ LANGUAGE ADHERENCE: ${languageInstruction}
+      8. ✅ ETHNICITY & LOCALIZATION: ${ethnicityInstruction}
+      9. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
+
+      🎨 ART DIRECTION & STYLE:
+      - Vibe: Commercial Advertising, High-End Packaging Design, Persuasive.
+      - Lighting: Studio brightness, soft shadows.
+      - Colors: Fresh and Vivid (match product branding).
+      - Textures: Glossy, Clean.
+      `;
+
+            const narrativeStyleInstruction = `
+      🎨 VISUAL STYLE & COLOR CONSISTENCY (CRITICAL):
+      - **UNIFIED COLOR PALETTE:** Analyze the PRODUCT COLOR. Use this color scheme for the ENTIRE image background, gradients, and accents.
+      - **RICH & DENSE DESIGN:** Avoid empty white spaces. Fill backgrounds with subtle textures, patterns, soft luxury gradients, or bokeh effects matching the product theme.
+      - **SEAMLESS FLOW:** This is a VERTICAL SCROLLING STRIP. Sections must MELT into each other using gradients. NO hard horizontal lines or section dividers.
+      - **COMMERCIAL VIBRANCE:** Use high-saturation, commercial-grade lighting. Make it look like a premium packaging box or a high-end flyer.
+      - **TEXT STYLING:** Use modern, bold fonts with thick strokes and distinctive shadows/outlines for maximum readability relative to the background.
+      `;
+
+            // --- END OF COPIED LOGIC ---
+
             const prompt = `
       ACT AS A SENIOR UI/UX DESIGNER & ART DIRECTOR.
       
-      YOUR TASK: Create a PIXEL-PERFECT COPY of the layout, style, and vibe of the REFERENCE IMAGE provided, but using the USER PRODUCT instead of the original product.
+      YOUR TASK: Create a PIXEL-PERFECT COPY of the layout structure of the REFERENCE IMAGE provided, but Apply the ${narrativeStyleInstruction} and ${baseRules} strictly.
 
       INPUTS:
-      1. REFERENCE IMAGE (First Image): The layout, fonts, colors, and structure to copy EXACTLY.
-      2. PRODUCT IMAGE (Second Image): The product to place into this layout.
+      1. REFERENCE IMAGE (Style/Structure Source): The vertical layout structure (Header, Hero, Feature Bubbles, Offer Box).
+      2. PRODUCT IMAGE (Content Source): The user's product to insert.
       3. TARGET LANGUAGE: ${formData.language}
       4. TARGET MARKET: ${formData.country}
 
       INSTRUCTIONS:
-      1. 📐 LAYOUT CLONING: Analyze the specific sections of the Reference Image (Header, Hero, Features, Offer). RECREATE this exact vertical structure.
-      2. 🎨 STYLE MATCHING: Copy the EXACT color palette, font styles (boldness, shadows), and background textures from the Reference Image.
-      3. 🔄 CONTENT SWAP: Replace the product in the reference with the provided USER PRODUCT. Ensure the user product has the same lighting and perspective as the scene.
-      4. ✍️ COPYWRITING: Replace the original text with HIGH-CONVERTING marketing copy in [${formData.language}].
-         - Create a catchy Headline.
-         - Short, punchy benefits.
-         - Price/Offer details if visible in reference.
-         - Use local dialect if applicable (e.g., Darija for Algeria/Morocco).
-      5. ⛔ CONSTRAINTS:
-         - Do NOT simply paste the product on top. INTEGRATE it into the scene.
-         - Do NOT include "Buy Now" buttons (make them non-clickable graphics).
-         - Ultra-High Resolution (4K).
-         - Maximize visual fidelity to the reference style.
+      1. 📐 LAYOUT CLONING: Analyze the vertical sections of the Reference Image. RECREATE this exact structural flow (e.g., If reference has 3 bubbles, make 3 bubbles).
+      2. 🎨 STYLE & ATMOSPHERE:
+         - IGNORE the reference image's specific colors if they clash with the USER PRODUCT.
+         - Instead, ADAPT the reference style to match the USER PRODUCT'S COLOR PALETTE (as per 'narrativeStyleInstruction').
+         - Ensure the result is RICH, DENSE, and SEAMLESS.
+      3. 🔄 CONTENT SWAP & COPYWRITING:
+         - Replace the product in the reference with the provided USER PRODUCT (Integrate naturally).
+         - Replace original text with HIGH-CONVERTING marketing copy in [${formData.language}].
+         - **OFFER SECTION:** Must include the Price: "${formData.price} ${formData.currency}" and Payment Icons: "${paymentInstruction}".
+         - ${hasDiscount ? 'Add a Discount Badge.' : ''}
+      4. ⛔ STRICT COMPLIANCE:
+         - **NO IMMODESTY:** If the reference shows immodest models, REPLACE them with modest ones (Long sleeves) as per 'baseRules'.
+         - **NO FAKE TEXT:** Do not fake user names. Use generic badges.
 
-      If the reference writes "Section 1" or placeholders, IGNORE them. Create a finished, polished final commercial image.
+      OUTPUT: A Single, Seamless, Vertical, 4K High-Converting E-Commerce Strip.
       `;
 
             const result = await generateImage({
@@ -230,8 +317,53 @@ const CloneCreativeTool: React.FC<CloneCreativeToolProps> = ({ points, deductPoi
                             </label>
                         </div>
 
-                        {/* 3. Settings */}
+                        {/* 3. Product Details */}
                         <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-1">
+                                <label className="block text-xs font-bold text-slate-700 mb-1">{t('price')} *</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    value={formData.price}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 2900"
+                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                                    required
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <label className="block text-xs font-bold text-slate-700 mb-1">{t('currency')}</label>
+                                <select name="currency" value={formData.currency} onChange={handleChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                                    <option value="DZD">DZD (Algerian Dinar)</option>
+                                    <option value="MAD">MAD (Moroccan Dirham)</option>
+                                    <option value="TND">TND (Tunisian Dinar)</option>
+                                    <option value="SAR">SAR (Saudi Riyal)</option>
+                                    <option value="AED">AED (UAE Dirham)</option>
+                                    <option value="QAR">QAR (Qatari Riyal)</option>
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-1">
+                                <label className="block text-xs font-bold text-slate-700 mb-1">Payment Method</label>
+                                <select name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                                    <option value="cod">Cash on Delivery 🏠</option>
+                                    <option value="online">Online Payment 💳</option>
+                                </select>
+                            </div>
+                            <div className="col-span-1 flex items-center pt-6">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" name="discount" checked={formData.discount} onChange={handleCheckboxChange} className="rounded text-violet-600 focus:ring-violet-500" />
+                                    <span className="text-xs font-bold text-slate-700">Add Discount Badge?</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* 4. Settings */}
+                        <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 mb-1">{t('country') || 'Target Market'}</label>
                                 <select name="country" value={formData.country} onChange={handleChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
