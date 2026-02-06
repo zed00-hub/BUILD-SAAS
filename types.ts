@@ -6,12 +6,15 @@ export enum Language {
   Spanish = 'Spanish',
   German = 'German',
   Italian = 'Italian',
-  Dutch = 'Dutch'
+  Dutch = 'Dutch',
+  Darija = 'Darija (North African Dialect)',
+  Amazigh = 'Amazigh (Latin Script)'
 }
 
 export enum Country {
   Algeria = 'Algeria',
   Morocco = 'Morocco',
+  Tunisia = 'Tunisia',
   Gulf = 'Gulf Countries (GCC)',
   Spain = 'Spain',
   Italy = 'Italy',

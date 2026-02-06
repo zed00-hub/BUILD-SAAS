@@ -164,7 +164,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmittingRef.current) return; // STOP double clicks immediately
+    if (isSubmittingRef.current) return;
 
     if (!productImage) {
       setError("Product image is required.");
@@ -176,7 +176,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       return;
     }
 
-    isSubmittingRef.current = true; // LOCK
+    isSubmittingRef.current = true;
     setIsLoading(true);
     setError(null);
     setResultImage(null);
@@ -184,36 +184,55 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
     const hasPoints = await deductPoints(generationCost, `Generate Landing Page ${formData.pageType === 'extended' ? '(Extended)' : ''}`);
     if (!hasPoints) {
       setIsLoading(false);
-      isSubmittingRef.current = false; // UNLOCK
+      isSubmittingRef.current = false;
       return;
     }
 
     try {
+      // 1. Smart Ethnicity & Style Selection
+      let ethnicityInstruction = "Models should have an International/Universal appearance.";
+      if ([Country.Algeria, Country.Morocco, Country.Tunisia].includes(formData.country)) {
+        ethnicityInstruction = "Models MUST have a North African (Maghrebi) appearance (Olive skin, Mediterranean features). Authentic representation of Algerian/Moroccan people.";
+      } else if (formData.country === Country.Gulf) {
+        ethnicityInstruction = "Models MUST have a Gulf Arab (Khaleeji) appearance. Clothing can include modern-traditional fusion (e.g., Thobe/Abaya hints) but keep it commercial.";
+      } else if ([Country.France, Country.Spain, Country.Italy, Country.Germany, Country.UK, Country.USA].includes(formData.country)) {
+        ethnicityInstruction = "Models should have a Western/European appearance.";
+      }
+
+      // 2. Advanced Language Instructions
+      let languageInstruction = "";
+      switch (formData.language) {
+        case Language.Darija:
+          languageInstruction = "🔴 WRITING LANGUAGE: NORTH AFRICAN DARIJA (Arabic Script). Use local dialect expressions common in Algeria/Morocco (e.g., 'بزاف', 'ديالك', 'شري دابا'). Mix strictly necessary French terms only if common in marketing.";
+          break;
+        case Language.Amazigh:
+          languageInstruction = "🔴 WRITING LANGUAGE: AMAZIGH (Tamazight) using LATIN SCRIPT (e.g., 'Azul', 'Tanmmirt'). Ensure correct Latin spelling for Berber languages.";
+          break;
+        case Language.Arabic:
+          languageInstruction = "🔴 WRITING LANGUAGE: Modern Standard Arabic (Fusha). Elegant and professional.";
+          break;
+        case Language.French:
+          languageInstruction = "🔴 WRITING LANGUAGE: Professional French.";
+          break;
+        default:
+          languageInstruction = `🔴 WRITING LANGUAGE: ${formData.language}. Translate all text to this language.`;
+      }
+
       let paymentInstruction = "";
       if (formData.paymentMethod === 'cod') {
-        paymentInstruction = "Include prominent icons/badges for 'Cash on Delivery' (الدفع عند الاستلام).";
+        paymentInstruction = "Include prominent icons/badges for 'Cash on Delivery'.";
       } else if (formData.paymentMethod === 'online') {
         paymentInstruction = "Include secure payment icons (Visa/Mastercard).";
       } else {
         paymentInstruction = "Include trust badges for both Secure Payment and Cash on Delivery.";
       }
 
-      // STRICT PRICE LOGIC
-      const priceInstruction = formData.showPrice && formData.price
-        ? `السعر: ${formData.price} ${formData.currency}`
-        : "⛔ ممنوع عرض السعر نهائياً. (DO NOT SHOW ANY PRICE).";
+      const priceInstruction = formData.showPrice
+        ? `PRICE DISPLAY: Show the price "${formData.price} ${formData.currency}" clearly.`
+        : "PRICE DISPLAY: Do NOT show a specific price. Focus on value.";
 
-      const hasDiscount = formData.discount && parseInt(formData.discount) > 0;
-      const hasReviews = formData.reviews && formData.reviews.trim().length > 0;
-
-      const languageInstruction = formData.language === Language.Arabic
-        ? `🔴 TARGET LANGUAGE: ARABIC (العربية الفصحى). 
-           - RULE 1: ALL TEXT MUST BE IN ARABIC.
-           - RULE 2: IF the user provided reviews/descriptions in English/French, TRANSLATE THEM TO PROFESSIONAL MARKETING ARABIC IMMEDIATELY.
-           - RULE 3: Use RTL layout logic for text alignment.`
-        : formData.language === Language.French
-          ? "🔴 TARGET LANGUAGE: FRENCH (Français). TRANSLATE ALL USER INPUTS TO FRENCH."
-          : "🔴 TARGET LANGUAGE: ENGLISH. TRANSLATE ALL USER INPUTS TO ENGLISH.";
+      const hasDiscount = !!formData.discount && formData.showPrice;
+      const hasReviews = !!formData.reviews && formData.reviews.length > 5;
 
       const baseRules = `
       🚨 CRITICAL RULES (ZERO TOLERANCE):
@@ -223,12 +242,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout instructions on the image. Only write the actual marketing copy.
       5. ⛔ NO FAKE REVIEWS: If no specific review text is provided below, DO NOT invent fake customer quotes. Use generic trust badges (e.g., "5 Stars", "Trusted Choice") instead.
       6. ✅ MARKETING FOCUS: Focus on PAIN POINTS vs. SOLUTIONS. Use visual storytelling to show the *benefit* not just the features.
-      7. ✅ LANGUAGE ADHERENCE: The entire image MUST be in [${formData.language}]. Translate any user inputs to [${formData.language}] automatically.
-      8. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
+      7. ✅ LANGUAGE ADHERENCE: ${languageInstruction}
+      8. ✅ ETHNICITY & LOCALIZATION: ${ethnicityInstruction}
+      9. ✅ ULTRA HIGH QUALITY: 4K resolution, sharp details, professional studio lighting.
 
       📦 PRODUCT INFO:
       - Description: ${formData.description || 'Analyze image to identify key marketing angles and benefits'}
-      - ${languageInstruction}
       ${hasReviews ? `- Reviews to Display: "${formData.reviews}" (Present these EXACTLY as customer quotes)` : '- NO CUSTOMER REVIEWS PROVIDED. Do NOT create fake quotes. Focus on Star Ratings and Trust Badges only.'}
       
       🎨 ART DIRECTION & STYLE:
@@ -243,7 +262,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       - Create a masterpiece of commercial art. The image should feel ALIVE, DYNAMIC, and VIBRANT.
       - Use rich, deep colors and professional studio lighting giving a "High-End Magazine" feel.
       - Layout must be SEAMLESS and FLUID. Do NOT separate sections with hard lines; use soft gradients and light effects to transition.
-      - Text should be bold, modern, and perfectly legible in Arabic.
+      - Text should be bold, modern, and perfectly legible.
       `;
 
       let result: string;
@@ -252,19 +271,19 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         // ===== EXTENDED EDITION (Two merged images) =====
 
         // Image 1: Top Half (Hero + Splie-Screen Transformation)
-        const prompt1 = `Design the UPPER HALF of a seamless E-Commerce vertical strip (Infographic style).
+        const prompt1 = `Design the UPPER HALF of a seamless E-Commerce vertical strip (Infographic style) for the ${formData.country} market.
         ${narrativeStyleInstruction}
         ${baseRules}
 
         VISUAL COMPOSITION (Top to Bottom):
         
-        1. Start with a sleek, narrow top strip (gradient background) containing 4 elegant trust icons (Delivery, Quality, Guarantee, Secure Payment).
+        1. Start with a sleek, narrow top strip (gradient background) containing 4 elegant trust icons.
         
         2. Below that, create a MASSIVE, IMMERSIVE HERO SCENE (60% of image). 
-           - Show the PRODUCT in a hyper-realistic, elegant home setting.
-           - Include a happy person (wearing MODEST long-sleeve clothing) smiling while using or holding the product.
+           - Show the PRODUCT in a hyper-realistic, elegant home setting suitable for ${formData.country}.
+           - Include a happy person (${ethnicityInstruction}, wearing MODEST long-sleeve clothing) smiling while using or holding the product.
            - Add magical visual effects like golden sparkles or soft light rays around the product.
-           - Write a compelling Arabic HEADLINE in the empty space causing high intrigue.
+           - Write a compelling HEADLINE in ${formData.language} in the empty space causing high intrigue.
 
         3. Transition smoothly into a DRAMATIC BEFORE/AFTER SPLIT-SCREEN.
            - The Left side (Grayish filter) shows the "Pain/Problem" clearly (e.g., tired face, dirty surface) labeled "قبل" (Before).
