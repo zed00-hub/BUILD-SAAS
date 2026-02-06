@@ -238,82 +238,67 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       - Textures: Glossy, Clean.
       `;
 
+      const narrativeStyleInstruction = `
+      🎨 VISUAL STYLE & VIBE:
+      - Create a masterpiece of commercial art. The image should feel ALIVE, DYNAMIC, and VIBRANT.
+      - Use rich, deep colors and professional studio lighting giving a "High-End Magazine" feel.
+      - Layout must be SEAMLESS and FLUID. Do NOT separate sections with hard lines; use soft gradients and light effects to transition.
+      - Text should be bold, modern, and perfectly legible in Arabic.
+      `;
+
       let result: string;
 
       if (formData.pageType === 'extended') {
-        // ===== النسخة الموسعة: صورتين متكاملتين ثم دمج =====
+        // ===== EXTENDED EDITION (Two merged images) =====
 
-        // الصورة الأولى: Hero Section + Before/After (تفاصيل غنية)
-        const prompt1 = `Design the UPPER HALF of a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC.
+        // Image 1: Top Half (Hero + Splie-Screen Transformation)
+        const prompt1 = `Design the UPPER HALF of a seamless E-Commerce vertical strip (Infographic style).
+        ${narrativeStyleInstruction}
         ${baseRules}
 
-        📐 THIS IMAGE CONTAINS (Top to Bottom):
+        VISUAL COMPOSITION (Top to Bottom):
+        
+        1. Start with a sleek, narrow top strip (gradient background) containing 4 elegant trust icons (Delivery, Quality, Guarantee, Secure Payment).
+        
+        2. Below that, create a MASSIVE, IMMERSIVE HERO SCENE (60% of image). 
+           - Show the PRODUCT in a hyper-realistic, elegant home setting.
+           - Include a happy person (wearing MODEST long-sleeve clothing) smiling while using or holding the product.
+           - Add magical visual effects like golden sparkles or soft light rays around the product.
+           - Write a compelling Arabic HEADLINE in the empty space causing high intrigue.
 
-        SECTION 1: [PREMIUM TRUST HEADER]
-        - Luxurious header strip with gradient background.
-        - 4 trust icons with elegant styling: [🚚 التوصيل السريع] [🛡️ ضمان الجودة] [✅ رضا مضمون] [💳 دفع آمن].
-        - Subtle gold/silver accents.
+        3. Transition smoothly into a DRAMATIC BEFORE/AFTER SPLIT-SCREEN.
+           - The Left side (Grayish filter) shows the "Pain/Problem" clearly (e.g., tired face, dirty surface) labeled "قبل" (Before).
+           - The Right side (Vibrant/Bright) shows the "Solution/Benefit" (e.g., happy face, clean surface) labeled "بعد" (After) with sparkles.
+           - A large graphical arrow should point from the problem to the solution labeled "التحول" (Transformation).
 
-        SECTION 2: [HERO COMPOSITION - EXPANDED]
-        - DOMINANT Visual: Ultra-large 3D render of the PRODUCT (60% of this section).
-        - Rich Context: A happy person (MODESTLY DRESSED - full coverage, long sleeves) demonstrating the product in an elegant setting.
-        - Floating Elements: Golden sparkles, light rays, quality stamps.
-        - Main Headline: Big, bold Arabic text with drop shadow effect.
-        - Sub-headline: Supporting text explaining the core benefit.
-
-        SECTION 3: [BEFORE/AFTER TRANSFORMATION - DETAILED]
-        - Style: Dramatic split-screen with diagonal divider.
-        - BEFORE Side (Left/Gray):
-          * Detailed visualization of the problem.
-          * Sad/tired expression, dull colors.
-          * Red X marks or warning icons.
-          * Label: "قبل" with timestamp styling.
-        - AFTER Side (Right/Vibrant):
-          * Detailed visualization of the solution.
-          * Happy expression, vibrant colors, glow effects.
-          * Green checkmarks, sparkle effects.
-          * Label: "بعد" with success styling.
-        - Large Gold/Green arrow with "التحول" text.
-        - Include real transformation statistics if applicable.
-
-        ⚠️ IMPORTANT: This is the TOP HALF only. End with a subtle visual transition (gradient fade) at the bottom for seamless stitching.
+        ⚠️ NOTE: This image is the TOP HALF. Fade the bottom edge gently for stitching. NO "Section" labels.
         `;
 
-        // الصورة الثانية: Authority + Ingredients/Mechanism (تفاصيل غنية)
-        const prompt2 = `Design the LOWER HALF of a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC.
+        // Image 2: Bottom Half (Authority + Mechanism + Offer)
+        const prompt2 = `Design the LOWER HALF of a seamless E-Commerce vertical strip.
+        ${narrativeStyleInstruction}
         ${baseRules}
-        - ${priceInstruction}
-        ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a luxurious circular badge)` : ''}
+        
+        VISUAL COMPOSITION (Top to Bottom):
+        
+        1. Start with a "Social Proof" area using a soft gradient background.
+           - Display a large 5-Star Rating visualization.
+           - ${hasReviews ? 'Include 2 or 3 speech bubbles containing the customer reviews provided.' : 'Show generic badges like "Top Rated" and "Customer Choice" without specific quotes.'}
+           - Add "10,000+ Happy Customers" text counter.
 
-        📐 THIS IMAGE CONTAINS (Top to Bottom):
+        2. Flow into a "How it Works" or "Key Ingredients" visualization.
+           - Use 4 floating circular frames (bubbles) arranged elegantly. 
+           - Inside each circle, show a MACRO close-up detail of the product or its ingredients.
+           - Under each circle, write a short 2-word Arabic benefit.
 
-        ⚠️ START: Begin with a subtle visual transition (gradient fade) at the top for seamless stitching with the upper half.
+        3. End with a STRONG, HIGH-CONVERTING OFFER BOX at the bottom.
+           - Use a contrasting, rich background color (e.g., Deep Gold or Royal Blue).
+           - Display the Price clearly (${priceInstruction}).
+           - ${hasDiscount ? 'Add a "Special Discount" badge.' : ''}
+           - Show "${paymentInstruction}" visually with icons.
+           - Write a final bold call-to-action text: "اطلب الآن والدفع عند الاستلام".
 
-        SECTION 4: [AUTHORITY & SOCIAL PROOF - EXPANDED]
-        - Background: Premium gradient section.
-        - Star Ratings: Large 5-star display with review count.
-        ${hasReviews ? '- Customer Testimonials: 2-3 quote boxes with customer photos (modest dress) displaying the PROVIDED reviews.' : '- NO QUOTES: Do not display any text bubbles or fake testimonials.'}
-        - Trust Badges: "مختبر سريرياً" / "معتمد" / "الأكثر مبيعاً".
-        - Statistics: "10,000+ عميل راضٍ" style counters.
-        - Expert Endorsement section if applicable.
-
-        SECTION 5: [INGREDIENTS/MECHANISM - DETAILED CIRCLES]
-        - Layout: 4-5 Large Circular Frames in elegant arrangement.
-        - Each Circle Contains:
-          * High-quality zoomed detail of product component.
-          * Arabic label below with benefit description.
-          * Subtle glow/ring effect around circles.
-        - Connecting lines/arrows showing how components work together.
-        - "كيف يعمل؟" section title with decorative styling.
-
-        SECTION 6: [PREMIUM OFFER FOOTER]
-        - Luxurious box with gradient background.
-        - Price Display: Large, bold, with original price struck through if discount.
-        - ${priceInstruction}
-        ${hasDiscount ? `- Discount Badge: -${formData.discount}% in a premium circular design.` : ''}
-        - ${paymentInstruction}
-        - Quality seals, warranty badges, limited time offer styling.
-        - Final CTA text (not button): "اطلب الآن ووفر!".
+        ⚠️ NOTE: This image is the BOTTOM HALF. Start the top edge gently for stitching. NO "Section" labels.
         `;
 
         // توليد الصورتين بالتوازي
@@ -338,46 +323,28 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         result = await stitchImagesVertically([image1, image2]);
 
       } else {
-        // ===== النسخة العادية: صورة واحدة =====
-        const prompt = `Design a PREMIUM VERTICAL E-COMMERCE INFOGRAPHIC (Long Marketing Strip).
+        // ===== STANDARD EDITION (Single Image) =====
+        const prompt = `Design a COMPLETE, seamless vertical E-Commerce Infographic (Long Marketing Strip).
+        ${narrativeStyleInstruction}
         ${baseRules}
-        - ${priceInstruction}
-        ${hasDiscount ? `- Discount Badge: ${formData.discount}% (Use a circular badge, NOT a button)` : ''}
 
-        📐 LAYOUT STRUCTURE (Must follow this EXACT sequence from Top to Bottom):
+        VISUAL COMPOSITION (Top to Bottom Flow):
 
-        SECTION 1: [TOP TRUST STRIP]
-        - A narrow solid color strip at the very top.
-        - 3 small floating icons in a row: [🚚 Fast Shipping] [🛡️ Secure Payment] [✅ Satisfaction Guarantee].
-        - No text other than the icon labels.
+        1. TOP: A sleek trust strip with 3 small icons (Shipping, Warranty, Guarantee).
 
-        SECTION 2: [HERO COMPOSITION]
-        - Main Visual: Large 3D render of the PRODUCT in a realistic home setting.
-        - Context: A happy person (MODESTLY DRESSED) using the product or smiling near it.
-        - Text: Big, bold Arabic Headline floating in empty space (e.g., "The Perfect Solution").
+        2. UPPER MIDDLE: A Vivid Hero Scene. Large Product render + Happy Model (Modest/Long Sleeves) + Bold Arabic Headline.
 
-        SECTION 3: [VISUAL TRANSFORMATION]
-        - Style: A "Split Screen" or "Arrow Flow" visual.
-        - Content: 
-          * Left Side (Gray/Dull): The "Problem" (e.g., dirty floor, tired face). Label: "BEFORE".
-          * Right Side (Bright/Vibrant): The "Solution" (e.g., clean floor, glowing face). Label: "AFTER".
-        - Connecting Element: A large Gold/Green arrow pointing from Before to After.
+        3. MIDDLE: A "Before & After" Split visual. Left side (Dull/Problem) vs Right side (Bright/Solution). Label them "قبل" and "بعد".
 
-        SECTION 4: [KEY FEATURES - CIRCLES]
-        - Layout: A row of 3 or 4 Circular Frames (Bubbles) at the bottom.
-        - Content: Inside each circle, show a zoomed-in detail of the product (e.g., Texture, Mechanism, Ingredients).
-        - Labels: Short Arabic text under each circle.
+        4. LOWER MIDDLE: A row of 3 circular "Feature Bubbles" showing close-up details or ingredients.
 
-        SECTION 5: [OFFER FOOTER]
-        - A distinct colored box at the bottom.
-        - Content: The Price (Large Font) + Quality Seal Badge.
-        - background: Clean, contrasting color (e.g., Deep Blue or Gold).
+        5. BOTTOM: A Distinct Offer Box.
+           - Big Price Display (${priceInstruction}).
+           - ${hasDiscount ? 'Discount Badge.' : ''}
+           - Payment Icons (Cash on Delivery).
+           - Final text: "اطلب الآن".
 
-        FINAL CHECKLIST:
-        - Is it vertical? YES.
-        - Are there buttons? NO.
-        - Is the text Arabic? YES.
-        - Are the women modest? YES.
+        ⚠️ CRITICAL: Ensure a smooth flow between these elements. Do NOT write "Section 1", "Hero", etc. Just the marketing text.
         `;
 
         result = await generateImage({
@@ -763,20 +730,30 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
                   {/* Download Controls */}
                   <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => handleDownload('png')}
-                      className="py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                      {t('download_png')}
-                    </button>
-                    <button
-                      onClick={() => handleDownload('webp')}
-                      className="py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                      {t('download_webp')}
-                    </button>
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => handleDownload('png')}
+                        className="py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-2 w-full"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        {t('download_png')}
+                      </button>
+                      <span className="text-[10px] text-center text-slate-400">⚠️ {t('large_file_size') || 'حجم ملف كبير'}</span>
+                    </div>
+
+                    <div className="flex flex-col gap-1 relative">
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10 whitespace-nowrap">
+                        ✨ {t('recommended') || 'موصى به للويب'}
+                      </div>
+                      <button
+                        onClick={() => handleDownload('webp')}
+                        className="py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 w-full"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        {t('download_webp')}
+                      </button>
+                      <span className="text-[10px] text-center text-indigo-600 font-medium">🚀 {t('fast_loading') || 'سريع التحميل'}</span>
+                    </div>
                   </div>
                 </div>
 
