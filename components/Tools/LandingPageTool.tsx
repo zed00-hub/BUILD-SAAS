@@ -258,12 +258,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       `;
 
       const narrativeStyleInstruction = `
-      🎨 VISUAL STYLE & COLOR CONSISTENCY (CRITICAL):
-      - **UNIFIED COLOR PALETTE:** Analyze the PRODUCT COLOR. Use this color scheme for the ENTIRE image background, gradients, and accents. Do NOT use random colors.
-      - **RICH & DENSE DESIGN:** Avoid empty white spaces. Fill backgrounds with subtle textures, patterns, soft luxury gradients, or bokeh effects matching the product theme.
-      - **SEAMLESS FLOW:** This is a VERTICAL SCROLLING STRIP. Sections must MELT into each other using gradients. NO hard horizontal lines or section dividers.
-      - **COMMERCIAL VIBRANCE:** Use high-saturation, commercial-grade lighting. Make it look like a premium packaging box or a high-end flyer.
-      - **TEXT STYLING:** Use modern, bold fonts with thick strokes and distinctive shadows/outlines for maximum readability relative to the background.
+      🎨 VISUAL STYLE & COLOR CONSISTENCY (CRITICAL - SUPER SATURATED):
+      - **EXTREME COMPOSITION DENSITY:** NO WHITE SPACE. Every pixel must be filled with rich textures, gradients, or background elements. "Busy but organized" aesthetic.
+      - **VIBRANT & SATURATED:** Use PUNCHY, CONTRASTING colors. Allow colors to pop neon-bright where appropriate for the product. Think "High-End Advertising" meets "TikTok Visuals".
+      - **SEAMLESS VERTICALITY:** Sections must BLEED into each other. No hard white dividers. Use gradients to transition between the Hero and the Split-Screen.
+      - **GLOSSY & PREMIUM:** Everything should look shiny, expensive, and 3D rendered.
+      - **TEXT IMPACT:** Fonts should be HUGE, BOLD, and have heavy drop shadows or outlines to stand out against the busy backgrounds.
       `;
 
       let result: string;
@@ -271,58 +271,58 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       if (formData.pageType === 'extended') {
         // ===== EXTENDED EDITION (Two merged images) =====
 
-        // Image 1: Top Half (Hero + Splie-Screen Transformation)
-        const prompt1 = `Design the UPPER HALF of a seamless, RICHLY DETAILED E-Commerce vertical strip for the ${formData.country} market.
+        // Image 1: Top Half (Hero + Split-Screen Transformation)
+        const prompt1 = `PART 1 of 2: TOP HALF of a RICH, DENSELY PACKED E-Commerce Strip for ${formData.country}.
         ${narrativeStyleInstruction}
         ${baseRules}
 
-        VISUAL NARRATIVE (Top to Bottom):
+        VISUAL STRUCTURE (Top to Bottom):
         
-        1. **TRUST HEADER (The Entry):** A sleek, professional top bar using the Main Brand Color (Darker Shade). Place 4 golden trust icons (Delivery, Quality, Guarantee, Secure) evenly.
+        1. **HEADER (The Hook):** A slim, professional top bar with the Brand Color. 4 Gold Trust Icons (Delivery, Warranty, Secure, Quality).
         
-        2. **IMMERSIVE HERO SCENE (The Hook):** 
-           - Create a deep, immersive background (e.g., a modern kitchen, a cozy living room, or abstract luxury abstract) that complements the product.
-           - Place the PRODUCT centrally, larger than life, with studio lighting making it pop.
-           - Show a Happy Model (${ethnicityInstruction}, Modest) interacting naturally.
-           - **KEY DETAIL:** Integrate a localized context beat suitable for ${formData.country}.
-           - Text: A huge, attractive 3D Headline in ${formData.language} floating within the scene.
+        2. **HERO SECTION (The Dream):** 
+           - A FULLY IMMERSIVE scene (e.g., Luxury Kitchen, Modern Clinic, Cozy Living Room) filled with props and depth.
+           - **CENTRAL FOCUS:** The PRODUCT (Large, High Detail).
+           - **MODEL:** A Happy Professional or User (${ethnicityInstruction}, Modest) interacting with the product.
+           - **TEXT:** A Massive 3D Headline in [${formData.language}] describing the main benefit.
+           - **VIBE:** Extremely cheerful, bright lighting, high energy.
 
-        3. **VISUAL TRANSFORMATION (The Proof):**
-           - Seamlessly fade into a Split-Screen comparison.
-           - **BEFORE (Left):** Desaturated, dull colors showing the problem. Text: "قبل" (Before).
-           - **AFTER (Right):** Bright, glowing, saturated colors showing the perfection/result. Text: "بعد" (After).
-           - Connect them with a dynamic 3D Arrow (Gold or Red) with the text "التحول" (Transformation).
+        3. **BEFORE & AFTER (The Logic):**
+           - A clear SPLIT-SCREEN comparison section immediately following the hero.
+           - **LEFT (Before):** Desaturated/Gray. Shows the problem (e.g., Chaos, Pain, Fog). Label: "BEFORE" (in ${formData.language}).
+           - **RIGHT (After):** Super Saturated/Bright. Shows the solution (e.g., Peace, Relief, Focus). Label: "AFTER" (in ${formData.language}).
+           - **ICON:** A large 3D Arrow pointing from Left to Right.
 
-        ⚠️ DESIGN NOTE: Ensure the bottom of this image fades into a neutral or gradient texture to allow seamless stitching with Part 2. NO hard borders at the bottom.
+        ⚠️ DESIGN NOTE: Ensure the bottom edge ends with a soft gradient to blend with Part 2. NO hard borders.
         `;
 
-        // Image 2: Bottom Half (Authority + Mechanism + Offer)
-        const prompt2 = `Design the LOWER HALF of a seamless, RICHLY DETAILED E-Commerce vertical strip.
+        // Image 2: Bottom Half (Lifestyle + Offer + Features)
+        const prompt2 = `PART 2 of 2: BOTTOM HALF of a RICH, DENSELY PACKED E-Commerce Strip.
         ${narrativeStyleInstruction}
         ${baseRules}
         
-        VISUAL NARRATIVE (Top to Bottom):
+        VISUAL STRUCTURE (Top to Bottom):
         
-        1. **AUTHORITY & SOCIAL PROOF (Validation):**
-           - Continue the background flow from the top half using a smooth gradient transition.
-           - Display a sophisticated 5-Star Rating Element (Gold Stars).
-           - ${hasReviews ? 'Include 2 or 3 elegant "Glassmorphism" styled speech bubbles containing the provided customer reviews.' : 'Show premium trust badges like "Top Rated", "Best Choice", and "100% Satisfaction" in Gold/Silver metallic finish.'}
-           - Add a bold text counter: "+10,000 ${t('total_users') || 'Clients'}".
+        1. **LIFESTYLE & SOCIAL PROOF (The Vibe):**
+           - A heartwarming scene of a GROUP of people (Family, Friends, Colleagues) enjoying the result of the product.
+           - Atmosphere: Warm, inviting, and community-focused. 
+           - Overlay: A gold "5-Star Rating" badge and a "Trusted by +10k Users" label.
 
-        2. **MECHANISM & FEATURES (The Logic):**
-           - Create a dynamic section with 4 Floating Circular Lenses (Bubbles).
-           - Inside each circle, show a MACRO close-up of the product's texture, ingredients, or inner mechanism.
-           - Connect the circles with subtle golden lines or light paths.
-           - Under each circle, write a short, punchy benefit in ${formData.language}.
+        2. **OFFER BOX (The Deal):**
+           - A DISTINCT, central rectangular box with a thick Gold or Green border.
+           - Inside the box:
+             - **PRICE:** Big Glowing Text: "${priceInstruction}".
+             - **payment:** ${paymentInstruction} icons.
+             - **CTA:** A huge "Order Now" button graphic in ${formData.language}.
+             - ${hasDiscount ? 'A "Special Offer" or "Discount" badge.' : ''}
 
-        3. **PREMIUM OFFER FOOTER (The Closing):**
-           - This bottom section must feel heavy and grounding. Use a Deep Royal Blue or Rich Burgundy background (or dark complementary brand color).
-           - **CENTERPIECE:** The Price (${priceInstruction}) in large, glowing typography.
-           - ${hasDiscount ? 'Add a circular "Special Discount" badge with 3D effects.' : ''}
-           - **TRUST SEALS:** Add "Money Back Guarantee" and "Secure Payment" golden seals.
-           - **CTA:** A huge, bold call-to-action label: "اطلب الآن" (Order Now).
+        3. **FEATURE BUBBLES (The Details - BOTTOM):**
+           - At the very bottom, place 3 CIRCULAR LENSES (Bubbles) side-by-side.
+           - **Content:** Each bubble shows a MACRO ZOOM or ICON of a specific feature (Ingredients, Motor, Silence, Speed).
+           - **Labels:** Small text under each bubble describing the feature in ${formData.language}.
+           - **Background:** This bottom area should be dark and heavy (branding color) to ground the design.
 
-        ⚠️ DESIGN NOTE: Start the top edge with a soft fade to match the upper half. The aim is a SINGLE continuous image look once stitched.
+        ⚠️ DESIGN NOTE: Start the top edge with a soft fade to match the upper half.
         `;
 
         // توليد الصورتين بالتوازي
