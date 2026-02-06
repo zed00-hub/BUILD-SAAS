@@ -116,6 +116,14 @@ export const translations = {
     region: "Region",
     edit_placeholder: "What do you want to change?",
 
+    // Clone Creative Tool
+    clone_title: "Clone Creative Style",
+    clone_desc: "Create a pixel-perfect copy of any landing page style with your product.",
+    ref_landing_upload: "Reference Landing Page (Style to Copy)",
+    product_upload: "Your Product Image",
+    upload_limit_note: "Max file size: 10MB per image.",
+    clone_btn: "Clone Style (45 pts)",
+
     // History
     history_title: "Previous Work",
     history_empty: "No saved work yet.",
@@ -378,6 +386,14 @@ export const translations = {
     region: "Région",
     edit_placeholder: "Que voulez-vous changer ?",
 
+    // Clone Creative Tool
+    clone_title: "Cloner le Style Créatif",
+    clone_desc: "Créez une copie parfaite du style de n'importe quelle page avec votre produit.",
+    ref_landing_upload: "Page de Référence (Style à Copier)",
+    product_upload: "Votre Image Produit",
+    upload_limit_note: "Taille max : 10Mo par image.",
+    clone_btn: "Cloner Style (45 pts)",
+
     // History
     history_title: "Travaux Précédents",
     history_empty: "Aucun travail enregistré.",
@@ -639,6 +655,14 @@ export const translations = {
     market: "السوق",
     region: "المنطقة",
     edit_placeholder: "ما الذي تريد تغييره؟",
+
+    // Clone Creative Tool
+    clone_title: "استنساخ الستايل الإبداعي",
+    clone_desc: "اصنع نسخة طبق الأصل من ستايل أي صفحة هبوط مع منتجك الخاص.",
+    ref_landing_upload: "صورة الصفحة المرجعية (للنسخ)",
+    product_upload: "صورة منتجك",
+    upload_limit_note: "الحد الأقصى لحجم الصورة: 10 ميجابايت.",
+    clone_btn: "استنسخ الستايل (45 نقطة)",
 
     // History
     history_title: "الأعمال السابقة",

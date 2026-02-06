@@ -11,6 +11,7 @@ import { LandingPageToolPro } from '../../components/Tools/LandingPageToolPro';
 import { QuickEditTool } from '../../components/Tools/QuickEditTool';
 import { ProductDescriptionTool } from '../../components/Tools/ProductDescriptionTool';
 import { VirtualTryOnTool } from '../../components/Tools/VirtualTryOnTool';
+import CloneCreativeTool from '../../components/Tools/CloneCreativeTool';
 import { AdminDashboard } from '../../components/Admin/AdminDashboard';
 
 // --- Tool Guard Component ---
@@ -173,6 +174,16 @@ export const LandingPageProWrapper: React.FC = () => {
         <ToolGuard toolId="landing-page-pro">
             {!isPaidUser && <TrialBanner />}
             <LandingPageToolPro points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
+        </ToolGuard>
+    );
+};
+
+export const CloneCreativeWrapper: React.FC = () => {
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+    return (
+        <ToolGuard toolId="clone-creative">
+            {!isPaidUser && <TrialBanner />}
+            <CloneCreativeTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
         </ToolGuard>
     );
 };

@@ -27,6 +27,7 @@ import {
     LandingPageProIcon,
     HomeIcon,
     ProjectsIcon,
+    CloneCreativeIcon,
     AdminIcon
 } from '../../components/ToolIcons';
 
@@ -326,6 +327,12 @@ export const Dashboard: React.FC = () => {
                                 onClick={() => { navigate('landing-page-pro'); setIsSidebarOpen(false); }}
                                 icon={<LandingPageProIcon size={20} />}
                                 label={isRtl ? 'لاندنق برو' : 'Landing Pro'}
+                            />
+                            <SidebarItem
+                                active={isActive('clone-creative')}
+                                onClick={() => { navigate('clone-creative'); setIsSidebarOpen(false); }}
+                                icon={<CloneCreativeIcon size={20} />}
+                                label={t('clone_title') || 'Clone Creative'}
                             />
                             <SidebarItem
                                 active={isActive('quick-edit')}

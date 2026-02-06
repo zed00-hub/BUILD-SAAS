@@ -68,6 +68,14 @@ export const VirtualTryOnIcon: React.FC<IconProps> = ({ className = '', size = 2
     </svg>
 );
 
+// Clone Creative - Copy/Duplicate Layers icon
+export const CloneCreativeIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+);
+
 // Admin Panel - Shield icon
 export const AdminIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -121,6 +129,12 @@ export const TOOL_ICONS = {
         gradient: 'from-emerald-500 to-teal-500',
         bgLight: 'bg-emerald-50',
         textColor: 'text-emerald-600',
+    },
+    'clone-creative': {
+        icon: CloneCreativeIcon,
+        gradient: 'from-violet-600 to-indigo-600',
+        bgLight: 'bg-violet-50',
+        textColor: 'text-violet-600',
     },
     'quick-edit': {
         icon: QuickEditIcon,

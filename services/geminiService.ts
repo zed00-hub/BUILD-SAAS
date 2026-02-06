@@ -116,7 +116,8 @@ const TEXT_MODEL_NAME = 'gemini-3-flash-preview';
 
 interface GenerateImageOptions {
   prompt: string;
-  referenceImage?: string; // Base64 (Product or Style)
+  referenceImage?: string; // Base64 (Style Source)
+  productImage?: string; // Base64 (Product Source)
   logoImage?: string; // Base64 (Brand Logo)
   elementImages?: string[]; // Base64 (Additional Elements)
   aspectRatio: "1:1" | "16:9" | "9:16" | "4:3" | "3:4";
@@ -180,7 +181,7 @@ export const generateSocialPlan = async (topic: string, slideCount: number): Pro
 export const generateImage = async (options: GenerateImageOptions): Promise<string> => {
   const parts: any[] = [];
 
-  // 1. Primary Reference Image (Style or Product)
+  // 1. Primary Reference Image (Style Source)
   if (options.referenceImage) {
     parts.push({
       inlineData: {
@@ -190,17 +191,27 @@ export const generateImage = async (options: GenerateImageOptions): Promise<stri
     });
   }
 
-  // 2. Logo Image (if provided)
+  // 2. Product Image (The Object to Insert)
+  if (options.productImage) {
+    parts.push({
+      inlineData: {
+        mimeType: 'image/jpeg',
+        data: options.productImage
+      }
+    });
+  }
+
+  // 3. Logo Image
   if (options.logoImage) {
     parts.push({
       inlineData: {
-        mimeType: 'image/png', // Logos are often PNGs with transparency
+        mimeType: 'image/png', // Logos are often PNGs
         data: options.logoImage
       }
     });
   }
 
-  // 3. Additional Element Images (if provided)
+  // 4. Additional Element Images
   if (options.elementImages && options.elementImages.length > 0) {
     options.elementImages.forEach((img) => {
       parts.push({
@@ -212,15 +223,19 @@ export const generateImage = async (options: GenerateImageOptions): Promise<stri
     });
   }
 
-  // 4. Construct the Text Prompt
+  // 5. Construct Text Prompt
   let finalPrompt = options.prompt;
 
+  if (options.productImage) {
+    finalPrompt += " \n\nIMPORTANT: The SECOND provided image is the MAIN PRODUCT. Integrating this product into the scene is the PRIMARY GOAL. Replace any product in the reference style with this product.";
+  }
+
   if (options.logoImage) {
-    finalPrompt += " \n\nIMPORTANT: Use the second provided image (the Logo) and place it clearly and professionally in the bottom-right corner of the design.";
+    finalPrompt += " \n\nIMPORTANT: Use the provided Logo image and place it professionally.";
   }
 
   if (options.elementImages && options.elementImages.length > 0) {
-    finalPrompt += ` \n\nIMPORTANT: Use the provided additional element images (after the logo) and integrate them naturally into the composition as key visual components.`;
+    finalPrompt += ` \n\nIMPORTANT: Use the provided additional element images and integrate them naturally.`;
   }
 
   parts.push({ text: finalPrompt });
