@@ -88,13 +88,13 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
     const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [resultImage, setResultImage] = useState<string | null>(null);
+    const [resultImages, setResultImages] = useState<string[]>([]);
 
     const [productImage, setProductImage] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         styleId: 'showcase',
         description: '',
-        aspectRatio: '1:1' as any,
+        ratios: { '1:1': 0, '9:16': 0, '16:9': 0, '4:5': 0 } as Record<string, number>,
         colorPreference: '',
         price: '',
         reviewText: '',
@@ -128,17 +128,32 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
         }
     };
 
+    const calculateTotalCost = () => {
+        const totalImages = Object.values(formData.ratios).reduce((a: number, b: number) => a + b, 0);
+        return totalImages * GENERATION_COST;
+    };
+
     const handleGenerate = async () => {
+        const totalImages = Object.values(formData.ratios).reduce((a: number, b: number) => a + b, 0);
+
         if (!productImage) {
-            setError('Please upload a product image.');
+            setError(t('upload_image_error') || 'Please upload a product image.');
+            return;
+        }
+
+        if (totalImages === 0) {
+            setError(t('select_ratio_error') || 'Please select at least one image format.');
             return;
         }
 
         setLoading(true);
         setError(null);
+        setResultImages([]);
 
         // Check points
-        const hasPoints = await deductPoints(GENERATION_COST, 'Statica Design Generation');
+        const totalCost = calculateTotalCost();
+        const hasPoints = await deductPoints(totalCost, `Statica Generation (${totalImages} images)`);
+
         if (!hasPoints) {
             setLoading(false);
             return;
@@ -148,7 +163,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
             const STYLES = getStyles(t);
             const selectedStyle = STYLES.find(s => s.id === formData.styleId) || STYLES[0];
 
-            const prompt = `
+            const basePrompt = `
       ACT AS: "STATICA", an elite AI Art Director specialized in Conversion-Centered Design.
       
       YOUR TASK: Transform the provided product image into a professional advertising creative based on the following specifications.
@@ -162,7 +177,6 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
       ${selectedStyle.prompt}
 
       📦 PRODUCT CONTEXT:
-      - Description/Angle: ${formData.description || 'Analyze the product and highlight its best features.'}
       - Description/Angle: ${formData.description || 'Analyze the product and highlight its best features.'}
       - Color Palette: ${formData.colorPreference ? `Use this palette/mood: ${formData.colorPreference}` : 'EXTRACT and harmoniously apply the product\'s own color identity.'}
       ${formData.price ? `- PRICE ELEMENT: distinctively display the price "${formData.price}" in a modern, elegant font.` : ''}
@@ -197,22 +211,36 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
       OUTPUT QUALITY: 4K, Commercial Grade, Sharp Focus.
       `;
 
-            const result = await generateImage({
-                prompt,
-                productImage,
-                logoImage: logoImage || undefined,
-                aspectRatio: formData.aspectRatio,
-                imageSize: '4K',
+            // Prepare generation tasks
+            const generationTasks: Promise<string>[] = [];
+
+            Object.entries(formData.ratios).forEach(([ratio, count]) => {
+                for (let i = 0; i < count; i++) {
+                    generationTasks.push(
+                        generateImage({
+                            prompt: basePrompt,
+                            productImage,
+                            logoImage: logoImage || undefined,
+                            aspectRatio: ratio as any,
+                            imageSize: '4K',
+                        })
+                    );
+                }
             });
 
-            setResultImage(result);
+            // Execute all generations in parallel
+            // Note: Use Promise.allSettled to handle partial failures if needed, 
+            // but for simplicity we use Promise.all and refund on total failure or handle individually.
+            // Let's use Promise.all for speed.
+            const results = await Promise.all(generationTasks);
+            setResultImages(results);
 
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Generation failed');
-            // Refund logic could go here
+            // Refund logic
             if (auth.currentUser) {
-                await WalletService.refundPoints(auth.currentUser.uid, GENERATION_COST, "Refund: Statica Failed");
+                await WalletService.refundPoints(auth.currentUser.uid, totalCost, "Refund: Statica Partial/Full Failure");
             }
         } finally {
             setLoading(false);
@@ -278,17 +306,29 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                 </p>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-800">{t('format_size')}</label>
-                                <div className="flex gap-2">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-sm font-bold text-slate-800">{t('format_size')}</label>
+                                    <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-bold">
+                                        Total: {Object.values(formData.ratios).reduce((a: number, b: number) => a + b, 0)} {t('images') || 'Images'}
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
                                     {ASPECT_RATIOS.map(ratio => (
-                                        <button
-                                            key={ratio.value}
-                                            onClick={() => setFormData(prev => ({ ...prev, aspectRatio: ratio.value as any }))}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold border transition-all ${formData.aspectRatio === ratio.value ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
-                                        >
-                                            {ratio.label}
-                                        </button>
+                                        <div key={ratio.value} className={`p-3 rounded-xl border transition-all flex flex-col justify-between ${formData.ratios[ratio.value] > 0 ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 bg-white'}`}>
+                                            <span className="text-xs font-bold text-slate-700 mb-2">{ratio.label}</span>
+                                            <div className="flex items-center justify-between bg-white rounded-lg border border-slate-200 p-1">
+                                                <button
+                                                    onClick={() => setFormData(prev => ({ ...prev, ratios: { ...prev.ratios, [ratio.value]: Math.max(0, prev.ratios[ratio.value] - 1) } }))}
+                                                    className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                                                >-</button>
+                                                <span className="font-bold text-slate-800 w-6 text-center">{formData.ratios[ratio.value]}</span>
+                                                <button
+                                                    onClick={() => setFormData(prev => ({ ...prev, ratios: { ...prev.ratios, [ratio.value]: prev.ratios[ratio.value] + 1 } }))}
+                                                    className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                                                >+</button>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
@@ -403,7 +443,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                 <span className="flex items-center gap-2">
                                     {t('generate_statica')}
                                     <span className="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        {GENERATION_COST} <CoinIcon className="w-3 h-3" />
+                                        {calculateTotalCost()} <CoinIcon className="w-3 h-3" />
                                     </span>
                                 </span>
                             </Button>
@@ -414,37 +454,61 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
 
                 {/* Right Panel: Result */}
                 <div className="lg:col-span-7">
-                    <div className="bg-white rounded-2xl shadow-xl border border-slate-100 h-full min-h-[600px] p-8 flex flex-col items-center justify-center relative overflow-hidden group">
-                        {resultImage ? (
-                            <div className="w-full h-full flex flex-col items-center animate-fade-in z-10">
-                                <img
-                                    src={resultImage}
-                                    alt="Generated Creative"
-                                    className="max-h-[600px] w-auto object-contain rounded-lg shadow-2xl ring-1 ring-slate-900/5 mb-6"
-                                />
-                                <div className="flex gap-4">
-                                    <a
-                                        href={resultImage}
-                                        download={`statica-${Date.now()}.png`}
-                                        className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all flex items-center gap-2"
-                                    >
-                                        <span>{t('download_png_btn')}</span>
-                                    </a>
+                    <div className="bg-white rounded-2xl shadow-xl border border-slate-100 h-full min-h-[600px] p-8 flex flex-col items-center relative overflow-hidden group">
+                        {resultImages.length > 0 ? (
+                            <div className="w-full h-full flex flex-col gap-6 animate-fade-in z-10 overflow-y-auto max-h-[800px] pr-2 custom-scrollbar">
+
+                                <div className="flex justify-between items-center w-full mb-2">
+                                    <h3 className="text-xl font-bold text-slate-800">{t('gallery_results') || 'Generated Designs'} ({resultImages.length})</h3>
+                                    <div className="flex gap-2">
+                                        {/* Download All Logic can be complex due to browser pop-up blockers, usually zip is better but for now individual or simple loop */}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                                    {resultImages.map((imgSrc, idx) => (
+                                        <div key={idx} className="relative group/img rounded-xl overflow-hidden shadow-lg border border-slate-100 bg-slate-50">
+                                            <img
+                                                src={imgSrc}
+                                                alt={`Generated Creative ${idx + 1}`}
+                                                className="w-full h-auto object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                                                <a
+                                                    href={imgSrc}
+                                                    download={`statica-${Date.now()}-${idx}.png`}
+                                                    className="p-2 bg-white text-slate-900 rounded-full hover:bg-indigo-50 transition-colors"
+                                                    title={t('download_png') || "Download PNG"}
+                                                >
+                                                    ⬇️
+                                                </a>
+                                                {/* Preview / Expand could go here */}
+                                            </div>
+                                            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md">
+                                                #{idx + 1}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex gap-4 sticky bottom-0 bg-white/90 backdrop-blur p-4 border-t border-slate-100 w-full justify-center rounded-2xl shadow-lg mt-auto">
                                     {isPaidUser && (
                                         <SaveToCloudButton
-                                            images={[resultImage]}
-                                            designType="social-media" // Reusing category
+                                            images={resultImages}
+                                            designType="ad-creative"
                                             metadata={{
                                                 style: formData.styleId,
-                                                ratio: formData.aspectRatio,
-                                                app: 'STATICA'
+                                                app: 'STATICA',
+                                                count: resultImages.length
                                             }}
+                                            className="w-full sm:w-auto"
                                         />
                                     )}
                                 </div>
+
                             </div>
                         ) : (
-                            <div className="text-center z-10 opacity-60">
+                            <div className="text-center z-10 opacity-60 m-auto">
                                 <div className="text-8xl mb-6 grayscale opacity-20">⚡</div>
                                 <h3 className="text-2xl font-bold text-slate-800 mb-2">{t('ready_to_design')}</h3>
                                 <p className="text-slate-500 max-w-md mx-auto">
