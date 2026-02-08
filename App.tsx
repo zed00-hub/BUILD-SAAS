@@ -14,6 +14,7 @@ import {
   ProductDescriptionWrapper,
   VirtualTryOnWrapper,
   CloneCreativeWrapper,
+  StaticaWrapper,
   AdminWrapper
 } from './src/pages/ToolWrappers';
 
@@ -36,6 +37,7 @@ const App: React.FC = () => {
             <Route path="product-description" element={<ProductDescriptionWrapper />} />
             <Route path="virtual-tryon" element={<VirtualTryOnWrapper />} />
             <Route path="clone-creative" element={<CloneCreativeWrapper />} />
+            <Route path="statica" element={<StaticaWrapper />} />
             <Route path="admin" element={<AdminWrapper />} />
           </Route>
 

@@ -12,6 +12,7 @@ import { QuickEditTool } from '../../components/Tools/QuickEditTool';
 import { ProductDescriptionTool } from '../../components/Tools/ProductDescriptionTool';
 import { VirtualTryOnTool } from '../../components/Tools/VirtualTryOnTool';
 import CloneCreativeTool from '../../components/Tools/CloneCreativeTool';
+import { StaticaTool } from '../../components/Tools/StaticaTool';
 import { AdminDashboard } from '../../components/Admin/AdminDashboard';
 
 // --- Tool Guard Component ---
@@ -184,6 +185,16 @@ export const CloneCreativeWrapper: React.FC = () => {
         <ToolGuard toolId="clone-creative">
             {!isPaidUser && <TrialBanner />}
             <CloneCreativeTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
+        </ToolGuard>
+    );
+};
+
+export const StaticaWrapper: React.FC = () => {
+    const { points, deductPoints, isPaidUser, userProfile } = useOutletContext<DashboardContextType>();
+    return (
+        <ToolGuard toolId="statica">
+            {!isPaidUser && <TrialBanner />}
+            <StaticaTool points={points} deductPoints={deductPoints} isPaidUser={isPaidUser} userProfile={userProfile} />
         </ToolGuard>
     );
 };

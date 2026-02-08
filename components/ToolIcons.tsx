@@ -76,6 +76,13 @@ export const CloneCreativeIcon: React.FC<IconProps> = ({ className = '', size = 
     </svg>
 );
 
+// Statica - Lightning icon
+export const StaticaIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+);
+
 // Admin Panel - Shield icon
 export const AdminIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -153,5 +160,11 @@ export const TOOL_ICONS = {
         gradient: 'from-violet-500 to-indigo-500',
         bgLight: 'bg-violet-50',
         textColor: 'text-violet-600',
+    },
+    'statica': {
+        icon: StaticaIcon,
+        gradient: 'from-yellow-400 to-orange-500',
+        bgLight: 'bg-yellow-50',
+        textColor: 'text-yellow-600',
     },
 };

@@ -28,6 +28,7 @@ import {
     HomeIcon,
     ProjectsIcon,
     CloneCreativeIcon,
+    StaticaIcon,
     AdminIcon
 } from '../../components/ToolIcons';
 
@@ -351,6 +352,12 @@ export const Dashboard: React.FC = () => {
                                 onClick={() => { navigate('virtual-tryon'); setIsSidebarOpen(false); }}
                                 icon={<VirtualTryOnIcon size={20} />}
                                 label={t('tool_virtual_tryon')}
+                            />
+                            <SidebarItem
+                                active={isActive('statica')}
+                                onClick={() => { navigate('statica'); setIsSidebarOpen(false); }}
+                                icon={<StaticaIcon size={20} />}
+                                label="Statica Design"
                             />
                             <div className="pt-4 pb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('my_projects')}</div>
                             <SidebarItem

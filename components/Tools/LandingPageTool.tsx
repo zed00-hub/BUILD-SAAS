@@ -242,10 +242,10 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
 
       const baseRules = `
       🚨 CRITICAL RULES (ZERO TOLERANCE):
-      1. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
-      2. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
-      3. ⛔ NO IMMODESTY (STRICT): Models MUST wear modest, loose clothing (Long sleeves, High necklines). AVOID any skin exposure or tight clothing. Family-friendly atmosphere is MANDATORY.
-      4. ⛔ NO META-TEXT: Do NOT write "SECTION 1", "HERO", "STRUCTURE", or any layout labels like "Header", "Footer" on the image. Only write the actual marketing copy.
+      1. ⛔ NO META-TEXT/LABELS (STRICT): Do NOT write "SECTION 1", "HERO", "PART 1", or any structural labels on the image. Only write the actual marketing copy.
+      2. ⛔ NO BUTTONS: Do NOT draw "Buy Now" buttons. This is an informational graphic.
+      3. ⛔ NO WEBSITE UI: No browser frames, no scrollbars, no navigation menus.
+      4. ⛔ NO IMMODESTY (STRICT): Models MUST wear modest, loose clothing (Long sleeves, High necklines). AVOID any skin exposure or tight clothing. Family-friendly atmosphere is MANDATORY.
       5. ⛔ NO FAKE REVIEWS: If no specific review text is provided below, DO NOT invent fake customer quotes. Use generic trust badges (e.g., "5 Stars", "Trusted Choice") instead.
       6. ✅ MARKETING FOCUS: Focus on PAIN POINTS vs. SOLUTIONS. Use visual storytelling to show the *benefit* not just the features.
       7. ✅ LANGUAGE ADHERENCE: ${languageInstruction}
@@ -287,14 +287,15 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         `;
 
         // Image 1: The Hook & The Logic (Hero + Before/After)
-        const prompt1 = `PART 1 of 2: TOP HALF of the Landing Page (Sections 1 & 2).
+        // Image 1: The Hook & The Logic (Hero + Before/After)
+        const prompt1 = `PART 1 of 2: TOP HALF of the Landing Page.
         ${narrativeStyleInstruction}
         ${splitStyleInstruction}
         ${baseRules}
 
         CONTENTS (Top to Bottom):
 
-        🔻 [TOP 50%] SECTION 1: THE HERO (The Dream & Spirit)
+        🔻 [TOP 50%] - VISUAL INSTRUCTION (Use Full Width):
         - **Visual:** A Cinematic, fully immersive product shot in a real-life context (${ethnicityInstruction}).
         - **Focus:** Capture the "Spirit" and "Vibe" of the product. If it's cozy, make it warm. If it's tech, make it sleek.
         - **Elements:** 
@@ -302,7 +303,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
            - Product shining with studio lighting.
            - Trust badges (small) at the very top.
 
-        🔻 [BOTTOM 50%] SECTION 2: BEFORE & AFTER (The Proof)
+        🔻 [BOTTOM 50%] - VISUAL INSTRUCTION (Use Split Layout):
         - **Visual:** A powerful "Split-Screen" comparison.
         - **Structure:**
            - LEFT: The "Old Way" (Gray, Problematic). Label: "BEFORE" (in ${formData.language}).
@@ -310,24 +311,26 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         - **Style:** Clean, convincing transformation visual. Labels in [${formData.language}].
         
         ⚠️ IMPORTANT: Ideally, show the user's problem disappearing.
+        ⛔ NEGATIVE CONSTRAINT: Do NOT write "Hero", "Section 1", "Part 1" on the image.
         `;
 
         // Image 2: The Trust & The Deal (Social + Ingredients/Offer)
-        const prompt2 = `PART 2 of 2: BOTTOM HALF of the Landing Page (Sections 3 & 4).
+        // Image 2: The Trust & The Deal (Social + Ingredients/Offer)
+        const prompt2 = `PART 2 of 2: BOTTOM HALF of the Landing Page.
         ${narrativeStyleInstruction}
         ${splitStyleInstruction}
         ${baseRules}
         
         CONTENTS (Top to Bottom):
 
-        🔻 [TOP 50%] SECTION 3: AUTHORITY & SOCIAL VALIDATION (The Trust)
+        🔻 [TOP 50%] - VISUAL INSTRUCTION (Social Proof Zone):
         - **Layout:** ${hasReviews ? 'A dedicated "Wall of Love" or "Testimonial Section".' : 'A sleek "Trust & Authority" section with Badges & Logos.'}
         - **CONTENT:** ${hasReviews ? 'You MUST display the specific user reviews provided below in CHAT BUBBLES or CARDS.' : 'Do NOT invent reviews. Display only "Trusted by 10k+" badge, 5-Star Icons, and potentially Media Logos.'}
         - **TEXT TO WRITE:**
           ${hasReviews ? `"${formData.reviews}" (DISTRIBUTE these sentences into 2-3 visual bubbles/cards).` : 'Use generic terms like "Excellent Quality", "Recommended", "Top Rated". NO FAKE QUOTES.'}
         - **Visuals:** ${hasReviews ? 'User avatars + bubbles.' : 'Shield icons, Checkmarks, Gold Seals.'}
 
-        🔻 [BOTTOM 50%] SECTION 4: INGREDIENTS/MECHANISM & OFFER (The Logic & Action)
+        🔻 [BOTTOM 50%] - VISUAL INSTRUCTION (Offer & Mechanism):
         - **Visual:** A technical or detailed breakdown (Ingredients/Mechanism) combined with the Final Offer.
         - **Components:**
            1. **Mechanism/Ingredients:** 3 Circular "Lens" bubbles showing what's inside (Micro-zoom).
@@ -337,6 +340,7 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
               - **Trust:** ${paymentInstruction} icons.
 
         ⚠️ INTEGRATION NOTE: The Top of this image (Section 3) must blend seamlessly with the Bottom of the previous image (Section 2).
+        ⛔ NEGATIVE CONSTRAINT: Do NOT write "Section", "Offer", "Part 2" labels on the image.
         `;
 
         // توليد الصورتين بالتوازي
@@ -367,26 +371,27 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
         ${narrativeStyleInstruction}
         ${baseRules}
 
-        VISUAL NARRATIVE (Continuous Vertical Flow):
+        VISUAL NARRATIVE (Continuous Vertical Flow - DO NOT PRINT STRUCTURE LABELS):
 
-        1. **TOP HEADER:** A sleek trust strip with 3 small icons (Shipping, Warranty, Guarantee).
+        [TOP STRIP]: A sleek trust strip with 3 small icons (Shipping, Warranty, Guarantee).
         
-        2. **HERO SECTION:** A Vivid, fully realized scene showing the PRODUCT + HAPPY PERSON (${ethnicityInstruction}, Modest) in a relevant setting. Big captivating Arabic Headline.
+        [HERO ZONE]: A Vivid, fully realized scene showing the PRODUCT + HAPPY PERSON (${ethnicityInstruction}, Modest) in a relevant setting. Big captivating Arabic Headline.
 
-        3. **TRANSFORMATION ZONE:** A soft-blended Split-View. 
+        [TRANSFORMATION ZONE]: A soft-blended Split-View. 
            - Left: "Before" (Dull/Problem). 
            - Right: "After" (Bright/Solution). 
            - Connected by a flowing stylistic Arrow.
 
-        4. **FEATURE BUBBLES:** 3 Circular close-ups floating on a textured background, showing product details.
+        [FEATURE BUBBLES]: 3 Circular close-ups floating on a textured background, showing product details.
 
-        5. **OFFER FOOTER:** A distinct, bold bottom section (Darker background).
+        [OFFER FOOTER]: A distinct, bold bottom section (Darker background).
            - Large Price Display (${priceInstruction}).
            - ${hasDiscount ? 'Discount Badge.' : ''}
            - Trust Seals & "${paymentInstruction}" icons.
            - Final Call-To-Action text.
 
         ⚠️ CRITICAL: The entire image must look like ONE cohesive design. Use color gradients to blend sections. Do NOT use white borders between sections.
+        ⛔ NEGATIVE CONSTRAINT: Do NOT write "Hero", "Section", "Header" labels on the image.
         `;
 
         result = await generateImage({
