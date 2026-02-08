@@ -9,6 +9,7 @@ import { auth } from '../../src/firebase';
 import { UserData } from '../../src/types/dbTypes';
 import { SaveToCloudButton } from '../SaveToCloudButton';
 import { UsageLimitsCard } from '../UsageLimitsCard';
+import { Country, Language } from '../../types';
 
 interface StaticaToolProps {
     points: number;
@@ -97,6 +98,8 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
         colorPreference: '',
         price: '',
         reviewText: '',
+        country: Country.Algeria,
+        language: Language.Arabic,
     });
     const [logoImage, setLogoImage] = useState<string | null>(null);
 
@@ -149,6 +152,11 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
       ACT AS: "STATICA", an elite AI Art Director specialized in Conversion-Centered Design.
       
       YOUR TASK: Transform the provided product image into a professional advertising creative based on the following specifications.
+
+      🌍 TARGET AUDIENCE:
+      - Country/Market: ${formData.country}
+      - Language: ${formData.language} (Ensure ALL text is in ${formData.language} unless specified otherwise).
+      - Cultural Nuance: Adapt visuals and models (if any) to respect local customs of ${formData.country}.
 
       🎨 SELECTED STYLE: ${selectedStyle.label}
       ${selectedStyle.prompt}
@@ -282,6 +290,34 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                             {ratio.label}
                                         </button>
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* Market & Language */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('target_country') || 'Target Country'}</label>
+                                    <select
+                                        value={formData.country}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value as Country }))}
+                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    >
+                                        {Object.values(Country).map((c) => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('language') || 'Language'}</label>
+                                    <select
+                                        value={formData.language}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, language: e.target.value as Language }))}
+                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    >
+                                        {Object.values(Language).map((l) => (
+                                            <option key={l} value={l}>{l}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
@@ -426,6 +462,6 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 };
