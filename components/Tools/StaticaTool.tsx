@@ -95,7 +95,10 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
         description: '',
         aspectRatio: '1:1' as any,
         colorPreference: '',
+        price: '',
+        reviewText: '',
     });
+    const [logoImage, setLogoImage] = useState<string | null>(null);
 
     const GENERATION_COST = 25;
 
@@ -107,6 +110,17 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                 setError(null);
             } catch (err) {
                 setError('Failed to load image');
+            }
+        }
+    };
+
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            try {
+                const base64 = await fileToBase64(e.target.files[0]);
+                setLogoImage(base64);
+            } catch (err) {
+                console.error('Failed to load logo');
             }
         }
     };
@@ -141,7 +155,23 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
 
       📦 PRODUCT CONTEXT:
       - Description/Angle: ${formData.description || 'Analyze the product and highlight its best features.'}
+      - Description/Angle: ${formData.description || 'Analyze the product and highlight its best features.'}
       - Color Palette: ${formData.colorPreference ? `Use this palette/mood: ${formData.colorPreference}` : 'EXTRACT and harmoniously apply the product\'s own color identity.'}
+      ${formData.price ? `- PRICE ELEMENT: distinctively display the price "${formData.price}" in a modern, elegant font.` : ''}
+      ${formData.reviewText ? `- SOCIAL PROOF: prominently feature this review: "${formData.reviewText}". Use a quote style layout.` : ''}
+      ${logoImage ? `- BRANDING: Place the provided LOGO in a standard branding position (top center, top left, or bottom right) with clear visibility.` : ''}
+
+      💎 GLOBAL STYLE INSPIRATION (GOD-TIER):
+      - Aesthetics: High-End Cosmetic / Luxury Editorial.
+      - Typography: Use Bold Serif fonts for headlines (Vogue/Harper's Bazaar style) mixed with clean Sans-Serif for body text.
+      - Layout: Structured, balanced, using "Problem/Solution" or "Benefit" framing where appropriate.
+      - Backgrounds: Clean, solid, or soft gradients (Beige, Pastel Pink, Soft Blue, Cream).
+      - Product Presentation: Floating, on a podium, or dynamic spill.
+      
+      🛡️ SAFETY & ETHICS (STRICT):
+      - **NO TABARRUJ**: Do NOT generate images of women or human figures unless absolutely necessary for context (e.g., a hand holding the product).
+      - If a human element is required, use ONLY hands/arms. NO faces, NO bodies.
+      - Focus purely on the product, nature elements (leaves, water drops, silk), and abstract shapes.
 
       📐 DESIGN LOGIC (MANDATORY):
       1. **Rule of Thirds:** Place the focal point (product) off-center or balance it with visual weight (text/elements) to create dynamic tension.
@@ -162,6 +192,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
             const result = await generateImage({
                 prompt,
                 productImage,
+                logoImage: logoImage || undefined,
                 aspectRatio: formData.aspectRatio,
                 imageSize: '4K',
             });
@@ -270,6 +301,55 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                     onChange={(e) => setFormData(prev => ({ ...prev, colorPreference: e.target.value }))}
                                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
                                 />
+                            </div>
+
+                            {/* 5. Optional Customizations */}
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                                <label className="text-sm font-bold text-slate-800 flex items-center justify-between cursor-pointer" onClick={() => document.getElementById('opt-custom')?.classList.toggle('hidden')}>
+                                    <span>5. Optional Customizations</span>
+                                    <span className="text-xs text-indigo-600">(Price, Review, Logo) ▼</span>
+                                </label>
+                                <div id="opt-custom" className="space-y-3 hidden animate-fade-in">
+                                    {/* Price */}
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-600 mb-1 block">{t('price_ph') || 'Price'} (Optional)</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. $49.99"
+                                            value={formData.price}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                                            className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        />
+                                    </div>
+                                    {/* Review */}
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-600 mb-1 block">{t('expert_reviews_label')}</label>
+                                        <textarea
+                                            placeholder={t('expert_reviews_ph')}
+                                            value={formData.reviewText}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, reviewText: e.target.value }))}
+                                            className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm min-h-[60px]"
+                                        />
+                                    </div>
+                                    {/* Logo */}
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-600 mb-1 block">{t('logo_opt')}</label>
+                                        <div className={`border border-dashed rounded-xl p-3 text-center transition-all ${logoImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400'}`}>
+                                            {logoImage ? (
+                                                <div className="relative h-12 flex items-center justify-center">
+                                                    <img src={`data:image/png;base64,${logoImage}`} className="h-full object-contain" alt="Logo" />
+                                                    <button onClick={() => setLogoImage(null)} className="ml-2 text-red-500 text-xs font-bold">✕</button>
+                                                </div>
+                                            ) : (
+                                                <label className="cursor-pointer flex items-center justify-center gap-2">
+                                                    <span className="text-lg">🏢</span>
+                                                    <span className="text-xs text-slate-500">Upload Logo</span>
+                                                    <input type="file" onChange={handleLogoUpload} accept="image/*" className="hidden" />
+                                                </label>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {error && (
