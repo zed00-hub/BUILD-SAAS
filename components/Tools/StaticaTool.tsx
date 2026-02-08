@@ -17,61 +17,61 @@ interface StaticaToolProps {
     userProfile?: UserData | null;
 }
 
-const STYLES = [
+const getStyles = (t: any) => [
     {
         id: 'showcase',
-        label: 'Product Showcase',
+        label: t('style_showcase'),
         icon: '💎',
-        desc: 'Focus on the product with isolated background and dramatic lighting.',
+        desc: t('style_desc_showcase'),
         prompt: 'STYLE: PRODUCT SHOWCASE. Create a high-end, studio-quality product shot. The background should be minimal or isolated to heavily emphasize the product. Use dramatic lighting (rim lighting, softbox) to highlight textures and curves. Focus: 100% on the product.'
     },
     {
         id: 'lifestyle',
-        label: 'Lifestyle Context',
+        label: t('style_lifestyle'),
         icon: '🏡',
-        desc: 'Product in a realistic, everyday use environment.',
+        desc: t('style_desc_lifestyle'),
         prompt: 'STYLE: LIFESTYLE CONTEXT. Place the product in a realistic, aspirational environment where it is being used naturally. The setting should imply a specific user persona and use case. Lighting should be natural and inviting (golden hour or bright daylight).'
     },
     {
         id: 'testimonial',
-        label: 'Testimonial Style',
+        label: t('style_testimonial'),
         icon: '💬',
-        desc: 'Visuals that highlight customer feedback and trust.',
+        desc: t('style_desc_testimonial'),
         prompt: 'STYLE: TESTIMONIAL. Design a layout that features the product alongside a visual representation of social proof. This could be a happy user holding the product, or a composition that leaves clear negative space for a quote (do not write the quote, just design the space). Mood: Trustworthy, Authentic.'
     },
     {
         id: 'comparison',
-        label: 'Before/After & Comparison',
+        label: t('style_comparison'),
         icon: '⚖️',
-        desc: 'Split-screen or comparison layout.',
+        desc: t('style_desc_comparison'),
         prompt: 'STYLE: BEFORE/AFTER COMPARISON. Create a split-screen composition. One side (Left/Top) represents the "Problem" (desaturated, chaotic) and the other side (Right/Bottom) represents the "Solution/Product" (bright, organized, solved). Use a visual divider. Focus on the transformation.'
     },
     {
         id: 'offer',
-        label: 'Offer-Centric (Flash Sale)',
+        label: t('style_offer'),
         icon: '🏷️',
-        desc: 'High energy, bold colors, focus on discounts.',
+        desc: t('style_desc_offer'),
         prompt: 'STYLE: OFFER-CENTRIC / FLASH SALE. High energy, vibrant design. Use bold, punchy colors (Red, Yellow, Neon). The composition should center the product but create dynamic zones for "50% OFF" or "LIMITED TIME" graphics (text can be simulated or implied). Aesthetics: Urgency, Excitement.'
     },
     {
         id: 'educational',
-        label: 'Educational Infographic',
+        label: t('style_educational'),
         icon: '🧠',
-        desc: 'Explains benefits with icons and arrows.',
+        desc: t('style_desc_educational'),
         prompt: 'STYLE: EDUCATIONAL INFOGRAPHIC. A clean, structured layout showing the product with "exploded view" elements or floating icons pointing to key features. Use lines, arrows, and glassmorphism panels to explain the tech/benefits. Style: Tech-forward, Clean, Informative.'
     },
     {
         id: 'minimalist',
-        label: 'Minimalist Typography',
+        label: t('style_minimalist'),
         icon: 'Aa',
-        desc: 'Clean aesthetics with focus on typography and space.',
+        desc: t('style_desc_minimalist'),
         prompt: 'STYLE: MINIMALIST TYPOGRAPHY. Ultra-clean, sophisticated design. Use massive amounts of negative space (white or solid color). The product plays with large, bold typographic elements (abstract letters). Style: Swiss Design, Editorial, Vogue-like.'
     },
     {
         id: 'ugc',
-        label: 'UGC (Pseudo-Native)',
+        label: t('style_ugc'),
         icon: '📱',
-        desc: 'Looks like a raw photo taken with a phone.',
+        desc: t('style_desc_ugc'),
         prompt: 'STYLE: UGC / PSEUDO-NATIVE. The image must look like a RAW photo taken with an iPhone 15 Pro. Slightly imperfect framing, realistic lighting (not studio), maybe a hand holding the product. It should feel "native" to Instagram/TikTok feed. Authentic, Unfiltered vibe.'
     }
 ];
@@ -128,6 +128,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
         }
 
         try {
+            const STYLES = getStyles(t);
             const selectedStyle = STYLES.find(s => s.id === formData.styleId) || STYLES[0];
 
             const prompt = `
@@ -187,7 +188,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                     <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
                         <span className="text-4xl">⚡</span> STATICA <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">BETA</span>
                     </h1>
-                    <p className="text-slate-500 mt-2">Intelligent Ad Creative Generator • Smart Styles • Commercial Ready</p>
+                    <p className="text-slate-500 mt-2">{t('statica_desc')}</p>
                 </div>
                 <UsageLimitsCard userProfile={userProfile} compact />
             </div>
@@ -201,7 +202,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
 
                             {/* Image Upload */}
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-800">1. Upload Product Image</label>
+                                <label className="text-sm font-bold text-slate-800">{t('upload_product_image')}</label>
                                 <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${productImage ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400'}`}>
                                     {productImage ? (
                                         <div className="relative h-48 w-full">
@@ -211,7 +212,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                     ) : (
                                         <label className="cursor-pointer block">
                                             <div className="text-4xl mb-2">📸</div>
-                                            <span className="text-sm font-medium text-slate-600">Click to upload product</span>
+                                            <span className="text-sm font-medium text-slate-600">{t('click_und_upload')}</span>
                                             <input type="file" onChange={handleImageUpload} accept="image/*" className="hidden" />
                                         </label>
                                     )}
@@ -220,9 +221,9 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
 
                             {/* Style Selection */}
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-800">2. Select Ad Style</label>
+                                <label className="text-sm font-bold text-slate-800">{t('select_ad_style')}</label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {STYLES.map(style => (
+                                    {getStyles(t).map(style => (
                                         <button
                                             key={style.id}
                                             onClick={() => setFormData(prev => ({ ...prev, styleId: style.id }))}
@@ -234,13 +235,12 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                     ))}
                                 </div>
                                 <p className="text-xs text-slate-500 mt-1 italic">
-                                    {STYLES.find(s => s.id === formData.styleId)?.desc}
+                                    {getStyles(t).find(s => s.id === formData.styleId)?.desc}
                                 </p>
                             </div>
 
-                            {/* Aspect Ratio */}
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-800">3. Format & Size</label>
+                                <label className="text-sm font-bold text-slate-800">{t('format_size')}</label>
                                 <div className="flex gap-2">
                                     {ASPECT_RATIOS.map(ratio => (
                                         <button
@@ -256,16 +256,16 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
 
                             {/* Context & Details */}
                             <div className="space-y-3">
-                                <label className="text-sm font-bold text-slate-800">4. Creative Details</label>
+                                <label className="text-sm font-bold text-slate-800">{t('creative_details')}</label>
                                 <textarea
-                                    placeholder="Describe your product & objective (e.g., 'Luxury perfume, evening wear, mysterious vibe')..."
+                                    placeholder={t('describe_product_ph')}
                                     value={formData.description}
                                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm min-h-[80px]"
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Color Preference (Optional, e.g., 'Pastel Pink & Gold')"
+                                    placeholder={t('color_pref_ph')}
                                     value={formData.colorPreference}
                                     onChange={(e) => setFormData(prev => ({ ...prev, colorPreference: e.target.value }))}
                                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
@@ -285,7 +285,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                 disabled={!productImage}
                             >
                                 <span className="flex items-center gap-2">
-                                    Generate Statica Design
+                                    {t('generate_statica')}
                                     <span className="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
                                         {GENERATION_COST} <CoinIcon className="w-3 h-3" />
                                     </span>
@@ -312,7 +312,7 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                                         download={`statica-${Date.now()}.png`}
                                         className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all flex items-center gap-2"
                                     >
-                                        <span>⬇️ Download PNG</span>
+                                        <span>{t('download_png_btn')}</span>
                                     </a>
                                     {isPaidUser && (
                                         <SaveToCloudButton
@@ -330,9 +330,9 @@ export const StaticaTool: React.FC<StaticaToolProps> = ({ points, deductPoints, 
                         ) : (
                             <div className="text-center z-10 opacity-60">
                                 <div className="text-8xl mb-6 grayscale opacity-20">⚡</div>
-                                <h3 className="text-2xl font-bold text-slate-800 mb-2">Ready to Design</h3>
+                                <h3 className="text-2xl font-bold text-slate-800 mb-2">{t('ready_to_design')}</h3>
                                 <p className="text-slate-500 max-w-md mx-auto">
-                                    Upload a product, select a style, and let STATICA generate professional ad creatives in seconds.
+                                    {t('ready_to_design_desc')}
                                 </p>
                             </div>
                         )}

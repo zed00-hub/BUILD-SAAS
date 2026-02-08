@@ -754,6 +754,12 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
               </div>
 
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                {/* Critical Download Warning */}
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-center shadow-sm">
+                  <p className="text-amber-900 font-bold text-sm">⚠️ Please download your result immediately. We do not save your files.</p>
+                  <p className="text-amber-900 font-bold text-sm mt-2 font-arabic" dir="rtl">⚠️ يرجى تحميل النتيجة فوراً. نحن لا نقوم بحفظ الملفات تلقائياً.</p>
+                  <p className="text-amber-900 font-bold text-sm mt-2">⚠️ Veuillez télécharger votre résultat immédiatement. Nous ne sauvegardons pas vos fichiers.</p>
+                </div>
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                   <span>✨ {t('refine_result')}</span>
                   <span className="text-xs font-normal text-slate-400 px-2 py-0.5 bg-slate-100 rounded-full">{t('ai_editor')}</span>
