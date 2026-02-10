@@ -25,6 +25,7 @@ export const AdminDashboard: React.FC = () => {
     const [amountToAdjust, setAmountToAdjust] = useState<string>('');
     const [adjustReason, setAdjustReason] = useState<string>('');
     const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro' | 'elite' | 'e-commerce'>('basic');
+    const [durationDays, setDurationDays] = useState<number>(30);
 
     // Pricing Management States
     const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG);
@@ -77,7 +78,8 @@ export const AdminDashboard: React.FC = () => {
             success = await AdminService.adjustTrialBalance(
                 selectedUser.uid,
                 amount,
-                adjustReason || 'Admin Manual Adjustment'
+                adjustReason || 'Admin Manual Adjustment',
+                durationDays
             );
         } else {
             success = await AdminService.upgradeToPaidPlan(
@@ -89,7 +91,7 @@ export const AdminDashboard: React.FC = () => {
 
         if (success) {
             alert(adjustmentType === 'trial'
-                ? "Trial balance updated successfully!"
+                ? `Trial balance updated successfully! Points expire in ${durationDays} days.`
                 : `User upgraded to ${PLAN_CONFIGS[selectedPlan].name} plan with ${PLAN_CONFIGS[selectedPlan].points} points!`
             );
             closeModal();
@@ -125,6 +127,7 @@ export const AdminDashboard: React.FC = () => {
         setAdjustmentType('trial');
         setSelectedPlan('basic');
         setCustomLimit('');
+        setDurationDays(30);
     };
 
     const handleUpdateCustomLimit = async () => {
@@ -691,6 +694,25 @@ export const AdminDashboard: React.FC = () => {
                                             </p>
                                         </div>
                                         <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1">⏰ {t('duration') || 'Duration (Expiry)'}</label>
+                                            <select
+                                                value={durationDays}
+                                                onChange={e => setDurationDays(parseInt(e.target.value))}
+                                                className="w-full px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                            >
+                                                <option value={7}>7 Days</option>
+                                                <option value={15}>15 Days</option>
+                                                <option value={30}>30 Days (Default)</option>
+                                                <option value={60}>60 Days</option>
+                                                <option value={90}>90 Days</option>
+                                                <option value={180}>180 Days</option>
+                                                <option value={365}>365 Days</option>
+                                            </select>
+                                            <p className="text-[11px] text-amber-600 mt-1 flex items-center gap-1">
+                                                ⚠️ Points will <strong>automatically expire</strong> and be removed after this period, even if unused.
+                                            </p>
+                                        </div>
+                                        <div>
                                             <label className="block text-sm font-bold text-slate-700 mb-1">{t('reason')}</label>
                                             <input
                                                 type="text"
@@ -701,6 +723,23 @@ export const AdminDashboard: React.FC = () => {
                                                 required
                                             />
                                         </div>
+                                        {/* Show active packages */}
+                                        {selectedUser?.pointsPackages && selectedUser.pointsPackages.length > 0 && (
+                                            <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                                <p className="text-xs font-bold text-blue-700 mb-2">📦 Active Points Packages:</p>
+                                                <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                                                    {selectedUser.pointsPackages.map((pkg: any, idx: number) => (
+                                                        <div key={idx} className="flex justify-between items-center text-[11px] bg-white px-2 py-1.5 rounded-lg border border-blue-50">
+                                                            <span className="text-slate-600 truncate flex-1">{pkg.description?.slice(0, 25)}</span>
+                                                            <span className="font-bold text-blue-700 mx-2">{pkg.remaining}/{pkg.amount}</span>
+                                                            <span className="text-amber-600 whitespace-nowrap">
+                                                                {pkg.expiresAt?.seconds ? new Date(pkg.expiresAt.seconds * 1000).toLocaleDateString() : '?'}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">

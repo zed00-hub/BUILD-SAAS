@@ -15,8 +15,8 @@ import {
     updateDoc,
     deleteField
 } from 'firebase/firestore';
-import { db } from '../firebase'; // تأكد أن ملف firebase exports db
-import { UserData, WalletTransaction, TransactionType } from '../types/dbTypes';
+import { db } from '../firebase';
+import { UserData, WalletTransaction, TransactionType, PointsPackage } from '../types/dbTypes';
 
 const USERS_COLLECTION = 'users';
 const TRANSACTIONS_COLLECTION = 'transactions';
@@ -144,6 +144,66 @@ export const WalletService = {
         return userSnap.exists() ? (userSnap.data().balance as number) : 0;
     },
 
+    /**
+     * Check and expire old points packages.
+     * Called on login and before each deduction.
+     */
+    async checkAndExpirePoints(uid: string): Promise<void> {
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userRef = doc(db, USERS_COLLECTION, uid);
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists()) return;
+
+                const userData = userDoc.data() as UserData;
+                const packages = userData.pointsPackages || [];
+                if (packages.length === 0) return;
+
+                const now = Timestamp.now();
+                let totalExpired = 0;
+                const activePackages: PointsPackage[] = [];
+
+                for (const pkg of packages) {
+                    // Check if expiresAt exists and has passed
+                    if (pkg.expiresAt && pkg.expiresAt.toMillis() <= now.toMillis()) {
+                        // This package has expired
+                        if (pkg.remaining > 0) {
+                            totalExpired += pkg.remaining;
+                        }
+                        // Do not add to activePackages (effectively removing it)
+                    } else {
+                        activePackages.push(pkg);
+                    }
+                }
+
+                if (totalExpired > 0) {
+                    const currentBalance = userData.balance || 0;
+                    const newBalance = Math.max(0, currentBalance - totalExpired);
+
+                    transaction.update(userRef, {
+                        balance: newBalance,
+                        pointsPackages: activePackages
+                    });
+
+                    // Log the expiry transaction
+                    const newTxRef = doc(collection(db, TRANSACTIONS_COLLECTION));
+                    transaction.set(newTxRef, {
+                        userId: uid,
+                        amount: totalExpired,
+                        type: 'expiry' as TransactionType,
+                        description: `Points expired: ${totalExpired} points removed (package expiry)`,
+                        createdAt: serverTimestamp()
+                    });
+                } else if (activePackages.length !== packages.length) {
+                    // Some zero-remaining packages expired, just clean up
+                    transaction.update(userRef, { pointsPackages: activePackages });
+                }
+            });
+        } catch (error) {
+            console.error('Error checking point expiry:', error);
+        }
+    },
+
     async getUserProfile(uid: string): Promise<UserData | null> {
         const userRef = doc(db, USERS_COLLECTION, uid);
         const userSnap = await getDoc(userRef);
@@ -166,8 +226,10 @@ export const WalletService = {
      */
     async deductPoints(uid: string, amount: number, description: string, orderId?: string, usageDelta: number = 1): Promise<boolean> {
         try {
-            // Fetch Global Limits Config OUTSIDE transaction to avoid read overhead inside tx (optimistic)
-            // Or ideally inside, but let's fetch first.
+            // First, check and expire any old packages
+            await this.checkAndExpirePoints(uid);
+
+            // Fetch Global Limits Config
             let globalLimits = DEFAULT_LIMITS;
             try {
                 const limitSnap = await getDoc(doc(db, 'settings', 'limitsConfig'));
@@ -238,15 +300,28 @@ export const WalletService = {
 
                 const newBalance = currentBalance - amount;
 
-                // 3. Update User
+                // 3. Deduct from packages (oldest first - FIFO)
+                const packages = [...(userData.pointsPackages || [])];
+                let remaining = amount;
+                for (const pkg of packages) {
+                    if (remaining <= 0) break;
+                    if (pkg.remaining > 0) {
+                        const deduct = Math.min(pkg.remaining, remaining);
+                        pkg.remaining -= deduct;
+                        remaining -= deduct;
+                    }
+                }
+
+                // 4. Update User
                 transaction.update(userRef, {
                     balance: newBalance,
+                    pointsPackages: packages,
                     dailyUsageCount: currentDailyCount + usageDelta,
                     lastResetDate: today,
                     lastUsageTime: serverTimestamp()
                 });
 
-                // 4. Add Transaction
+                // 5. Add Transaction
                 const newTransactionRef = doc(collection(db, TRANSACTIONS_COLLECTION));
                 transaction.set(newTransactionRef, {
                     userId: uid,

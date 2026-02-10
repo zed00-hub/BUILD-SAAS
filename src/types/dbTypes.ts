@@ -1,11 +1,22 @@
 import { Timestamp } from 'firebase/firestore';
 
-export type TransactionType = 'credit' | 'debit' | 'refund';
+export type TransactionType = 'credit' | 'debit' | 'refund' | 'expiry';
 export type OrderStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
 // Account Types
 export type AccountType = 'trial' | 'paid';
 export type PlanType = 'basic' | 'pro' | 'elite' | 'e-commerce' | null;
+
+// Points Package - tracks individual point allocations with expiry
+export interface PointsPackage {
+    id: string;
+    amount: number;       // original amount added
+    remaining: number;    // remaining points in this package
+    addedAt: Timestamp;   // when this package was created
+    expiresAt: Timestamp; // when this package expires
+    description: string;  // reason/description
+    durationDays: number; // original duration in days
+}
 
 export interface UserData {
     uid: string;
@@ -27,6 +38,9 @@ export interface UserData {
     dailyUsageCount?: number; // عدد العمليات/الصور المولدة اليوم
     lastResetDate?: string; // تاريخ آخر تصفير للعداد (YYYY-MM-DD)
     customDailyLimit?: number; // Optional override for daily limit
+
+    // Points Packages (for expiry tracking)
+    pointsPackages?: PointsPackage[];
 
     createdAt: Timestamp;
     lastLogin?: Timestamp;

@@ -13,7 +13,7 @@ import {
     deleteDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { UserData, Order, WalletTransaction, AccountType, PlanType } from '../types/dbTypes';
+import { UserData, Order, WalletTransaction, AccountType, PlanType, PointsPackage } from '../types/dbTypes';
 import { PricingService } from './pricingService';
 import { ToolLock } from '../../types';
 
@@ -50,8 +50,9 @@ export const AdminService = {
 
     /**
      * تعديل رصيد مستخدم (تجريبي فقط - بدون تغيير نوع الحساب)
+     * durationDays: مدة صلاحية النقاط بالأيام. يجب تحديد مدة.
      */
-    async adjustTrialBalance(userId: string, amountToAdd: number, description: string): Promise<boolean> {
+    async adjustTrialBalance(userId: string, amountToAdd: number, description: string, durationDays: number = 30): Promise<boolean> {
         try {
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, USERS_COLLECTION, userId);
@@ -59,11 +60,35 @@ export const AdminService = {
 
                 if (!userDoc.exists()) throw new Error("User not found");
 
-                const currentBalance = userDoc.data().balance || 0;
+                const userData = userDoc.data() as UserData;
+                const currentBalance = userData.balance || 0;
                 const newBalance = currentBalance + amountToAdd;
 
-                // 1. Update Balance only (keep account as trial)
-                transaction.update(userRef, { balance: newBalance });
+                // Create a PointsPackage for tracking expiry
+                const existingPackages: PointsPackage[] = userData.pointsPackages || [];
+                const now = Timestamp.now();
+                const expiresAt = Timestamp.fromDate(new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000));
+
+                const newPackage: PointsPackage = {
+                    id: `pkg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                    amount: Math.abs(amountToAdd),
+                    remaining: amountToAdd > 0 ? amountToAdd : 0,
+                    addedAt: now,
+                    expiresAt: expiresAt,
+                    description: description + ' (Trial - Admin)',
+                    durationDays: durationDays
+                };
+
+                // Only add package if adding positive points
+                const updatedPackages = amountToAdd > 0
+                    ? [...existingPackages, newPackage]
+                    : existingPackages;
+
+                // 1. Update Balance and Packages
+                transaction.update(userRef, {
+                    balance: newBalance,
+                    pointsPackages: updatedPackages
+                });
 
                 // 2. Add Transaction Record
                 const newTxRef = doc(collection(db, TRANSACTIONS_COLLECTION));
@@ -71,7 +96,7 @@ export const AdminService = {
                     userId,
                     amount: Math.abs(amountToAdd),
                     type: amountToAdd >= 0 ? 'credit' : 'debit',
-                    description: description + ' (Trial - Admin)',
+                    description: `${description} (Trial - Admin) | Expires: ${durationDays} days`,
                     createdAt: serverTimestamp()
                 });
             });
@@ -96,7 +121,7 @@ export const AdminService = {
 
             const pointsToAdd = planFromDb ? Number(planFromDb.basePoints) : fallbackPlan.points;
             const planName = planFromDb ? planFromDb.name : fallbackPlan.name;
-            const durationDays = fallbackPlan.durationDays; // Duration usually constant, or could be added to DB schema later
+            const durationDays = fallbackPlan.durationDays;
 
             const now = Timestamp.now();
             const endDate = Timestamp.fromDate(new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000));
@@ -107,11 +132,28 @@ export const AdminService = {
 
                 if (!userDoc.exists()) throw new Error("User not found");
 
-                const currentBalance = userDoc.data().balance || 0;
+                const userData = userDoc.data() as UserData;
+                const currentBalance = userData.balance || 0;
 
                 // If basePoints is 'Custom' (Elite), handle differently or default to 0/fallback
                 const finalPoints = isNaN(pointsToAdd) ? 0 : pointsToAdd;
                 const newBalance = currentBalance + finalPoints;
+
+                // Create a PointsPackage for this plan
+                const existingPackages: PointsPackage[] = userData.pointsPackages || [];
+                const newPackage: PointsPackage = {
+                    id: `plan_${planType}_${Date.now()}`,
+                    amount: finalPoints,
+                    remaining: finalPoints,
+                    addedAt: now,
+                    expiresAt: endDate,
+                    description: `${planName} Plan Purchase`,
+                    durationDays: durationDays
+                };
+
+                const updatedPackages = finalPoints > 0
+                    ? [...existingPackages, newPackage]
+                    : existingPackages;
 
                 // 1. Update user to paid plan
                 transaction.update(userRef, {
@@ -119,7 +161,8 @@ export const AdminService = {
                     accountType: 'paid',
                     planType: planType,
                     planStartDate: now,
-                    planEndDate: endDate
+                    planEndDate: endDate,
+                    pointsPackages: updatedPackages
                 });
 
                 // 2. Add Transaction Record
@@ -128,7 +171,7 @@ export const AdminService = {
                     userId,
                     amount: finalPoints,
                     type: 'credit',
-                    description: `${planName} Plan Purchase - ${description} (Admin)`,
+                    description: `${planName} Plan Purchase - ${description} (Admin) | Expires: ${durationDays} days`,
                     createdAt: serverTimestamp()
                 });
             });

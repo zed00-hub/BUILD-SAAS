@@ -182,6 +182,9 @@ export const Dashboard: React.FC = () => {
                 authUser.displayName || undefined,
                 authUser.photoURL || undefined
             );
+            // Check and expire old points packages on login
+            await WalletService.checkAndExpirePoints(uid);
+
             const profile = await WalletService.getUserProfile(uid);
             if (profile) {
                 setPoints(profile.balance);
