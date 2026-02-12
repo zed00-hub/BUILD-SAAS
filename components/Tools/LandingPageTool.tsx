@@ -121,10 +121,13 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
   const handleDownload = (format: 'png' | 'webp') => {
     if (!resultImage) return;
 
+    // Determine the file extension from the actual data
+    const isJpeg = resultImage.includes('image/jpeg');
+
     if (format === 'png') {
       const link = document.createElement('a');
       link.href = resultImage;
-      link.download = `creakits-landing-${Date.now()}.png`;
+      link.download = `creakits-landing-${Date.now()}.${isJpeg ? 'jpg' : 'png'}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -132,30 +135,49 @@ export const LandingPageTool: React.FC<LandingPageToolProps> = ({ points, deduct
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          try {
-            const webpData = canvas.toDataURL('image/webp', 0.9);
-            const link = document.createElement('a');
-            link.href = webpData;
-            link.download = `creakits-landing-${Date.now()}.webp`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          } catch (e) {
-            console.error("Download failed (CORS likely):", e);
-            alert("Could not convert to WEBP due to browser security restrictions. Downloading as PNG instead.");
-            const link = document.createElement('a');
-            link.href = resultImage;
-            link.download = `creakits-landing-${Date.now()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        try {
+          // Scale down if needed for canvas conversion
+          const MAX_PIXELS = 16_000_000;
+          let w = img.width;
+          let h = img.height;
+          if (w * h > MAX_PIXELS) {
+            const scale = Math.sqrt(MAX_PIXELS / (w * h));
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
           }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, w, h);
+            const webpData = canvas.toDataURL('image/webp', 0.9);
+            if (webpData && webpData.length > 100 && webpData !== 'data:,') {
+              const link = document.createElement('a');
+              link.href = webpData;
+              link.download = `creakits-landing-${Date.now()}.webp`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            } else {
+              // Fallback: download original
+              const link = document.createElement('a');
+              link.href = resultImage;
+              link.download = `creakits-landing-${Date.now()}.${isJpeg ? 'jpg' : 'png'}`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          }
+        } catch (e) {
+          console.error("Download failed:", e);
+          // Fallback: download original
+          const link = document.createElement('a');
+          link.href = resultImage;
+          link.download = `creakits-landing-${Date.now()}.${isJpeg ? 'jpg' : 'png'}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
         }
       };
       img.src = resultImage;

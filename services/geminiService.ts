@@ -55,29 +55,67 @@ export const compressImage = (file: File, maxWidth = 1200, quality = 0.85): Prom
 };
 
 // Helper to stitch multiple images vertically into one long image
+// Optimized: scales down to prevent mobile canvas/memory crashes
 export const stitchImagesVertically = async (images: string[]): Promise<string> => {
   if (images.length === 0) return '';
   if (images.length === 1) return images[0];
 
+  // Max width for the stitched result (keeps canvas under mobile limits)
+  const MAX_STITCH_WIDTH = 1080;
+  // Max total pixels allowed (safety guard: ~16 million px)
+  const MAX_CANVAS_PIXELS = 16_000_000;
+
   return new Promise((resolve, reject) => {
     const loadedImages: HTMLImageElement[] = [];
     let loadedCount = 0;
+    let hasErrored = false;
 
     images.forEach((src, index) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
+        if (hasErrored) return;
         loadedImages[index] = img;
         loadedCount++;
         if (loadedCount === images.length) {
-          // All images loaded, now stitch
           try {
-            // Calculate total dimensions (use max width, sum of heights)
-            const maxWidth = Math.max(...loadedImages.map(i => i.width));
-            const totalHeight = loadedImages.reduce((sum, i) => sum + i.height, 0);
+            // Calculate scaled dimensions
+            const naturalMaxWidth = Math.max(...loadedImages.map(i => i.width));
+            const scaleFactor = Math.min(1, MAX_STITCH_WIDTH / naturalMaxWidth);
+
+            const targetWidth = Math.round(naturalMaxWidth * scaleFactor);
+            const scaledHeights = loadedImages.map(i => Math.round(i.height * scaleFactor));
+            const totalHeight = scaledHeights.reduce((sum, h) => sum + h, 0);
+
+            // Safety check: canvas size limit
+            if (targetWidth * totalHeight > MAX_CANVAS_PIXELS) {
+              // Further scale down to fit
+              const extraScale = Math.sqrt(MAX_CANVAS_PIXELS / (targetWidth * totalHeight));
+              const safeWidth = Math.round(targetWidth * extraScale);
+              const safeHeights = scaledHeights.map(h => Math.round(h * extraScale));
+              const safeTotalHeight = safeHeights.reduce((sum, h) => sum + h, 0);
+
+              const canvas = document.createElement('canvas');
+              canvas.width = safeWidth;
+              canvas.height = safeTotalHeight;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) { reject(new Error('Canvas context failed')); return; }
+
+              let currentY = 0;
+              loadedImages.forEach((loadedImg, idx) => {
+                const drawWidth = Math.round(loadedImg.width * scaleFactor * extraScale);
+                const drawHeight = safeHeights[idx];
+                const x = (safeWidth - drawWidth) / 2;
+                ctx.drawImage(loadedImg, x, currentY, drawWidth, drawHeight);
+                currentY += drawHeight;
+              });
+
+              resolve(canvas.toDataURL('image/jpeg', 0.92));
+              return;
+            }
 
             const canvas = document.createElement('canvas');
-            canvas.width = maxWidth;
+            canvas.width = targetWidth;
             canvas.height = totalHeight;
             const ctx = canvas.getContext('2d');
 
@@ -86,25 +124,42 @@ export const stitchImagesVertically = async (images: string[]): Promise<string> 
               return;
             }
 
-            // Draw each image, stacking vertically
+            // Draw each image scaled, stacking vertically
             let currentY = 0;
-            loadedImages.forEach((loadedImg) => {
-              // Center horizontally if narrower than max width
-              const x = (maxWidth - loadedImg.width) / 2;
-              ctx.drawImage(loadedImg, x, currentY);
-              currentY += loadedImg.height;
+            loadedImages.forEach((loadedImg, idx) => {
+              const drawWidth = Math.round(loadedImg.width * scaleFactor);
+              const drawHeight = scaledHeights[idx];
+              const x = (targetWidth - drawWidth) / 2;
+              ctx.drawImage(loadedImg, x, currentY, drawWidth, drawHeight);
+              currentY += drawHeight;
             });
 
-            // Convert to data URL
-            const result = canvas.toDataURL('image/png', 1.0);
+            // Use JPEG to keep data URL small (PNG can be 50MB+ for large canvases)
+            const result = canvas.toDataURL('image/jpeg', 0.92);
+
+            // Validate output (some browsers return empty or tiny string on failure)
+            if (!result || result.length < 100 || result === 'data:,') {
+              reject(new Error('Canvas export failed - image too large for this device. Try the standard landing page instead.'));
+              return;
+            }
+
             resolve(result);
           } catch (e) {
-            reject(e);
+            reject(new Error('Failed to stitch images: ' + (e instanceof Error ? e.message : 'Unknown error')));
           }
         }
       };
-      img.onerror = () => reject(new Error(`Failed to load image ${index + 1}`));
-      img.src = src;
+      img.onerror = () => {
+        if (hasErrored) return;
+        hasErrored = true;
+        reject(new Error(`Failed to load image ${index + 1} for stitching`));
+      };
+      // Set src - handle both data URLs and raw base64
+      if (src.startsWith('data:')) {
+        img.src = src;
+      } else {
+        img.src = `data:image/png;base64,${src}`;
+      }
     });
   });
 };
